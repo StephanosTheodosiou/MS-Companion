@@ -4,4 +4,5 @@ export type RootStackParamList = {
   Profile: { onboarding?: boolean } | undefined;
   Home: undefined;
   Settings: undefined;
+  CheckIn: undefined;
 };

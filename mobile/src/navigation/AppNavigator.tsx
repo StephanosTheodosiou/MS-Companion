@@ -7,6 +7,7 @@ import { ConsentScreen } from '../screens/ConsentScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { CheckInScreen } from '../screens/CheckInScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -29,6 +30,7 @@ export function AppNavigator({ initialRoute }: { initialRoute: 'Welcome' | 'Home
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="CheckIn" component={CheckInScreen} />
     </Stack.Navigator>
   );
 }

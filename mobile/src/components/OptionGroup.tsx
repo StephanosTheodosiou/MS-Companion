@@ -4,12 +4,12 @@ import { Row } from './Row';
 import { Section } from './Section';
 import { colors } from '../theme/theme';
 
-interface Option<T extends string> {
+interface Option<T extends string | number> {
   value: T;
   label: string;
 }
 
-interface Props<T extends string> {
+interface Props<T extends string | number> {
   header?: string;
   footer?: string;
   options: Option<T>[];
@@ -18,14 +18,14 @@ interface Props<T extends string> {
 }
 
 // A single-choice list with a check mark on the chosen row.
-export function OptionGroup<T extends string>({ header, footer, options, selected, onSelect }: Props<T>) {
+export function OptionGroup<T extends string | number>({ header, footer, options, selected, onSelect }: Props<T>) {
   return (
     <Section header={header} footer={footer}>
       {options.map((option) => {
         const isSelected = option.value === selected;
         return (
           <Row
-            key={option.value}
+            key={String(option.value)}
             label={option.label}
             onPress={() => onSelect(option.value)}
             accessibilityRole="radio"
