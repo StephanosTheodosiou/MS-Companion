@@ -7,6 +7,7 @@ namespace MSCompanion.Data.Models;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserSession> UserSessions => Set<UserSession>();
     public DbSet<Patient> Patients => Set<Patient>();
     public DbSet<ConsentRecord> ConsentRecords => Set<ConsentRecord>();
     public DbSet<SymptomCheckin> SymptomCheckins => Set<SymptomCheckin>();

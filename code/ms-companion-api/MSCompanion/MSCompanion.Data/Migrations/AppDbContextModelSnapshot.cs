@@ -784,6 +784,50 @@ namespace MSCompanion.Data.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("MSCompanion.Data.Models.UserSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTimeOffset?>("LastRefreshedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_refreshed_at");
+
+                    b.Property<string>("RefreshTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("refresh_token_hash");
+
+                    b.Property<bool>("RememberMe")
+                        .HasColumnType("boolean")
+                        .HasColumnName("remember_me");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("revoked_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_user_session");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_user_session_user_id");
+
+                    b.ToTable("user_session", (string)null);
+                });
+
             modelBuilder.Entity("MSCompanion.Data.Models.VisitQuestion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1076,6 +1120,18 @@ namespace MSCompanion.Data.Migrations
                     b.Navigation("Patient");
                 });
 
+            modelBuilder.Entity("MSCompanion.Data.Models.UserSession", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.User", "User")
+                        .WithMany("Sessions")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_session_users_user_id");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MSCompanion.Data.Models.VisitQuestion", b =>
                 {
                     b.HasOne("MSCompanion.Data.Models.Appointment", "Appointment")
@@ -1161,6 +1217,8 @@ namespace MSCompanion.Data.Migrations
             modelBuilder.Entity("MSCompanion.Data.Models.User", b =>
                 {
                     b.Navigation("Patient");
+
+                    b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
         }

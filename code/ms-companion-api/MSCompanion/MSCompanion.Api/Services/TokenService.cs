@@ -14,7 +14,7 @@ public sealed class TokenService(IOptions<JwtOptions> options, TimeProvider cloc
     private readonly JwtOptions _jwt = options.Value;
     private readonly JsonWebTokenHandler _handler = new();
 
-    public AccessToken CreateToken(User user)
+    public AccessToken CreateToken(User user, Guid sessionId)
     {
         var expiresAt = clock.GetUtcNow().UtcDateTime.AddMinutes(_jwt.ExpiresMinutes);
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
@@ -27,6 +27,7 @@ public sealed class TokenService(IOptions<JwtOptions> options, TimeProvider cloc
             Subject = new ClaimsIdentity(
             [
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sid, sessionId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
                 new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),

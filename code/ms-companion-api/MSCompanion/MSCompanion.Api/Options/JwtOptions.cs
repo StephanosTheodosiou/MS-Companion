@@ -20,6 +20,14 @@ public sealed class JwtOptions
     [Required, MinLength(32)]
     public string Key { get; init; } = string.Empty;
 
+    /// <summary>Access token lifetime. Keep it short: "remember me" sessions renew it with the refresh token.</summary>
     [Range(1, 1440)]
-    public int ExpiresMinutes { get; init; } = 60;
+    public int ExpiresMinutes { get; init; } = 40;
+
+    /// <summary>
+    /// "Remember me" sessions end after this many days without a refresh. Every refresh extends it again,
+    /// so a user who opens the app regularly stays signed in.
+    /// </summary>
+    [Range(1, 365)]
+    public int RefreshTokenDays { get; init; } = 30;
 }
