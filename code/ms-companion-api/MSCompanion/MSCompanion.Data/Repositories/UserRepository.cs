@@ -13,6 +13,10 @@ public class UserRepository(AppDbContext context) : IUserRepository
     public Task<User?> GetByEmailAsync(string normalizedEmail, CancellationToken ct = default) =>
         context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == normalizedEmail, ct);
 
+    /// <summary>
+    /// Inserts the user together with anything attached to it (e.g. its <see cref="Patient"/>)
+    /// in a single SaveChanges, so either all rows are written or none are.
+    /// </summary>
     public async Task<bool> TryAddAsync(User user, CancellationToken ct = default)
     {
         context.Users.Add(user);
@@ -25,7 +29,8 @@ public class UserRepository(AppDbContext context) : IUserRepository
             ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
         {
             // Relying on the unique index (instead of "check, then insert") is race-safe.
-            context.Entry(user).State = EntityState.Detached;
+            // Clear() also detaches the attached Patient, not only the user.
+            context.ChangeTracker.Clear();
             return false;
         }
     }

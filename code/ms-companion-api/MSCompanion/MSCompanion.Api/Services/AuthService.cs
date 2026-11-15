@@ -19,6 +19,9 @@ public sealed class AuthService(IUserRepository users, ITokenService tokens) : I
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
             FirstName = request.FirstName.Trim(),
             LastName = request.LastName.Trim(),
+            // Every account starts with an empty health record; it is saved in the same transaction.
+            // Profile fields are filled in later via PUT /api/patient/me.
+            Patient = new Patient { Id = Guid.CreateVersion7() },
         };
 
         return await users.TryAddAsync(user, ct) ? CreateSession(user) : null;
