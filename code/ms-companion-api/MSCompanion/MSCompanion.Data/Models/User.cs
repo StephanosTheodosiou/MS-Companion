@@ -26,4 +26,7 @@ public class User : AuditableEntity
     /// non-patient accounts (caregivers, E10). Deleting the user cascades to the patient and all its data.
     /// </summary>
     public Patient? Patient { get; set; }
+
+    /// <summary>Logins (devices) of this account. See <see cref="UserSession"/>.</summary>
+    public ICollection<UserSession> Sessions { get; set; } = [];
 }

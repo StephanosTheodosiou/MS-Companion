@@ -15,4 +15,7 @@ public sealed class RegisterRequest
 
     [Required, MaxLength(100)]
     public required string LastName { get; init; }
+
+    /// <summary>When true, the response also contains a refresh token so the app can stay signed in.</summary>
+    public bool RememberMe { get; init; }
 }

@@ -11,4 +11,8 @@ public static class ClaimsPrincipalExtensions
     /// </summary>
     public static Guid? GetUserId(this ClaimsPrincipal principal) =>
         Guid.TryParse(principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out var id) ? id : null;
+
+    /// <summary>The login session this token belongs to, read from the JWT "sid" claim.</summary>
+    public static Guid? GetSessionId(this ClaimsPrincipal principal) =>
+        Guid.TryParse(principal.FindFirst(JwtRegisteredClaimNames.Sid)?.Value, out var id) ? id : null;
 }

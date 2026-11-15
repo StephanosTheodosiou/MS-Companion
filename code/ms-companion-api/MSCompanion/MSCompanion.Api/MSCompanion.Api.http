@@ -25,6 +25,29 @@ Content-Type: application/json
   "password": "ChangeMe123!"
 }
 
+### Sign in with "remember me" (the response also contains a refreshToken)
+# @name loginRemember
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "ChangeMe123!",
+  "rememberMe": true
+}
+
+### Get a new token pair (each refresh token works once; keep the newest)
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{loginRemember.response.body.$.refreshToken}}"
+}
+
+### Sign out (the token and its refresh token stop working immediately)
+POST {{baseUrl}}/api/auth/logout
+Authorization: Bearer {{login.response.body.$.token}}
+
 ### Current user (uses the token from the "login" request above)
 GET {{baseUrl}}/api/auth/me
 Authorization: Bearer {{login.response.body.$.token}}

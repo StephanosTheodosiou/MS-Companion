@@ -30,6 +30,7 @@ builder.Services.AddOptions<JwtOptions>()
 // 3. Dependency injection — register repositories and services here
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
@@ -54,6 +55,23 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
             NameClaimType = JwtRegisteredClaimNames.Sub,
             RoleClaimType = "role",
             ClockSkew = TimeSpan.FromSeconds(30),
+        };
+
+        // A valid signature is not enough: the token's session must still be active, so logout
+        // (and deactivating an account) takes effect immediately instead of when the token expires.
+        bearer.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var sessions = context.HttpContext.RequestServices.GetRequiredService<ISessionRepository>();
+                var clock = context.HttpContext.RequestServices.GetRequiredService<TimeProvider>();
+
+                if (context.Principal?.GetSessionId() is not { } sessionId
+                    || !await sessions.IsActiveAsync(sessionId, clock.GetUtcNow(), context.HttpContext.RequestAborted))
+                {
+                    context.Fail("The session has ended. Sign in again.");
+                }
+            },
         };
     });
 builder.Services.AddAuthorization();
