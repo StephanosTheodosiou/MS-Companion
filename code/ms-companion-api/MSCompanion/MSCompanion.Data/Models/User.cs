@@ -20,4 +20,10 @@ public class User : AuditableEntity
     public UserRole Role { get; set; } = UserRole.User;
 
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// The health record this account owns. Null until onboarding creates it, and for future
+    /// non-patient accounts (caregivers, E10). Deleting the user cascades to the patient and all its data.
+    /// </summary>
+    public Patient? Patient { get; set; }
 }
