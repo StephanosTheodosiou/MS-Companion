@@ -22,6 +22,710 @@ namespace MSCompanion.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("MSCompanion.Data.Models.Appointment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ClinicianName")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("clinician_name");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("location");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<DateTimeOffset>("StartsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("starts_at");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("type");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_appointment");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_appointment_patient_id_server_updated_at");
+
+                    b.HasIndex("PatientId", "StartsAt")
+                        .HasDatabaseName("ix_appointment_patient_id_starts_at");
+
+                    b.ToTable("appointment", (string)null);
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.BloodTestReminder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateOnly?>("CompletedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("completed_on");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<Guid?>("MedicationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("medication_id");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<bool>("ReminderEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("reminder_enabled");
+
+                    b.Property<short?>("RepeatEveryWeeks")
+                        .HasColumnType("smallint")
+                        .HasColumnName("repeat_every_weeks");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<string>("TestName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("test_name");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_blood_test_reminder");
+
+                    b.HasIndex("MedicationId")
+                        .HasDatabaseName("ix_blood_test_reminder_medication_id");
+
+                    b.HasIndex("PatientId", "DueDate")
+                        .HasDatabaseName("ix_blood_test_reminder_patient_id_due_date");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_blood_test_reminder_patient_id_server_updated_at");
+
+                    b.ToTable("blood_test_reminder", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_blood_test_reminder_repeat", "repeat_every_weeks IS NULL OR repeat_every_weeks > 0");
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.ConsentRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("DataType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("data_type");
+
+                    b.Property<bool>("Granted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("granted");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<string>("PolicyVersion")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("policy_version");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_consent_record");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_consent_record_patient_id_server_updated_at");
+
+                    b.HasIndex("PatientId", "DataType", "CreatedAt")
+                        .HasDatabaseName("ix_consent_record_patient_id_data_type_created_at");
+
+                    b.ToTable("consent_record", (string)null);
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.Medication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Dose")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("dose");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<string>("Instructions")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("instructions");
+
+                    b.Property<bool>("IsDiseaseModifying")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_disease_modifying");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<DateOnly?>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_medication");
+
+                    b.HasAlternateKey("Id", "PatientId")
+                        .HasName("ak_medication_id_patient_id");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_medication_patient_id_server_updated_at");
+
+                    b.ToTable("medication", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_medication_dates", "end_date IS NULL OR start_date IS NULL OR end_date >= start_date");
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.MedicationIntake", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("MedicationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("medication_id");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<Guid?>("ScheduleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("schedule_id");
+
+                    b.Property<DateTimeOffset?>("ScheduledFor")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("scheduled_for");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("TakenAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("taken_at");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_medication_intake");
+
+                    b.HasIndex("MedicationId", "PatientId")
+                        .HasDatabaseName("ix_medication_intake_medication_id_patient_id");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_medication_intake_patient_id_server_updated_at");
+
+                    b.HasIndex("ScheduleId", "ScheduledFor")
+                        .IsUnique()
+                        .HasDatabaseName("ix_medication_intake_schedule_id_scheduled_for")
+                        .HasFilter("deleted_at IS NULL AND schedule_id IS NOT NULL");
+
+                    b.HasIndex("PatientId", "MedicationId", "ScheduledFor")
+                        .HasDatabaseName("ix_medication_intake_patient_id_medication_id_scheduled_for");
+
+                    b.ToTable("medication_intake", (string)null);
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.MedicationSchedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("Days")
+                        .HasColumnType("integer")
+                        .HasColumnName("days");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("MedicationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("medication_id");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<bool>("ReminderEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("reminder_enabled");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<TimeOnly>("TimeOfDay")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("time_of_day");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_medication_schedule");
+
+                    b.HasIndex("MedicationId", "PatientId")
+                        .HasDatabaseName("ix_medication_schedule_medication_id_patient_id");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_medication_schedule_patient_id_server_updated_at");
+
+                    b.ToTable("medication_schedule", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_medication_schedule_days", "days BETWEEN 1 AND 127");
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.Patient", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date")
+                        .HasColumnName("date_of_birth");
+
+                    b.Property<short?>("DiagnosisYear")
+                        .HasColumnType("smallint")
+                        .HasColumnName("diagnosis_year");
+
+                    b.Property<string>("MsTeamName")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("ms_team_name");
+
+                    b.Property<string>("MsTeamPhone")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("ms_team_phone");
+
+                    b.Property<string>("MsType")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("ms_type");
+
+                    b.Property<string>("PreferredName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("preferred_name");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("time_zone");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_patient");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_patient_user_id");
+
+                    b.ToTable("patient", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_patient_diagnosis_year", "diagnosis_year IS NULL OR diagnosis_year BETWEEN 1950 AND 2100");
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.RelapseLogEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("BodyArea")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("body_area");
+
+                    b.Property<bool>("ContactedMsTeam")
+                        .HasColumnType("boolean")
+                        .HasColumnName("contacted_ms_team");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("GuidanceShown")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("guidance_shown");
+
+                    b.Property<bool?>("HadFever")
+                        .HasColumnType("boolean")
+                        .HasColumnName("had_fever");
+
+                    b.Property<bool?>("HeatExposure")
+                        .HasColumnType("boolean")
+                        .HasColumnName("heat_exposure");
+
+                    b.Property<bool>("LastedOver24Hours")
+                        .HasColumnType("boolean")
+                        .HasColumnName("lasted_over24hours");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("note");
+
+                    b.Property<DateOnly>("OnsetDate")
+                        .HasColumnType("date")
+                        .HasColumnName("onset_date");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<DateOnly?>("ResolvedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("resolved_on");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<string>("SymptomDescription")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("symptom_description");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_relapse_log_entry");
+
+                    b.HasIndex("PatientId", "OnsetDate")
+                        .HasDatabaseName("ix_relapse_log_entry_patient_id_onset_date");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_relapse_log_entry_patient_id_server_updated_at");
+
+                    b.ToTable("relapse_log_entry", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_relapse_log_entry_dates", "resolved_on IS NULL OR resolved_on >= onset_date");
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.SideEffect", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<DateOnly?>("EndedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("ended_on");
+
+                    b.Property<Guid?>("MedicationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("medication_id");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("severity");
+
+                    b.Property<DateOnly>("StartedOn")
+                        .HasColumnType("date")
+                        .HasColumnName("started_on");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_side_effect");
+
+                    b.HasIndex("MedicationId")
+                        .HasDatabaseName("ix_side_effect_medication_id");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_side_effect_patient_id_server_updated_at");
+
+                    b.ToTable("side_effect", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_side_effect_dates", "ended_on IS NULL OR ended_on >= started_on");
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.SymptomCheckin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<short>("Bladder")
+                        .HasColumnType("smallint")
+                        .HasColumnName("bladder");
+
+                    b.Property<DateOnly>("CheckinDate")
+                        .HasColumnType("date")
+                        .HasColumnName("checkin_date");
+
+                    b.Property<short>("Cognition")
+                        .HasColumnType("smallint")
+                        .HasColumnName("cognition");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<short>("Fatigue")
+                        .HasColumnType("smallint")
+                        .HasColumnName("fatigue");
+
+                    b.Property<bool>("LowMoodPromptShown")
+                        .HasColumnType("boolean")
+                        .HasColumnName("low_mood_prompt_shown");
+
+                    b.Property<short>("Mobility")
+                        .HasColumnType("smallint")
+                        .HasColumnName("mobility");
+
+                    b.Property<short>("Mood")
+                        .HasColumnType("smallint")
+                        .HasColumnName("mood");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("note");
+
+                    b.Property<short>("Pain")
+                        .HasColumnType("smallint")
+                        .HasColumnName("pain");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_symptom_checkin");
+
+                    b.HasIndex("PatientId", "CheckinDate")
+                        .IsUnique()
+                        .HasDatabaseName("ix_symptom_checkin_patient_id_checkin_date")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_symptom_checkin_patient_id_server_updated_at");
+
+                    b.ToTable("symptom_checkin", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_symptom_checkin_bladder", "bladder BETWEEN 0 AND 4");
+
+                            t.HasCheckConstraint("ck_symptom_checkin_cognition", "cognition BETWEEN 0 AND 4");
+
+                            t.HasCheckConstraint("ck_symptom_checkin_fatigue", "fatigue BETWEEN 0 AND 4");
+
+                            t.HasCheckConstraint("ck_symptom_checkin_mobility", "mobility BETWEEN 0 AND 4");
+
+                            t.HasCheckConstraint("ck_symptom_checkin_mood", "mood BETWEEN 0 AND 4");
+
+                            t.HasCheckConstraint("ck_symptom_checkin_pain", "pain BETWEEN 0 AND 4");
+                        });
+                });
+
             modelBuilder.Entity("MSCompanion.Data.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -78,6 +782,385 @@ namespace MSCompanion.Data.Migrations
                         .HasDatabaseName("ix_users_email");
 
                     b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.VisitQuestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AnswerNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("answer_note");
+
+                    b.Property<Guid?>("AppointmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("appointment_id");
+
+                    b.Property<bool>("Asked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("asked");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("text");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_visit_question");
+
+                    b.HasIndex("AppointmentId")
+                        .HasDatabaseName("ix_visit_question_appointment_id");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_visit_question_patient_id_server_updated_at");
+
+                    b.ToTable("visit_question", (string)null);
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.VisitReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid?>("AppointmentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("appointment_id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<string>("FhirBundleJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("fhir_bundle_json");
+
+                    b.Property<string>("FhirVersion")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("fhir_version");
+
+                    b.Property<DateTimeOffset>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("generated_at");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<DateOnly>("PeriodEnd")
+                        .HasColumnType("date")
+                        .HasColumnName("period_end");
+
+                    b.Property<DateOnly>("PeriodStart")
+                        .HasColumnType("date")
+                        .HasColumnName("period_start");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_visit_report");
+
+                    b.HasIndex("AppointmentId")
+                        .HasDatabaseName("ix_visit_report_appointment_id");
+
+                    b.HasIndex("PatientId", "GeneratedAt")
+                        .HasDatabaseName("ix_visit_report_patient_id_generated_at");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_visit_report_patient_id_server_updated_at");
+
+                    b.ToTable("visit_report", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_visit_report_period", "period_end >= period_start");
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.Appointment", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany("Appointments")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_appointment_patients_patient_id");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.BloodTestReminder", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Medication", "Medication")
+                        .WithMany("BloodTestReminders")
+                        .HasForeignKey("MedicationId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_blood_test_reminder_medications_medication_id");
+
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany("BloodTestReminders")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_blood_test_reminder_patients_patient_id");
+
+                    b.Navigation("Medication");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.ConsentRecord", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany("ConsentRecords")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_consent_record_patients_patient_id");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.Medication", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany("Medications")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_medication_patients_patient_id");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.MedicationIntake", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_medication_intake_patients_patient_id");
+
+                    b.HasOne("MSCompanion.Data.Models.MedicationSchedule", "Schedule")
+                        .WithMany("Intakes")
+                        .HasForeignKey("ScheduleId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_medication_intake_medication_schedules_schedule_id");
+
+                    b.HasOne("MSCompanion.Data.Models.Medication", "Medication")
+                        .WithMany("Intakes")
+                        .HasForeignKey("MedicationId", "PatientId")
+                        .HasPrincipalKey("Id", "PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_medication_intake_medication_medication_id_patient_id");
+
+                    b.Navigation("Medication");
+
+                    b.Navigation("Patient");
+
+                    b.Navigation("Schedule");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.MedicationSchedule", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_medication_schedule_patients_patient_id");
+
+                    b.HasOne("MSCompanion.Data.Models.Medication", "Medication")
+                        .WithMany("Schedules")
+                        .HasForeignKey("MedicationId", "PatientId")
+                        .HasPrincipalKey("Id", "PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_medication_schedule_medication_medication_id_patient_id");
+
+                    b.Navigation("Medication");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.Patient", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.User", "User")
+                        .WithOne("Patient")
+                        .HasForeignKey("MSCompanion.Data.Models.Patient", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_patient_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.RelapseLogEntry", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany("RelapseLogEntries")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_relapse_log_entry_patient_patient_id");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.SideEffect", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Medication", "Medication")
+                        .WithMany("SideEffects")
+                        .HasForeignKey("MedicationId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_side_effect_medication_medication_id");
+
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_side_effect_patient_patient_id");
+
+                    b.Navigation("Medication");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.SymptomCheckin", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany("SymptomCheckins")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_symptom_checkin_patient_patient_id");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.VisitQuestion", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Appointment", "Appointment")
+                        .WithMany("Questions")
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_visit_question_appointment_appointment_id");
+
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany("VisitQuestions")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_visit_question_patient_patient_id");
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.VisitReport", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Appointment", "Appointment")
+                        .WithMany("Reports")
+                        .HasForeignKey("AppointmentId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_visit_report_appointment_appointment_id");
+
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany("VisitReports")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_visit_report_patient_patient_id");
+
+                    b.Navigation("Appointment");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.Appointment", b =>
+                {
+                    b.Navigation("Questions");
+
+                    b.Navigation("Reports");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.Medication", b =>
+                {
+                    b.Navigation("BloodTestReminders");
+
+                    b.Navigation("Intakes");
+
+                    b.Navigation("Schedules");
+
+                    b.Navigation("SideEffects");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.MedicationSchedule", b =>
+                {
+                    b.Navigation("Intakes");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.Patient", b =>
+                {
+                    b.Navigation("Appointments");
+
+                    b.Navigation("BloodTestReminders");
+
+                    b.Navigation("ConsentRecords");
+
+                    b.Navigation("Medications");
+
+                    b.Navigation("RelapseLogEntries");
+
+                    b.Navigation("SymptomCheckins");
+
+                    b.Navigation("VisitQuestions");
+
+                    b.Navigation("VisitReports");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.User", b =>
+                {
+                    b.Navigation("Patient");
                 });
 #pragma warning restore 612, 618
         }

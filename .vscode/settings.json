@@ -1,0 +1,5 @@
+{
+  // C# Dev Kit: load only the API solution. Without this it scans the whole workspace and
+  // also picks up stray .csproj files (e.g. the local docs/ reference copy).
+  "dotnet.defaultSolution": "code/ms-companion-api/MSCompanion/MSCompanion.sln"
+}
