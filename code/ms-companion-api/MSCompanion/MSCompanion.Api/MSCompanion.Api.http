@@ -70,3 +70,26 @@ Content-Type: application/json
   "msTeamPhone": "+357 22 000000",
   "timeZone": "Europe/Nicosia"
 }
+
+### My consent choices (one entry per data type; never decided = not granted)
+GET {{baseUrl}}/api/consent
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Record consent (e.g. the onboarding screen). Unchanged choices are skipped.
+POST {{baseUrl}}/api/consent
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "policyVersion": "2026-11-v1",
+  "decisions": [
+    { "dataType": "SymptomCheckins", "granted": true },
+    { "dataType": "Medication", "granted": true },
+    { "dataType": "Reminders", "granted": true },
+    { "dataType": "Location", "granted": false }
+  ]
+}
+
+### Consent history (every decision, newest first)
+GET {{baseUrl}}/api/consent/history
+Authorization: Bearer {{login.response.body.$.token}}
