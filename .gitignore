@@ -1,0 +1,139 @@
+# ==============================================================================
+# MS-Companion — repository-wide ignore rules
+#   - Mobile app (Expo/Node) rules live in code/ms-companion-ui/.gitignore
+#   - .NET API rules are below (shared so they apply as soon as the API is created)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# OS files
+# ------------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+$RECYCLE.BIN/
+
+# ------------------------------------------------------------------------------
+# IDEs / editors
+#   Shared VS Code settings (settings.json, extensions.json) ARE committed.
+# ------------------------------------------------------------------------------
+.vs/
+.idea/
+*.iml
+*.suo
+*.user
+*.userosscache
+*.userprefs
+*.rsuser
+*.sw?
+*.sublime-workspace
+*.sublime-project
+**/.vscode/*
+!**/.vscode/settings.json
+!**/.vscode/extensions.json
+!**/.vscode/launch.json
+!**/.vscode/tasks.json
+
+# Rider / ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Claude Code — personal settings only (shared .claude/settings.json is committed)
+**/.claude/settings.local.json
+
+# ------------------------------------------------------------------------------
+# Environment / secrets — NEVER commit these
+#   UI:  commit `.env.example`, keep your real values in `.env`.
+#   API: appsettings*.json are committed WITHOUT secrets; real secrets (DB password,
+#        JWT key) go in `dotnet user-secrets`, which lives outside the repo.
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+appsettings.*.local.json
+appsettings.secrets.json
+**/secrets.json
+**/.secretstore/
+*.pem
+*.pfx
+
+# ------------------------------------------------------------------------------
+# .NET / C# API
+# ------------------------------------------------------------------------------
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Dd]ebug/
+[Rr]elease/
+[Ll]og/
+*.pdb
+*.cache
+
+# EF Core build artifacts (migrations themselves ARE committed)
+Migrations/obj/
+
+# Test results / coverage
+TestResults/
+[Tt]est[Rr]esult*/
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# Publish output
+publish/
+app.publish/
+*.pubxml
+*.publishproj
+PublishScripts/
+
+# ------------------------------------------------------------------------------
+# Database / Docker local data
+# ------------------------------------------------------------------------------
+pgdata/
+postgres-data/
+docker-compose.override.yml
+*.backup
+*.dump
+*.mdf
+*.ldf
+*.db-shm
+*.db-wal
+
+# ------------------------------------------------------------------------------
+# Node (safety net — the UI has its own .gitignore)
+# ------------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ------------------------------------------------------------------------------
+# Markdown files (README.md, AGENTS.md, CLAUDE.md, notes…) are kept local only.
+#   To share one again, add an exception below, e.g.  !README.md
+# ------------------------------------------------------------------------------
+*.md
+
+# ------------------------------------------------------------------------------
+# Logs / temp files
+# ------------------------------------------------------------------------------
+*.log
+logs/
+LogFiles/
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*.rej
+*.pid
+*.pid.lock

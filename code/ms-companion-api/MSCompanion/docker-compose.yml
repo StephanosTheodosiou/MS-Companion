@@ -1,0 +1,26 @@
+# Optional local PostgreSQL for development (if you don't have PostgreSQL installed).
+#   Start:  docker compose up -d
+#   Stop:   docker compose down        (add -v to also delete the data)
+# Connection string: Host=localhost;Port=5432;Database=ms_companion;Username=postgres;Password=postgres
+# If port 5432 is taken, run with another port, e.g.  POSTGRES_PORT=5434 docker compose up -d
+services:
+  db:
+    image: postgres:18
+    container_name: ms-companion-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ms_companion
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres # local development only
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ms_companion"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:

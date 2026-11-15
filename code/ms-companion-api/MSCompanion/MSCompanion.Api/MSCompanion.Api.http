@@ -1,0 +1,30 @@
+# Send these requests from VS Code (REST Client extension), Visual Studio or Rider.
+@baseUrl = http://localhost:5080
+
+### Health check (API + database)
+GET {{baseUrl}}/health
+
+### Register a new account
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "ChangeMe123!",
+  "firstName": "Jane",
+  "lastName": "Doe"
+}
+
+### Sign in
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "ChangeMe123!"
+}
+
+### Current user (uses the token from the "login" request above)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.token}}
