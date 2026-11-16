@@ -1,0 +1,31 @@
+# MS Companion API - local database setup (once per machine)
+#
+# Prerequisites: .NET 10 SDK (winget install Microsoft.DotNet.SDK.10 --source winget)
+#                and Docker Desktop (running).
+#
+# If you applied the OLD InitialCreate migration before, reset your database first
+# (the migration was replaced):  docker compose down -v
+#
+# If port 5432 is already in use: run  POSTGRES_PORT=5434 docker compose up -d
+# and use Port=5434 in the connection string below.
+
+# 1. Start PostgreSQL (from the API folder)
+cd code/ms-companion-api/MSCompanion
+docker compose up -d
+
+# 2. Restore the EF Core command-line tool pinned in .config/dotnet-tools.json
+dotnet tool restore
+
+# 3. Local secrets (stored outside the repo, once per machine)
+cd MSCompanion.Api
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=ms_companion;Username=postgres;Password=postgres"
+dotnet user-secrets set "Jwt:Key" "<any random string, at least 32 characters>"
+cd ..
+
+# 4. Create the tables (run again after every git pull that adds a migration)
+dotnet ef database update --project MSCompanion.Data --startup-project MSCompanion.Api
+
+# 5. Run the API
+dotnet run --project MSCompanion.Api
+
+# Swagger:  http://localhost:5080/swagger

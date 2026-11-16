@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Core domain types (enums, constants, business rules). No dependencies on EF Core or ASP.NET. -->
+
+</Project>

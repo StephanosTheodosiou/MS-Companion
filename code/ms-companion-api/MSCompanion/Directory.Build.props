@@ -1,0 +1,10 @@
+<Project>
+  <!-- Shared build settings for every project in the solution (picked up automatically by MSBuild). -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Nullable warnings usually point at real NullReferenceExceptions: fail the build on them. -->
+    <WarningsAsErrors>nullable</WarningsAsErrors>
+  </PropertyGroup>
+</Project>

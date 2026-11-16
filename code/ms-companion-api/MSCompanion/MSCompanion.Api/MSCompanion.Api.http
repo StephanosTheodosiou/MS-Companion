@@ -1,0 +1,95 @@
+# Send these requests from VS Code (REST Client extension), Visual Studio or Rider.
+@baseUrl = http://localhost:5080
+
+### Health check (API + database)
+GET {{baseUrl}}/health
+
+### Register a new account
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "ChangeMe123!",
+  "firstName": "Jane",
+  "lastName": "Doe"
+}
+
+### Sign in
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "ChangeMe123!"
+}
+
+### Sign in with "remember me" (the response also contains a refreshToken)
+# @name loginRemember
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jane@example.com",
+  "password": "ChangeMe123!",
+  "rememberMe": true
+}
+
+### Get a new token pair (each refresh token works once; keep the newest)
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{loginRemember.response.body.$.refreshToken}}"
+}
+
+### Sign out (the token and its refresh token stop working immediately)
+POST {{baseUrl}}/api/auth/logout
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Current user (uses the token from the "login" request above)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.token}}
+
+### My patient profile (created empty at registration)
+GET {{baseUrl}}/api/patient/me
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Update my patient profile (PUT: fields left out are cleared; only timeZone is required)
+PUT {{baseUrl}}/api/patient/me
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "preferredName": "Jane",
+  "dateOfBirth": "1988-04-12",
+  "msType": "RelapsingRemitting",
+  "diagnosisYear": 2019,
+  "msTeamName": "Nicosia General MS Clinic",
+  "msTeamPhone": "+357 22 000000",
+  "timeZone": "Europe/Nicosia"
+}
+
+### My consent choices (one entry per data type; never decided = not granted)
+GET {{baseUrl}}/api/consent
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Record consent (e.g. the onboarding screen). Unchanged choices are skipped.
+POST {{baseUrl}}/api/consent
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "policyVersion": "2026-11-v1",
+  "decisions": [
+    { "dataType": "SymptomCheckins", "granted": true },
+    { "dataType": "Medication", "granted": true },
+    { "dataType": "Reminders", "granted": true },
+    { "dataType": "Location", "granted": false }
+  ]
+}
+
+### Consent history (every decision, newest first)
+GET {{baseUrl}}/api/consent/history
+Authorization: Bearer {{login.response.body.$.token}}
