@@ -40,10 +40,8 @@ export function TabButton({ children, isFocused, ref, ...props }: TabTriggerSlot
       // expo-router/ui types `ref` as Ref<View>, which doesn't match Pressable's ref type in RN 0.88.
       ref={ref as ComponentProps<typeof Pressable>['ref']}
       style={({ pressed }) => pressed && styles.pressed}>
-      <ThemedView
-        type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
-        style={styles.tabButtonView}>
-        <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
+      <ThemedView type={isFocused ? 'primarySoft' : 'surface'} style={styles.tabButtonView}>
+        <ThemedText type="calloutStrong" themeColor={isFocused ? 'primary' : 'textSecondary'}>
           {children}
         </ThemedText>
       </ThemedView>
@@ -54,8 +52,8 @@ export function TabButton({ children, isFocused, ref, ...props }: TabTriggerSlot
 export function CustomTabList(props: TabListProps) {
   return (
     <View {...props} style={styles.tabListContainer}>
-      <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <ThemedText type="smallBold" style={styles.brandText}>
+      <ThemedView type="surface" style={styles.innerContainer}>
+        <ThemedText type="calloutStrong" style={styles.brandText}>
           MS Companion
         </ThemedText>
 
