@@ -1,26 +1,35 @@
-import { router } from 'expo-router';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/auth-context';
+import { Spacing } from '@/constants/theme';
 import { g } from '@/styles/global';
-import { clearToken } from '@/utils/authStorage';
 
 export default function ProfileScreen() {
-  async function handleSignOut() {
-    await clearToken();
-    router.replace('/login');
-  }
+  const { user, signOut } = useAuth();
 
   return (
     <ThemedView style={g.screen}>
       <SafeAreaView style={g.screen} edges={['top']}>
         <ScrollView contentContainerStyle={[g.content, g.tabContent]}>
-          <ThemedText type="subtitle">Profile</ThemedText>
-          <ThemedText themeColor="textSecondary">Account settings will live here.</ThemedText>
-          <Button title="Sign out" variant="outline" onPress={handleSignOut} />
+          <ThemedText type="title" accessibilityRole="header">
+            Profile
+          </ThemedText>
+
+          {user ? (
+            <View style={{ gap: Spacing.one }}>
+              <ThemedText type="headline">
+                {user.firstName} {user.lastName}
+              </ThemedText>
+              <ThemedText themeColor="textSecondary">{user.email}</ThemedText>
+            </View>
+          ) : null}
+
+          {/* Navigation back to login happens automatically (protected routes in app/_layout.tsx). */}
+          <Button title="Log out" variant="secondary" onPress={signOut} />
         </ScrollView>
       </SafeAreaView>
     </ThemedView>
