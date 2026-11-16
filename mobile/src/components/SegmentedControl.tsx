@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, MIN_TOUCH, radius } from '../theme/theme';
+import { colors, MIN_TOUCH, radius, shadow } from '../theme/theme';
 import { AppText } from './AppText';
 
 interface Props<T extends string> {
@@ -24,8 +24,8 @@ export function SegmentedControl<T extends string>({ options, selected, onSelect
             style={[styles.segment, isSelected && styles.selected]}
           >
             <AppText
-              variant={isSelected ? 'label' : 'body'}
-              color={isSelected ? colors.ink : colors.secondary}
+              variant="label"
+              color={isSelected ? colors.onAccent : colors.secondary}
               numberOfLines={1}
               adjustsFontSizeToFit
             >
@@ -39,23 +39,14 @@ export function SegmentedControl<T extends string>({ options, selected, onSelect
 }
 
 const styles = StyleSheet.create({
-  track: {
-    flexDirection: 'row',
-    backgroundColor: colors.track,
-    borderRadius: radius.control,
-    padding: 3,
-  },
+  track: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.button, padding: 4, ...shadow },
   segment: {
     flex: 1,
-    minHeight: MIN_TOUCH - 6,
+    minHeight: MIN_TOUCH - 8,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radius.control - 2,
+    borderRadius: radius.button - 4,
     paddingHorizontal: 6,
   },
-  selected: {
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.inputBorder,
-  },
+  selected: { backgroundColor: colors.accent },
 });

@@ -1,30 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Button } from '../components/Button';
+import { IconName } from '../components/Icon';
+import { Badge, Note } from '../components/Notice';
 import { Row, SwitchRow } from '../components/Row';
 import { Screen } from '../components/Screen';
 import { Section } from '../components/Section';
-import { RootStackParamList } from '../navigation/types';
+import { StepHeader } from '../components/StepHeader';
+import { StackProps } from '../navigation/types';
 import { getConsents, saveAllConsents } from '../services/storage';
 import { ConsentKey, ConsentMap } from '../types';
-
-type Props = NativeStackScreenProps<RootStackParamList, 'Consent'>;
 
 export const OPTIONAL_CONSENTS: {
   key: Exclude<ConsentKey, 'symptoms'>;
   label: string;
   description: string;
+  icon: IconName;
 }[] = [
-  { key: 'medication', label: 'Medication', description: 'Your medicine list and dose reminders.' },
-  { key: 'notifications', label: 'Reminders', description: 'A daily nudge to fill in your check-in.' },
-  { key: 'location', label: 'Location', description: 'Only used to warn you about hot days.' },
+  { key: 'medication', label: 'Medication', description: 'Your medicine list and dose reminders.', icon: 'plus-square' },
+  { key: 'notifications', label: 'Reminders', description: 'A daily nudge to fill in your check-in.', icon: 'bell' },
+  { key: 'location', label: 'Location', description: 'Only used to warn you about hot days.', icon: 'map-pin' },
 ];
 
-// E1: one switch per data type. Only symptom data is required for the app to work.
+// E1, step 2 of 3: one switch per data type. Only symptom data is required for the app to work.
 // This screen stores the user's choice. The phone's own permission prompts
 // (notifications, location) come later, with the features that need them.
-export function ConsentScreen({ navigation }: Props) {
+export function ConsentScreen({ navigation }: StackProps<'Consent'>) {
   const [consents, setConsents] = useState<ConsentMap>({
     symptoms: true,
     medication: false,
@@ -43,10 +44,10 @@ export function ConsentScreen({ navigation }: Props) {
     setSaving(true);
     try {
       await saveAllConsents({ ...consents, symptoms: true });
-      navigation.navigate('Profile', { onboarding: true });
+      navigation.navigate('Profile');
     } catch (e) {
       console.warn('Could not save consents', e);
-      Alert.alert('Your choices were not saved', 'Check your phone and try again.');
+      Alert.alert('Your choices were not saved', 'Please try again.');
     } finally {
       setSaving(false);
     }
@@ -54,22 +55,27 @@ export function ConsentScreen({ navigation }: Props) {
 
   return (
     <Screen
+      topBar={<StepHeader step={2} total={3} onBack={() => navigation.goBack()} />}
       title="Your data, your choice"
       subtitle="Choose what the app may use. You can change this later in Settings."
       footer={<Button label="Continue" onPress={onContinue} disabled={saving} />}
     >
       <Section footer="The app needs these to work. To stop them, delete your data in Settings.">
         <Row
+          icon="clipboard"
+          strong
           label="Symptom check-ins"
           description="Daily ratings of how you feel."
-          value="Always on"
+          badge={<Badge icon="lock" label="Always on" />}
+          accessibilityLabel="Symptom check-ins, daily ratings of how you feel. Always on."
         />
       </Section>
 
-      <Section header="Optional">
+      <Section header="Optional" iconInset>
         {OPTIONAL_CONSENTS.map((item) => (
           <SwitchRow
             key={item.key}
+            icon={item.icon}
             label={item.label}
             description={item.description}
             value={consents[item.key]}
@@ -77,6 +83,8 @@ export function ConsentScreen({ navigation }: Props) {
           />
         ))}
       </Section>
+
+      <Note>You can withdraw any choice at any time.</Note>
     </Screen>
   );
 }

@@ -18,3 +18,19 @@ export function validatePhone(value: string): string | null {
 export function toDialNumber(value: string): string {
   return value.replace(/[^\d+]/g, '');
 }
+
+/** Returns an error message, or null when the email looks right. */
+export function validateEmail(value: string): string | null {
+  const trimmed = value.trim();
+  if (trimmed === '') return 'Enter your email address.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return 'Enter an email like name@example.com.';
+  return null;
+}
+
+export const MIN_PASSWORD_LENGTH = 8;
+
+/** Returns an error message, or null when the password is long enough. */
+export function validateNewPassword(value: string): string | null {
+  if (value.length < MIN_PASSWORD_LENGTH) return `Use at least ${MIN_PASSWORD_LENGTH} characters.`;
+  return null;
+}

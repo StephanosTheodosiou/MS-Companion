@@ -1,30 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, View } from 'react-native';
 import { usePreventRemove } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AppText } from '../components/AppText';
 import { Button } from '../components/Button';
-import { OptionGroup } from '../components/OptionGroup';
-import { ProgressBar } from '../components/ProgressBar';
+import { IconCircle } from '../components/Icon';
+import { SafetyCard } from '../components/Notice';
+import { RatingOption } from '../components/RatingOption';
 import { Row } from '../components/Row';
 import { Screen } from '../components/Screen';
 import { Section } from '../components/Section';
+import { StepHeader } from '../components/StepHeader';
 import { TextField } from '../components/TextField';
 import { LOW_MOOD_THRESHOLD, RATING_OPTIONS, ratingLabel, SYMPTOMS } from '../constants/checkIn';
-import { RootStackParamList } from '../navigation/types';
+import { StackProps } from '../navigation/types';
 import { getCheckIn, getProfile, saveCheckIn } from '../services/storage';
+import { space } from '../theme/theme';
 import { EMPTY_PROFILE, Profile, Rating, SymptomKey } from '../types';
 import { todayKey } from '../utils/date';
 import { toDialNumber } from '../utils/validation';
-
-type Props = NativeStackScreenProps<RootStackParamList, 'CheckIn'>;
 
 type Answers = Partial<Record<SymptomKey, Rating>>;
 
 // E2: daily check-in. One question per step (less to take in at once), then an
 // optional note and a review step, then a confirmation. Editing today's check-in
 // reuses the same flow with the saved answers filled in.
-export function CheckInScreen({ navigation }: Props) {
+export function CheckInScreen({ navigation }: StackProps<'CheckIn'>) {
   const [answers, setAnswers] = useState<Answers>({});
   const [note, setNote] = useState('');
   const [step, setStep] = useState(0); // 0..5 questions, 6 = note and review
@@ -52,9 +52,9 @@ export function CheckInScreen({ navigation }: Props) {
       .catch((e) => console.warn('Could not load profile', e));
   }, []);
 
-  // After saving, "Done" is the only way out, so hide the back arrow.
+  // After saving, "Done" is the only way out, so the swipe-back gesture is turned off.
   useEffect(() => {
-    navigation.setOptions({ headerBackVisible: !saved, gestureEnabled: !saved });
+    navigation.setOptions({ gestureEnabled: !saved });
   }, [navigation, saved]);
 
   // Ask before leaving with unsaved answers (back button or swipe).
@@ -64,6 +64,8 @@ export function CheckInScreen({ navigation }: Props) {
       { text: 'Leave', style: 'destructive', onPress: () => navigation.dispatch(data.action) },
     ]);
   });
+
+  const back = () => (step > 0 ? setStep(step - 1) : navigation.goBack());
 
   const answer = (key: SymptomKey, rating: Rating) => {
     setAnswers((a) => ({ ...a, [key]: rating }));
@@ -85,7 +87,7 @@ export function CheckInScreen({ navigation }: Props) {
       setSaved(true);
     } catch (e) {
       console.warn('Could not save check-in', e);
-      Alert.alert('Your check-in was not saved', 'Check your phone and try again.');
+      Alert.alert('Your check-in was not saved', 'Please try again.');
     } finally {
       setSaving(false);
     }
@@ -98,32 +100,38 @@ export function CheckInScreen({ navigation }: Props) {
     const hasPhone = profile.teamPhone.trim() !== '';
     return (
       <Screen
+        header={<IconCircle name="check" size={72} />}
         title="Saved"
         subtitle="Thank you. Your check-in for today is saved and will be part of your visit summary."
         footer={<Button label="Done" onPress={() => navigation.goBack()} />}
       >
         {lowMood ? (
-          <Section
-            header="You said your mood has been low"
-            footer="If you feel unsafe or think you might harm yourself, call 112 now."
-          >
-            <Row
-              label="You don't have to handle this alone"
-              description="Talking to someone can help. Your MS team can also support you with mood, which is common with MS."
-            />
-            {hasPhone ? (
+          <>
+            <Section header="You said your mood has been low" iconInset>
               <Row
-                label={`Call ${teamName}`}
-                description={profile.teamPhone}
-                chevron
-                onPress={() =>
-                  Linking.openURL(`tel:${toDialNumber(profile.teamPhone)}`).catch(() =>
-                    Alert.alert('The call did not start', `Dial ${profile.teamPhone} from your phone app.`)
-                  )
-                }
+                icon="heart"
+                strong
+                label="You don't have to handle this alone"
+                description="Talking to someone can help. Your MS team can also support you with mood, which is common with MS."
               />
-            ) : null}
-          </Section>
+              {hasPhone ? (
+                <Row
+                  icon="phone"
+                  strong
+                  label={`Call ${teamName}`}
+                  description={profile.teamPhone}
+                  chevron
+                  accessibilityHint="Opens your phone app"
+                  onPress={() =>
+                    Linking.openURL(`tel:${toDialNumber(profile.teamPhone)}`).catch(() =>
+                      Alert.alert('The call did not start', `Dial ${profile.teamPhone} from your phone app.`)
+                    )
+                  }
+                />
+              ) : null}
+            </Section>
+            <SafetyCard>If you feel unsafe or think you might harm yourself, call 112 now.</SafetyCard>
+          </>
         ) : null}
       </Screen>
     );
@@ -133,23 +141,23 @@ export function CheckInScreen({ navigation }: Props) {
   if (step === reviewStep) {
     return (
       <Screen
+        topBar={<StepHeader variant="flow" step={totalSteps} total={totalSteps} onBack={back} />}
+        header={<IconCircle name="edit-3" size={72} />}
         title="Anything else?"
         subtitle="Add a note if something stood out today, then check your answers."
         footer={
-          <>
-            <Button
-              label={editing ? 'Save changes' : 'Save check-in'}
-              onPress={onSave}
-              disabled={saving || !allAnswered}
-            />
-            <Button label="Back" variant="plain" onPress={() => setStep(step - 1)} />
-          </>
+          <Button
+            label={editing ? 'Save changes' : 'Save check-in'}
+            onPress={onSave}
+            disabled={saving || !allAnswered}
+          />
         }
       >
-        <ProgressBar step={totalSteps} total={totalSteps} />
         <TextField
           label="Note"
-          hint="Optional. For example: bad night's sleep, very hot day, new symptom."
+          icon="edit-3"
+          placeholder="For example: bad night's sleep, very hot day"
+          hint="Optional."
           value={note}
           onChangeText={(text) => {
             setNote(text);
@@ -157,12 +165,13 @@ export function CheckInScreen({ navigation }: Props) {
           }}
           multiline
         />
-        <Section header="Your answers" footer="Tap an answer to change it.">
+        <Section header="Your answers" footer="Tap an answer to change it." iconInset>
           {SYMPTOMS.map((symptom, index) => {
             const rating = answers[symptom.key];
             return (
               <Row
                 key={symptom.key}
+                icon={symptom.icon}
                 label={symptom.name}
                 value={rating === undefined ? 'Not answered' : ratingLabel(rating)}
                 chevron
@@ -180,25 +189,25 @@ export function CheckInScreen({ navigation }: Props) {
   const current = answers[symptom.key];
   return (
     <Screen
+      topBar={<StepHeader variant="flow" step={step + 1} total={totalSteps} onBack={back} />}
+      header={<IconCircle name={symptom.icon} size={72} />}
       title={symptom.name}
       subtitle={symptom.question}
-      footer={
-        <>
-          <Button label="Next" onPress={() => setStep(step + 1)} disabled={current === undefined} />
-          {step > 0 ? (
-            <Button label="Back" variant="plain" onPress={() => setStep(step - 1)} />
-          ) : null}
-        </>
-      }
+      footer={<Button label="Next" onPress={() => setStep(step + 1)} disabled={current === undefined} />}
     >
-      <ProgressBar step={step + 1} total={totalSteps} />
-      <OptionGroup
-        options={RATING_OPTIONS}
-        selected={current ?? null}
-        onSelect={(rating) => answer(symptom.key, rating)}
-      />
+      <View style={{ gap: space.md }} accessibilityRole="radiogroup">
+        {RATING_OPTIONS.map((option) => (
+          <RatingOption
+            key={option.value}
+            value={option.value}
+            label={option.label}
+            selected={current === option.value}
+            onPress={() => answer(symptom.key, option.value)}
+          />
+        ))}
+      </View>
       {step === 0 && !editing ? (
-        <AppText variant="footnote">Think about today as a whole. There are no wrong answers.</AppText>
+        <AppText variant="footnote">{'Think about today as a whole.\nThere are no wrong answers.'}</AppText>
       ) : null}
     </Screen>
   );
