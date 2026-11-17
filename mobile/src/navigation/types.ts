@@ -16,6 +16,11 @@ export type RootStackParamList = {
   Profile: undefined;
   Home: NavigatorScreenParams<TabParamList> | undefined;
   CheckIn: undefined;
+  Medications: undefined;
+  MedicationEdit: { id?: string } | undefined;
+  SideEffect: { medicationId?: string } | undefined;
+  SymptomLog: undefined;
+  SymptomEntry: { id?: string } | undefined;
 };
 
 export type StackProps<T extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList, T>;

@@ -12,6 +12,11 @@ import { ProfileSetupScreen, ProfileTabScreen } from '../screens/ProfileScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { CheckInScreen } from '../screens/CheckInScreen';
+import { MedicationsScreen } from '../screens/MedicationsScreen';
+import { MedicationEditScreen } from '../screens/MedicationEditScreen';
+import { SideEffectScreen } from '../screens/SideEffectScreen';
+import { SymptomLogScreen } from '../screens/SymptomLogScreen';
+import { SymptomEntryScreen } from '../screens/SymptomEntryScreen';
 
 export type StartRoute = 'Welcome' | 'Login' | 'Consent' | 'Home';
 
@@ -44,6 +49,11 @@ export function AppNavigator({ initialRoute }: { initialRoute: StartRoute }) {
       <Stack.Screen name="Profile" component={ProfileSetupScreen} />
       <Stack.Screen name="Home" component={Tabs} />
       <Stack.Screen name="CheckIn" component={CheckInScreen} />
+      <Stack.Screen name="Medications" component={MedicationsScreen} />
+      <Stack.Screen name="MedicationEdit" component={MedicationEditScreen} />
+      <Stack.Screen name="SideEffect" component={SideEffectScreen} />
+      <Stack.Screen name="SymptomLog" component={SymptomLogScreen} />
+      <Stack.Screen name="SymptomEntry" component={SymptomEntryScreen} />
     </Stack.Navigator>
   );
 }

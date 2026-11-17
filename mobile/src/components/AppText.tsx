@@ -14,9 +14,7 @@ interface Props extends TextProps {
 export function AppText({ variant = 'body', color, style, children, ...rest }: Props) {
   const { scale } = useTextSize();
   const { size, weight } = type[variant];
-  // Large titles are already big, so they grow less; otherwise long words like
-  // "Appointments" would break in the middle at the largest text size.
-  const fontSize = size * (variant === 'largeTitle' ? Math.min(scale, 1.15) : scale);
+  const fontSize = size * scale;
   const overline = variant === 'overline';
   const defaultColor =
     variant === 'footnote' ? colors.secondary : overline ? colors.overline : colors.ink;

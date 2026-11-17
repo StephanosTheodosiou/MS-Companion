@@ -142,6 +142,7 @@ export function SettingsScreen({ navigation }: TabProps<'Settings'>) {
         <Row icon="download" label="Export my data" chevron onPress={onExport} />
         <Row icon="trash-2" label="Delete all my data" destructive onPress={onDelete} />
       </Section>
+
     </Screen>
   );
 }

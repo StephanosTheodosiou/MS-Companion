@@ -172,6 +172,9 @@ export function ProfileTabScreen({ navigation }: TabProps<'ProfileTab'>) {
       }
     >
       {form.fields}
+      <Section header="Medicines" iconInset>
+        <Row icon="plus-square" label="My medicines and doses" chevron onPress={() => navigation.navigate('Medications')} />
+      </Section>
     </Screen>
   );
 }

@@ -107,6 +107,12 @@ export function HomeScreen({ navigation }: TabProps<'Today'>) {
         </Section>
       ) : null}
 
+      <Section header="Health log" iconInset>
+        <Row icon="plus-square" label="Medication" value={doseSummary} chevron onPress={() => navigation.navigate('Medications')} />
+        <Row icon="alert-triangle" label="New or worse symptom" chevron onPress={() => navigation.navigate('SymptomEntry')} />
+        <Row icon="list" label="Symptom log" chevron onPress={() => navigation.navigate('SymptomLog')} />
+      </Section>
+
       <Section header="Your MS team">
         {hasPhone ? (
           <Row
