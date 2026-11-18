@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { colors, space } from '../theme/theme';
 import { AppText } from './AppText';
 import { Row } from './Row';
@@ -16,25 +16,34 @@ interface Props {
   error?: string | null;
 }
 
-// A row that opens the phone's own calendar or clock.
-// Android: the system pop-up. iPhone: the picker opens below the row.
+function toWebDateValue(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function toWebTimeValue(d: Date): string {
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
 export function PickerRow({ label, mode, value, display, onChange, error }: Props) {
   const [open, setOpen] = useState(false);
   const initial = value ?? defaultValue(mode);
 
   const onPress = () => {
     if (Platform.OS === 'android') {
-      DateTimePickerAndroid.open({
-        value: initial,
-        mode,
-        is24Hour: true,
-        onChange: (event: DateTimePickerEvent, date?: Date) => {
-          if (event.type === 'set' && date) onChange(date);
-        },
-      });
+      setOpen(true);
     } else {
       setOpen((o) => !o);
       if (!value) onChange(initial);
+    }
+  };
+
+  const handleAndroidChange = (event: DateTimePickerEvent, date?: Date) => {
+    setOpen(false);
+    if (event.type === 'set' && date) {
+      onChange(date);
     }
   };
 
@@ -52,6 +61,14 @@ export function PickerRow({ label, mode, value, display, onChange, error }: Prop
           </AppText>
         }
       />
+      {open && Platform.OS === 'android' ? (
+        <DateTimePicker
+          value={initial}
+          mode={mode}
+          is24Hour
+          onChange={handleAndroidChange}
+        />
+      ) : null}
       {open && Platform.OS === 'ios' ? (
         <View style={styles.inline}>
           <DateTimePicker
@@ -64,6 +81,38 @@ export function PickerRow({ label, mode, value, display, onChange, error }: Prop
               if (date) onChange(date);
             }}
           />
+        </View>
+      ) : null}
+      {open && Platform.OS === 'web' ? (
+        <View style={styles.webInline}>
+          {React.createElement('input', {
+            type: mode,
+            value: mode === 'date' ? toWebDateValue(initial) : toWebTimeValue(initial),
+            onChange: (e: any) => {
+              const raw: string = e.target?.value;
+              if (!raw) return;
+              if (mode === 'date') {
+                const [y, m, d] = raw.split('-').map(Number);
+                if (y && m && d) onChange(new Date(y, m - 1, d, 12));
+              } else {
+                const [h, min] = raw.split(':').map(Number);
+                if (!Number.isNaN(h) && !Number.isNaN(min)) {
+                  const next = new Date(initial);
+                  next.setHours(h, min, 0, 0);
+                  onChange(next);
+                }
+              }
+            },
+            style: {
+              fontSize: 16,
+              padding: 10,
+              borderRadius: 8,
+              border: `1px solid ${colors.inputBorder}`,
+              color: colors.ink,
+              backgroundColor: colors.page,
+              width: '100%',
+            },
+          })}
         </View>
       ) : null}
       {error ? (
@@ -84,5 +133,6 @@ function defaultValue(mode: 'date' | 'time'): Date {
 const styles = StyleSheet.create({
   value: { fontWeight: '700' },
   inline: { backgroundColor: colors.surface, paddingHorizontal: space.sm },
+  webInline: { backgroundColor: colors.surface, paddingHorizontal: space.lg, paddingBottom: space.md },
   error: { paddingHorizontal: space.lg, paddingBottom: space.md, backgroundColor: colors.surface },
 });

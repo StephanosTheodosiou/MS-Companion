@@ -1,6 +1,6 @@
 import {
-  Session,
   Appointment,
+  BloodTest,
   CheckIn,
   DoctorQuestion,
   ConsentKey,
@@ -9,6 +9,7 @@ import {
   EMPTY_PROFILE,
   Medication,
   Profile,
+  Session,
   SideEffect,
   SymptomEntry,
   TextSize,
@@ -37,6 +38,7 @@ let sideEffects: SideEffect[] = [];
 let symptomEntries: SymptomEntry[] = [];
 let appointments: Appointment[] = [];
 let questions: DoctorQuestion[] = [];
+let bloodTests: BloodTest[] = [];
 
 export async function getConsents(): Promise<ConsentMap> {
   return { ...consents };
@@ -63,11 +65,6 @@ export async function saveProfile(next: Profile): Promise<void> {
   };
 }
 
-export async function hasCompletedOnboarding(): Promise<boolean> {
-  return onboardingDone;
-}
-
-// ---------- Account (who is logged in) ----------
 
 export async function getSession(): Promise<Session | null> {
   return session ? { ...session } : null;
@@ -77,9 +74,12 @@ export async function saveSession(next: Session): Promise<void> {
   session = { ...next };
 }
 
-/** Log out: forgets who is logged in. Health data on the phone is kept. */
 export async function clearSession(): Promise<void> {
   session = null;
+}
+
+export async function hasCompletedOnboarding(): Promise<boolean> {
+  return onboardingDone;
 }
 
 export async function completeOnboarding(): Promise<void> {
@@ -217,6 +217,27 @@ export async function deleteQuestion(id: string): Promise<void> {
   questions = questions.filter((q) => q.id !== id);
 }
 
+// ---------- Blood-test reminders (E3) ----------
+
+/** All blood tests, soonest due first. */
+export async function listBloodTests(): Promise<BloodTest[]> {
+  return [...bloodTests].sort((a, b) => a.dueDate.localeCompare(b.dueDate)).map((t) => ({ ...t }));
+}
+
+export async function getBloodTest(id: string): Promise<BloodTest | null> {
+  const found = bloodTests.find((t) => t.id === id);
+  return found ? { ...found } : null;
+}
+
+/** Adds a new blood test or replaces one with the same id. */
+export async function saveBloodTest(test: BloodTest): Promise<void> {
+  bloodTests = [...bloodTests.filter((t) => t.id !== test.id), { ...test }];
+}
+
+export async function deleteBloodTest(id: string): Promise<void> {
+  bloodTests = bloodTests.filter((t) => t.id !== id);
+}
+
 export async function exportAllData(): Promise<string> {
   return JSON.stringify(
     {
@@ -231,6 +252,7 @@ export async function exportAllData(): Promise<string> {
       symptomEntries,
       appointments,
       questions,
+      bloodTests,
     },
     null,
     2
@@ -250,4 +272,5 @@ export async function deleteAllData(): Promise<void> {
   symptomEntries = [];
   appointments = [];
   questions = [];
+  bloodTests = [];
 }

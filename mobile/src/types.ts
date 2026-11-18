@@ -105,7 +105,26 @@ export interface DoctorQuestion {
   asked: boolean;
 }
 
-// ---------- Account (same shape as the API's AuthResponse and UserDto) ----------
+// ---------- Blood-test reminders (E3) ----------
+
+/** How often a blood test comes round, in months. 'none' means a one-off test. */
+export type BloodTestRepeat = 'none' | '1' | '3' | '6' | '12';
+
+/** How many days before the due date the reminder is sent. */
+export type RemindBefore = '0' | '1' | '7';
+
+export interface BloodTest {
+  id: string;
+  /** What the test is called, e.g. "Full blood count". Free text. */
+  name: string;
+  /** YYYY-MM-DD the test is due. */
+  dueDate: string;
+  repeat: BloodTestRepeat;
+  remindDaysBefore: RemindBefore;
+  notes: string;
+  /** YYYY-MM-DD the test was last marked as done, or null if never. */
+  lastDoneOn: string | null;
+}
 
 export interface User {
   id: string;
@@ -115,12 +134,9 @@ export interface User {
   role: 'User' | 'Admin';
 }
 
-/** Who is logged in on this phone. `token` is what the API expects as a Bearer token (JWT). */
 export interface Session {
   token: string;
-  /** When `token` stops working (UTC, ISO). */
   expiresAt: string;
-  /** Only with "Keep me logged in". */
   refreshToken?: string | null;
   refreshTokenExpiresAt?: string | null;
   user: User;

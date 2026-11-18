@@ -6,6 +6,7 @@ import {
   logDose,
   saveAllConsents,
   saveAppointment,
+  saveBloodTest,
   saveCheckIn,
   saveMedication,
   saveProfile,
@@ -70,6 +71,10 @@ export async function loadDemoData(): Promise<void> {
 
   await saveAppointment({ id: 'demo-a1', date: daysAgoKey(15), time: '10:30', withWhom: 'Dr Andreas', place: 'Nicosia General Hospital', notes: '' });
   await saveAppointment({ id: 'demo-a2', date: daysAgoKey(-7), time: '11:00', withWhom: 'Dr Andreas', place: 'Nicosia General Hospital', notes: 'Bring blood test results.' });
+
+  await saveBloodTest({ id: 'demo-b1', name: 'Full blood count', dueDate: daysAgoKey(2), repeat: '3', remindDaysBefore: '1', notes: '', lastDoneOn: daysAgoKey(92) });
+  await saveBloodTest({ id: 'demo-b2', name: 'Liver function test', dueDate: daysAgoKey(-6), repeat: '6', remindDaysBefore: '7', notes: 'Fasting needed.', lastDoneOn: null });
+  await saveBloodTest({ id: 'demo-b3', name: 'Vitamin D', dueDate: daysAgoKey(-60), repeat: 'none', remindDaysBefore: '1', notes: '', lastDoneOn: null });
 
   await saveQuestion({ id: 'demo-q1', text: 'Could the leg numbness be related to the heat?', createdAt: `${daysAgoKey(2)}T10:05:00.000Z`, asked: false });
   await saveQuestion({ id: 'demo-q2', text: 'Should I change the time of my Baclofen dose?', createdAt: `${daysAgoKey(1)}T18:00:00.000Z`, asked: false });

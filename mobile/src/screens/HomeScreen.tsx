@@ -11,10 +11,12 @@ import { Screen } from '../components/Screen';
 import { Section } from '../components/Section';
 import { WeekDay, WeekStrip } from '../components/WeekStrip';
 import { TabProps } from '../navigation/types';
-import { getCheckIn, getDoseLogs, getProfile, listMedications } from '../services/storage';
+import { getCheckIn, getDoseLogs, getProfile, listAppointments, listBloodTests, listMedications, listQuestions } from '../services/storage';
+import { appointmentDetails, appointmentTitle } from './AppointmentsScreen';
 import { colors } from '../theme/theme';
-import { CheckIn, EMPTY_PROFILE, Profile } from '../types';
+import { Appointment, CheckIn, EMPTY_PROFILE, Profile } from '../types';
 import { formatLongDate, formatTime, todayKey, weekKeys } from '../utils/date';
+import { bloodTestSummary } from '../utils/bloodTest';
 import { toDialNumber } from '../utils/validation';
 
 const LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -27,6 +29,9 @@ export function HomeScreen({ navigation }: TabProps<'Today'>) {
   const [todaysCheckIn, setTodaysCheckIn] = useState<CheckIn | null>(null);
   const [week, setWeek] = useState<WeekDay[]>([]);
   const [doseSummary, setDoseSummary] = useState<string | undefined>(undefined);
+  const [nextVisit, setNextVisit] = useState<Appointment | null>(null);
+  const [openQuestions, setOpenQuestions] = useState(0);
+  const [bloodTestNote, setBloodTestNote] = useState<string | undefined>(undefined);
 
   // Reload whenever the screen is shown, so changes made elsewhere appear straight away.
   useFocusEffect(
@@ -59,6 +64,15 @@ export function HomeScreen({ navigation }: TabProps<'Today'>) {
           setDoseSummary(total > 0 ? `${taken} of ${total} taken` : undefined);
         })
         .catch((e) => console.warn('Could not load medication', e));
+      listAppointments()
+        .then((all) => setNextVisit(all.find((a) => a.date >= today) ?? null))
+        .catch((e) => console.warn('Could not load appointments', e));
+      listBloodTests()
+        .then((tests) => setBloodTestNote(bloodTestSummary(tests, today)))
+        .catch((e) => console.warn('Could not load blood tests', e));
+      listQuestions()
+        .then((qs) => setOpenQuestions(qs.filter((q) => !q.asked).length))
+        .catch((e) => console.warn('Could not load questions', e));
     }, [])
   );
 
@@ -109,8 +123,32 @@ export function HomeScreen({ navigation }: TabProps<'Today'>) {
 
       <Section header="Health log" iconInset>
         <Row icon="plus-square" label="Medication" value={doseSummary} chevron onPress={() => navigation.navigate('Medications')} />
+        <Row icon="droplet" label="Blood tests" value={bloodTestNote} chevron onPress={() => navigation.navigate('BloodTests')} />
         <Row icon="alert-triangle" label="New or worse symptom" chevron onPress={() => navigation.navigate('SymptomEntry')} />
         <Row icon="list" label="Symptom log" chevron onPress={() => navigation.navigate('SymptomLog')} />
+      </Section>
+
+      <Section header="Next visit" iconInset>
+        {nextVisit ? (
+          <Row
+            icon="calendar"
+            strong
+            label={appointmentTitle(nextVisit)}
+            description={appointmentDetails(nextVisit)}
+            chevron
+            onPress={() => navigation.navigate('Appointments')}
+          />
+        ) : (
+          <Row icon="calendar" label="Add an appointment" chevron onPress={() => navigation.navigate('Appointments')} />
+        )}
+        <Row
+          icon="help-circle"
+          label="Questions for my doctor"
+          value={openQuestions > 0 ? `${openQuestions} to ask` : undefined}
+          chevron
+          onPress={() => navigation.navigate('Questions')}
+        />
+        <Row icon="file-text" label="Visit summary" chevron onPress={() => navigation.navigate('VisitSummary')} />
       </Section>
 
       <Section header="Your MS team">

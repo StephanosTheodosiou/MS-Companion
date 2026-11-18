@@ -15,10 +15,14 @@ import { CheckInScreen } from '../screens/CheckInScreen';
 import { MedicationsScreen } from '../screens/MedicationsScreen';
 import { MedicationEditScreen } from '../screens/MedicationEditScreen';
 import { SideEffectScreen } from '../screens/SideEffectScreen';
+import { BloodTestsScreen } from '../screens/BloodTestsScreen';
+import { BloodTestEditScreen } from '../screens/BloodTestEditScreen';
 import { SymptomLogScreen } from '../screens/SymptomLogScreen';
 import { SymptomEntryScreen } from '../screens/SymptomEntryScreen';
-
-export type StartRoute = 'Welcome' | 'Login' | 'Consent' | 'Home';
+import { AppointmentsScreen } from '../screens/AppointmentsScreen';
+import { AppointmentEditScreen } from '../screens/AppointmentEditScreen';
+import { QuestionsScreen } from '../screens/QuestionsScreen';
+import { VisitSummaryScreen } from '../screens/VisitSummaryScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -36,6 +40,9 @@ function Tabs() {
   );
 }
 
+// Every screen draws its own header (back button and progress), so the native one is hidden.
+export type StartRoute = 'Welcome' | 'Login' | 'Consent' | 'Home';
+
 export function AppNavigator({ initialRoute }: { initialRoute: StartRoute }) {
   return (
     <Stack.Navigator
@@ -52,8 +59,14 @@ export function AppNavigator({ initialRoute }: { initialRoute: StartRoute }) {
       <Stack.Screen name="Medications" component={MedicationsScreen} />
       <Stack.Screen name="MedicationEdit" component={MedicationEditScreen} />
       <Stack.Screen name="SideEffect" component={SideEffectScreen} />
+      <Stack.Screen name="BloodTests" component={BloodTestsScreen} />
+      <Stack.Screen name="BloodTestEdit" component={BloodTestEditScreen} />
       <Stack.Screen name="SymptomLog" component={SymptomLogScreen} />
       <Stack.Screen name="SymptomEntry" component={SymptomEntryScreen} />
+      <Stack.Screen name="Appointments" component={AppointmentsScreen} />
+      <Stack.Screen name="AppointmentEdit" component={AppointmentEditScreen} />
+      <Stack.Screen name="Questions" component={QuestionsScreen} />
+      <Stack.Screen name="VisitSummary" component={VisitSummaryScreen} />
     </Stack.Navigator>
   );
 }
