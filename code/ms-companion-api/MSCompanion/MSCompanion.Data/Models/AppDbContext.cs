@@ -10,7 +10,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<UserSession> UserSessions => Set<UserSession>();
     public DbSet<Patient> Patients => Set<Patient>();
     public DbSet<ConsentRecord> ConsentRecords => Set<ConsentRecord>();
-    public DbSet<SymptomCheckin> SymptomCheckins => Set<SymptomCheckin>();
+    public DbSet<CheckIn> CheckIns => Set<CheckIn>();
+    public DbSet<CheckInAnswer> CheckInAnswers => Set<CheckInAnswer>();
+    public DbSet<TestSession> TestSessions => Set<TestSession>();
+    public DbSet<TestResult> TestResults => Set<TestResult>();
+    public DbSet<TestRawData> TestRawData => Set<TestRawData>();
+    public DbSet<TestMetric> TestMetrics => Set<TestMetric>();
     public DbSet<Medication> Medications => Set<Medication>();
     public DbSet<MedicationSchedule> MedicationSchedules => Set<MedicationSchedule>();
     public DbSet<MedicationIntake> MedicationIntakes => Set<MedicationIntake>();
@@ -23,8 +28,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        // Category enums are stored as readable text, so reordering an enum can never silently change
-        // stored data. SymptomScore (smallint 0–4) and Weekdays (int bit mask) are deliberately numbers.
         StoreAsText<MsType>(configurationBuilder);
         StoreAsText<ConsentDataType>(configurationBuilder);
         StoreAsText<MedicationStatus>(configurationBuilder);
@@ -32,6 +35,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         StoreAsText<SideEffectSeverity>(configurationBuilder);
         StoreAsText<RelapseGuidance>(configurationBuilder);
         StoreAsText<AppointmentType>(configurationBuilder);
+        StoreAsText<CheckInItem>(configurationBuilder);
+        StoreAsText<TestType>(configurationBuilder);
+        StoreAsText<TestSessionStatus>(configurationBuilder);
+        StoreAsText<Laterality>(configurationBuilder);
     }
 
     private static void StoreAsText<TEnum>(ModelConfigurationBuilder configurationBuilder)
@@ -40,11 +47,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Applies every IEntityTypeConfiguration<T> in MSCompanion.Data/Configurations.
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-        // Hide soft-deleted rows from normal queries.
-        // The sync "pull" endpoint must use .IgnoreQueryFilters() so tombstones reach the phone.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes()
                      .Where(t => typeof(PatientOwnedEntity).IsAssignableFrom(t.ClrType)))
         {
@@ -70,12 +74,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
-    /// <summary>
-    /// - Server-owned audit fields on <see cref="AuditableEntity"/> (users).
-    /// - Sync cursor (<see cref="SyncedEntity.ServerUpdatedAt"/>) on every synced write, plus device timestamps
-    ///   for rows created on the server.
-    /// - Consent records are append-only.
-    /// </summary>
     private void StampAndGuard()
     {
         var now = DateTimeOffset.UtcNow;
