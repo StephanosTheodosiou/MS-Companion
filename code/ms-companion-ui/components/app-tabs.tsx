@@ -22,6 +22,19 @@ export default function AppTabs() {
         <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} md="home" />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="tests">
+        <NativeTabs.Trigger.Label>Tests</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'list.clipboard', selected: 'list.clipboard.fill' }}
+          md="assignment"
+        />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="visit">
+        <NativeTabs.Trigger.Label>Visit</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="stethoscope" md="stethoscope" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="profile">
         <NativeTabs.Trigger.Label>Profile</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
