@@ -155,6 +155,93 @@ namespace MSCompanion.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MSCompanion.Data.Models.CheckIn", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
+                    b.Property<DateOnly>("LocalDate")
+                        .HasColumnType("date")
+                        .HasColumnName("local_date");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<string>("QuestionnaireVersion")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("questionnaire_version");
+
+                    b.Property<DateTimeOffset>("ServerUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("server_updated_at");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("time_zone");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_check_in");
+
+                    b.HasIndex("PatientId", "LocalDate")
+                        .IsUnique()
+                        .HasDatabaseName("ix_check_in_patient_id_local_date")
+                        .HasFilter("deleted_at IS NULL");
+
+                    b.HasIndex("PatientId", "ServerUpdatedAt")
+                        .HasDatabaseName("ix_check_in_patient_id_server_updated_at");
+
+                    b.ToTable("check_in", (string)null);
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.CheckInAnswer", b =>
+                {
+                    b.Property<Guid>("CheckInId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("check_in_id");
+
+                    b.Property<string>("Item")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("item");
+
+                    b.Property<short>("Score")
+                        .HasColumnType("smallint")
+                        .HasColumnName("score");
+
+                    b.HasKey("CheckInId", "Item")
+                        .HasName("pk_check_in_answer");
+
+                    b.ToTable("check_in_answer", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_check_in_answer_item", "item IN ('Fatigue', 'Mobility', 'Mood')");
+
+                            t.HasCheckConstraint("ck_check_in_answer_score", "score BETWEEN 0 AND 10");
+                        });
+                });
+
             modelBuilder.Entity("MSCompanion.Data.Models.ConsentRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -636,23 +723,222 @@ namespace MSCompanion.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("MSCompanion.Data.Models.SymptomCheckin", b =>
+            modelBuilder.Entity("MSCompanion.Data.Models.TestMetric", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("Display")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("display");
+
+                    b.Property<string>("TestType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("test_type");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("unit");
+
+                    b.HasKey("Code")
+                        .HasName("pk_test_metric");
+
+                    b.HasAlternateKey("Code", "TestType")
+                        .HasName("ak_test_metric_code_test_type");
+
+                    b.ToTable("test_metric", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_test_metric_test_type", "test_type IN ('SymbolDigit', 'FingerTapping', 'Walking')");
+                        });
+
+                    b.HasData(
+                        new
+                        {
+                            Code = "symbol-digit-correct-count",
+                            Display = "Symbol-digit test: correct responses",
+                            TestType = "SymbolDigit",
+                            Unit = "{count}"
+                        },
+                        new
+                        {
+                            Code = "symbol-digit-error-count",
+                            Display = "Symbol-digit test: errors",
+                            TestType = "SymbolDigit",
+                            Unit = "{count}"
+                        },
+                        new
+                        {
+                            Code = "symbol-digit-accuracy",
+                            Display = "Symbol-digit test: accuracy",
+                            TestType = "SymbolDigit",
+                            Unit = "%"
+                        },
+                        new
+                        {
+                            Code = "symbol-digit-mean-response-time",
+                            Display = "Symbol-digit test: mean response time",
+                            TestType = "SymbolDigit",
+                            Unit = "ms"
+                        },
+                        new
+                        {
+                            Code = "finger-tapping-tap-count",
+                            Display = "Finger tapping: number of taps",
+                            TestType = "FingerTapping",
+                            Unit = "{taps}"
+                        },
+                        new
+                        {
+                            Code = "finger-tapping-tap-rate",
+                            Display = "Finger tapping: tap rate",
+                            TestType = "FingerTapping",
+                            Unit = "{taps}/s"
+                        },
+                        new
+                        {
+                            Code = "finger-tapping-intertap-mean",
+                            Display = "Finger tapping: mean inter-tap interval",
+                            TestType = "FingerTapping",
+                            Unit = "ms"
+                        },
+                        new
+                        {
+                            Code = "finger-tapping-intertap-cv",
+                            Display = "Finger tapping: inter-tap interval coefficient of variation",
+                            TestType = "FingerTapping",
+                            Unit = "%"
+                        },
+                        new
+                        {
+                            Code = "walking-duration",
+                            Display = "Walking test: duration",
+                            TestType = "Walking",
+                            Unit = "s"
+                        },
+                        new
+                        {
+                            Code = "walking-step-count",
+                            Display = "Walking test: step count",
+                            TestType = "Walking",
+                            Unit = "{steps}"
+                        },
+                        new
+                        {
+                            Code = "walking-cadence",
+                            Display = "Walking test: cadence",
+                            TestType = "Walking",
+                            Unit = "{steps}/min"
+                        },
+                        new
+                        {
+                            Code = "walking-step-time-cv",
+                            Display = "Walking test: step time coefficient of variation",
+                            TestType = "Walking",
+                            Unit = "%"
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.TestRawData", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_id");
+
+                    b.Property<short>("FormatVersion")
+                        .HasColumnType("smallint")
+                        .HasColumnName("format_version");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payload");
+
+                    b.HasKey("SessionId")
+                        .HasName("pk_test_raw_data");
+
+                    b.ToTable("test_raw_data", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_test_raw_data_format_version", "format_version > 0");
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.TestResult", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<short>("Bladder")
-                        .HasColumnType("smallint")
-                        .HasColumnName("bladder");
+                    b.Property<string>("Laterality")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("laterality");
 
-                    b.Property<DateOnly>("CheckinDate")
-                        .HasColumnType("date")
-                        .HasColumnName("checkin_date");
+                    b.Property<string>("MetricCode")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("metric_code");
 
-                    b.Property<short>("Cognition")
-                        .HasColumnType("smallint")
-                        .HasColumnName("cognition");
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("session_id");
+
+                    b.Property<string>("TestType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("test_type");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("numeric")
+                        .HasColumnName("value");
+
+                    b.HasKey("Id")
+                        .HasName("pk_test_result");
+
+                    b.HasIndex("MetricCode", "TestType")
+                        .HasDatabaseName("ix_test_result_metric_code_test_type");
+
+                    b.HasIndex("SessionId", "TestType")
+                        .HasDatabaseName("ix_test_result_session_id_test_type");
+
+                    b.HasIndex("SessionId", "MetricCode", "Laterality")
+                        .IsUnique()
+                        .HasDatabaseName("ix_test_result_session_id_metric_code_laterality");
+
+                    NpgsqlIndexBuilderExtensions.AreNullsDistinct(b.HasIndex("SessionId", "MetricCode", "Laterality"), false);
+
+                    b.ToTable("test_result", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_test_result_laterality", "laterality IN ('Left', 'Right')");
+
+                            t.HasCheckConstraint("ck_test_result_laterality_required", "(test_type = 'FingerTapping') = (laterality IS NOT NULL)");
+
+                            t.HasCheckConstraint("ck_test_result_test_type", "test_type IN ('SymbolDigit', 'FingerTapping', 'Walking')");
+
+                            t.HasCheckConstraint("ck_test_result_value", "value >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.TestSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AppVersion")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("app_version");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
@@ -662,30 +948,18 @@ namespace MSCompanion.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
-                    b.Property<short>("Fatigue")
-                        .HasColumnType("smallint")
-                        .HasColumnName("fatigue");
+                    b.Property<string>("DeviceModel")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("device_model");
 
-                    b.Property<bool>("LowMoodPromptShown")
+                    b.Property<DateTimeOffset>("EndedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ended_at");
+
+                    b.Property<bool>("IsPractice")
                         .HasColumnType("boolean")
-                        .HasColumnName("low_mood_prompt_shown");
-
-                    b.Property<short>("Mobility")
-                        .HasColumnType("smallint")
-                        .HasColumnName("mobility");
-
-                    b.Property<short>("Mood")
-                        .HasColumnType("smallint")
-                        .HasColumnName("mood");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("note");
-
-                    b.Property<short>("Pain")
-                        .HasColumnType("smallint")
-                        .HasColumnName("pain");
+                        .HasColumnName("is_practice");
 
                     b.Property<Guid>("PatientId")
                         .HasColumnType("uuid")
@@ -695,34 +969,52 @@ namespace MSCompanion.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("server_updated_at");
 
+                    b.Property<DateTimeOffset>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TestType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("test_type");
+
+                    b.Property<string>("TimeZone")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("time_zone");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
-                        .HasName("pk_symptom_checkin");
+                        .HasName("pk_test_session");
 
-                    b.HasIndex("PatientId", "CheckinDate")
-                        .IsUnique()
-                        .HasDatabaseName("ix_symptom_checkin_patient_id_checkin_date")
-                        .HasFilter("deleted_at IS NULL");
+                    b.HasAlternateKey("Id", "TestType")
+                        .HasName("ak_test_sessions_id_test_type");
 
                     b.HasIndex("PatientId", "ServerUpdatedAt")
-                        .HasDatabaseName("ix_symptom_checkin_patient_id_server_updated_at");
+                        .HasDatabaseName("ix_test_session_patient_id_server_updated_at");
 
-                    b.ToTable("symptom_checkin", null, t =>
+                    b.HasIndex("PatientId", "TestType", "StartedAt")
+                        .HasDatabaseName("ix_test_session_trend")
+                        .HasFilter("status = 'Completed' AND NOT is_practice AND deleted_at IS NULL");
+
+                    b.ToTable("test_session", null, t =>
                         {
-                            t.HasCheckConstraint("ck_symptom_checkin_bladder", "bladder BETWEEN 0 AND 4");
+                            t.HasCheckConstraint("ck_test_session_status", "status IN ('Completed', 'Aborted')");
 
-                            t.HasCheckConstraint("ck_symptom_checkin_cognition", "cognition BETWEEN 0 AND 4");
+                            t.HasCheckConstraint("ck_test_session_test_type", "test_type IN ('SymbolDigit', 'FingerTapping', 'Walking')");
 
-                            t.HasCheckConstraint("ck_symptom_checkin_fatigue", "fatigue BETWEEN 0 AND 4");
-
-                            t.HasCheckConstraint("ck_symptom_checkin_mobility", "mobility BETWEEN 0 AND 4");
-
-                            t.HasCheckConstraint("ck_symptom_checkin_mood", "mood BETWEEN 0 AND 4");
-
-                            t.HasCheckConstraint("ck_symptom_checkin_pain", "pain BETWEEN 0 AND 4");
+                            t.HasCheckConstraint("ck_test_session_times", "ended_at >= started_at");
                         });
                 });
 
@@ -988,6 +1280,30 @@ namespace MSCompanion.Data.Migrations
                     b.Navigation("Patient");
                 });
 
+            modelBuilder.Entity("MSCompanion.Data.Models.CheckIn", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany("CheckIns")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_check_in_patients_patient_id");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.CheckInAnswer", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.CheckIn", "CheckIn")
+                        .WithMany("Answers")
+                        .HasForeignKey("CheckInId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_check_in_answer_check_ins_check_in_id");
+
+                    b.Navigation("CheckIn");
+                });
+
             modelBuilder.Entity("MSCompanion.Data.Models.ConsentRecord", b =>
                 {
                     b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
@@ -1108,14 +1424,49 @@ namespace MSCompanion.Data.Migrations
                     b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("MSCompanion.Data.Models.SymptomCheckin", b =>
+            modelBuilder.Entity("MSCompanion.Data.Models.TestRawData", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.TestSession", "Session")
+                        .WithOne("RawData")
+                        .HasForeignKey("MSCompanion.Data.Models.TestRawData", "SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_test_raw_data_test_sessions_session_id");
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.TestResult", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.TestMetric", "Metric")
+                        .WithMany()
+                        .HasForeignKey("MetricCode", "TestType")
+                        .HasPrincipalKey("Code", "TestType")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_test_result_test_metric_metric_code_test_type");
+
+                    b.HasOne("MSCompanion.Data.Models.TestSession", "Session")
+                        .WithMany("Results")
+                        .HasForeignKey("SessionId", "TestType")
+                        .HasPrincipalKey("Id", "TestType")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_test_result_test_sessions_session_id_test_type");
+
+                    b.Navigation("Metric");
+
+                    b.Navigation("Session");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.TestSession", b =>
                 {
                     b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
-                        .WithMany("SymptomCheckins")
+                        .WithMany("TestSessions")
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("fk_symptom_checkin_patient_patient_id");
+                        .HasConstraintName("fk_test_session_patient_patient_id");
 
                     b.Navigation("Patient");
                 });
@@ -1179,6 +1530,11 @@ namespace MSCompanion.Data.Migrations
                     b.Navigation("Reports");
                 });
 
+            modelBuilder.Entity("MSCompanion.Data.Models.CheckIn", b =>
+                {
+                    b.Navigation("Answers");
+                });
+
             modelBuilder.Entity("MSCompanion.Data.Models.Medication", b =>
                 {
                     b.Navigation("BloodTestReminders");
@@ -1201,17 +1557,26 @@ namespace MSCompanion.Data.Migrations
 
                     b.Navigation("BloodTestReminders");
 
+                    b.Navigation("CheckIns");
+
                     b.Navigation("ConsentRecords");
 
                     b.Navigation("Medications");
 
                     b.Navigation("RelapseLogEntries");
 
-                    b.Navigation("SymptomCheckins");
+                    b.Navigation("TestSessions");
 
                     b.Navigation("VisitQuestions");
 
                     b.Navigation("VisitReports");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.TestSession", b =>
+                {
+                    b.Navigation("RawData");
+
+                    b.Navigation("Results");
                 });
 
             modelBuilder.Entity("MSCompanion.Data.Models.User", b =>
