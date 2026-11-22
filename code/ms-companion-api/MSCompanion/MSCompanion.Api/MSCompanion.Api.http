@@ -93,3 +93,47 @@ Content-Type: application/json
 ### Consent history (every decision, newest first)
 GET {{baseUrl}}/api/consent/history
 Authorization: Bearer {{login.response.body.$.token}}
+
+### My medications (needs Medication consent for changes)
+GET {{baseUrl}}/api/medications
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Add a medication
+# @name addMedication
+POST {{baseUrl}}/api/medications
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "name": "Dimethyl fumarate",
+  "dose": "240 mg",
+  "instructions": "Take with food",
+  "isDiseaseModifying": true,
+  "startDate": "2026-06-01"
+}
+
+### Add a reminder time
+# @name addSchedule
+POST {{baseUrl}}/api/medications/{{addMedication.response.body.$.id}}/schedules
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "timeOfDay": "08:00",
+  "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+}
+
+### Log a dose for that reminder
+POST {{baseUrl}}/api/medications/{{addMedication.response.body.$.id}}/intakes
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "scheduleId": "{{addSchedule.response.body.$.schedules[0].id}}",
+  "scheduledFor": "2026-11-23T08:00:00+02:00",
+  "status": "Taken"
+}
+
+### Dose history
+GET {{baseUrl}}/api/medications/intakes?from=2026-11-01T00:00:00Z&to=2026-12-01T00:00:00Z
+Authorization: Bearer {{login.response.body.$.token}}

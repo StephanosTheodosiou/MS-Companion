@@ -39,6 +39,8 @@ builder.Services.AddScoped<IConsentRepository, ConsentRepository>();
 builder.Services.AddScoped<IConsentService, ConsentService>();
 builder.Services.AddScoped<ISyncRepository, SyncRepository>();
 builder.Services.AddScoped<ISyncService, SyncService>();
+builder.Services.AddScoped<IMedicationRepository, MedicationRepository>();
+builder.Services.AddScoped<IMedicationService, MedicationService>();
 
 // 4. Authentication (JWT bearer) and authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
@@ -90,7 +92,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
 // 6. Controllers, error responses, OpenAPI and health checks
 builder.Services.AddControllers()
     // Enums travel as readable strings ("RelapsingRemitting"), matching how they are stored in the database.
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddProblemDetails(); // RFC 7807 error bodies: { type, title, status, detail }
 builder.Services.AddOpenApi(options => options.AddBearerSecurityScheme());
