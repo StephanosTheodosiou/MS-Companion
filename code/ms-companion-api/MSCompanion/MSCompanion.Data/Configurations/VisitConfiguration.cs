@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSCompanion.Data.Models;
+using MSCompanion.Domain.Enums;
 
 namespace MSCompanion.Data.Configurations;
 
@@ -8,7 +9,11 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
 {
     public void Configure(EntityTypeBuilder<Appointment> builder)
     {
-        builder.ToTable("appointment");
+        builder.ToTable("appointment", t =>
+        {
+            t.HasCheckConstraint("ck_appointment_status", CheckConstraintSql.OneOf<AppointmentStatus>("status"));
+            t.HasCheckConstraint("ck_appointment_times", "ends_at IS NULL OR ends_at > starts_at");
+        });
 
         builder.OwnedByPatient(p => p.Appointments);
 
