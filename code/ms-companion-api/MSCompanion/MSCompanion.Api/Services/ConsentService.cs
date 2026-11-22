@@ -9,6 +9,7 @@ namespace MSCompanion.Api.Services;
 public sealed class ConsentService(
     IPatientRepository patients,
     IConsentRepository consents,
+    IMedicationRepository medications,
     TimeProvider clock) : IConsentService
 {
     public async Task<IReadOnlyList<ConsentStateDto>?> GetCurrentAsync(Guid userId, CancellationToken ct = default)
@@ -68,6 +69,12 @@ public sealed class ConsentService(
             return ToStates(current);
         }
 
+        if (newRecords.Any(r => r.DataType == ConsentDataType.Medication && !r.Granted))
+        {
+            await medications.MarkAllDeletedAsync(patientId, now, ct);
+        }
+
+        // Saves the consent records and the deletions above in one transaction.
         await consents.AddRangeAsync(newRecords, ct);
 
         var updated = current.ToDictionary(kv => kv.Key, kv => kv.Value);
