@@ -41,6 +41,8 @@ builder.Services.AddScoped<ISyncRepository, SyncRepository>();
 builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IMedicationRepository, MedicationRepository>();
 builder.Services.AddScoped<IMedicationService, MedicationService>();
+builder.Services.AddScoped<IRelapseLogRepository, RelapseLogRepository>();
+builder.Services.AddScoped<IRelapseLogService, RelapseLogService>();
 
 // 4. Authentication (JWT bearer) and authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

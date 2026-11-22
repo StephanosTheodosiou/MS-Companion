@@ -12,29 +12,29 @@ public sealed class MedicationService(
     IConsentService consents,
     TimeProvider clock) : IMedicationService
 {
-    public async Task<MedicationResult<List<MedicationDto>>> GetAllAsync(Guid userId, CancellationToken ct = default)
+    public async Task<ServiceResult<List<MedicationDto>>> GetAllAsync(Guid userId, CancellationToken ct = default)
     {
         if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
         {
-            return MedicationError.PatientNotFound;
+            return ServiceError.PatientNotFound;
         }
 
         var list = await medications.GetAllAsync(patientId, ct);
         return list.Select(MedicationDto.FromEntity).ToList();
     }
 
-    public async Task<MedicationResult<MedicationDto>> GetAsync(Guid userId, Guid medicationId, CancellationToken ct = default)
+    public async Task<ServiceResult<MedicationDto>> GetAsync(Guid userId, Guid medicationId, CancellationToken ct = default)
     {
         if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
         {
-            return MedicationError.PatientNotFound;
+            return ServiceError.PatientNotFound;
         }
 
         var medication = await medications.GetAsync(patientId, medicationId, ct);
-        return medication is null ? MedicationError.NotFound : MedicationDto.FromEntity(medication);
+        return medication is null ? ServiceError.NotFound : MedicationDto.FromEntity(medication);
     }
 
-    public async Task<MedicationResult<MedicationDto>> CreateAsync(
+    public async Task<ServiceResult<MedicationDto>> CreateAsync(
         Guid userId,
         SaveMedicationRequest request,
         CancellationToken ct = default)
@@ -53,7 +53,7 @@ public sealed class MedicationService(
         return MedicationDto.FromEntity(medication);
     }
 
-    public async Task<MedicationResult<MedicationDto>> UpdateAsync(
+    public async Task<ServiceResult<MedicationDto>> UpdateAsync(
         Guid userId,
         Guid medicationId,
         SaveMedicationRequest request,
@@ -67,7 +67,7 @@ public sealed class MedicationService(
 
         if (await medications.GetAsync(patientId, medicationId, ct) is not { } medication)
         {
-            return MedicationError.NotFound;
+            return ServiceError.NotFound;
         }
 
         Apply(medication, request);
@@ -77,16 +77,16 @@ public sealed class MedicationService(
         return MedicationDto.FromEntity(medication);
     }
 
-    public async Task<MedicationResult<bool>> DeleteAsync(Guid userId, Guid medicationId, CancellationToken ct = default)
+    public async Task<ServiceResult<bool>> DeleteAsync(Guid userId, Guid medicationId, CancellationToken ct = default)
     {
         if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
         {
-            return MedicationError.PatientNotFound;
+            return ServiceError.PatientNotFound;
         }
 
         if (await medications.GetAsync(patientId, medicationId, ct) is not { } medication)
         {
-            return MedicationError.NotFound;
+            return ServiceError.NotFound;
         }
 
         var now = clock.GetUtcNow();
@@ -101,7 +101,7 @@ public sealed class MedicationService(
         return true;
     }
 
-    public async Task<MedicationResult<MedicationDto>> AddScheduleAsync(
+    public async Task<ServiceResult<MedicationDto>> AddScheduleAsync(
         Guid userId,
         Guid medicationId,
         SaveScheduleRequest request,
@@ -115,7 +115,7 @@ public sealed class MedicationService(
 
         if (await medications.GetAsync(patientId, medicationId, ct) is not { } medication)
         {
-            return MedicationError.NotFound;
+            return ServiceError.NotFound;
         }
 
         var schedule = new MedicationSchedule
@@ -131,7 +131,7 @@ public sealed class MedicationService(
         return MedicationDto.FromEntity(medication);
     }
 
-    public async Task<MedicationResult<MedicationDto>> UpdateScheduleAsync(
+    public async Task<ServiceResult<MedicationDto>> UpdateScheduleAsync(
         Guid userId,
         Guid medicationId,
         Guid scheduleId,
@@ -147,7 +147,7 @@ public sealed class MedicationService(
         var medication = await medications.GetAsync(patientId, medicationId, ct);
         if (medication?.Schedules.FirstOrDefault(s => s.Id == scheduleId) is not { } schedule)
         {
-            return MedicationError.NotFound;
+            return ServiceError.NotFound;
         }
 
         Apply(schedule, request);
@@ -157,7 +157,7 @@ public sealed class MedicationService(
         return MedicationDto.FromEntity(medication);
     }
 
-    public async Task<MedicationResult<MedicationDto>> DeleteScheduleAsync(
+    public async Task<ServiceResult<MedicationDto>> DeleteScheduleAsync(
         Guid userId,
         Guid medicationId,
         Guid scheduleId,
@@ -165,13 +165,13 @@ public sealed class MedicationService(
     {
         if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
         {
-            return MedicationError.PatientNotFound;
+            return ServiceError.PatientNotFound;
         }
 
         var medication = await medications.GetAsync(patientId, medicationId, ct);
         if (medication?.Schedules.FirstOrDefault(s => s.Id == scheduleId) is not { } schedule)
         {
-            return MedicationError.NotFound;
+            return ServiceError.NotFound;
         }
 
         var now = clock.GetUtcNow();
@@ -182,7 +182,7 @@ public sealed class MedicationService(
         return MedicationDto.FromEntity(medication);
     }
 
-    public async Task<MedicationResult<MedicationIntakeDto>> LogIntakeAsync(
+    public async Task<ServiceResult<MedicationIntakeDto>> LogIntakeAsync(
         Guid userId,
         Guid medicationId,
         LogIntakeRequest request,
@@ -198,7 +198,7 @@ public sealed class MedicationService(
         if (medication is null
             || (request.ScheduleId is { } scheduleId && medication.Schedules.All(s => s.Id != scheduleId)))
         {
-            return MedicationError.NotFound;
+            return ServiceError.NotFound;
         }
 
         var status = request.Status!.Value;
@@ -219,10 +219,10 @@ public sealed class MedicationService(
 
         return await medications.TrySaveChangesAsync(ct)
             ? MedicationIntakeDto.FromEntity(intake)
-            : MedicationError.AlreadyLogged;
+            : ServiceError.AlreadyLogged;
     }
 
-    public async Task<MedicationResult<bool>> DeleteIntakeAsync(
+    public async Task<ServiceResult<bool>> DeleteIntakeAsync(
         Guid userId,
         Guid medicationId,
         Guid intakeId,
@@ -230,13 +230,13 @@ public sealed class MedicationService(
     {
         if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
         {
-            return MedicationError.PatientNotFound;
+            return ServiceError.PatientNotFound;
         }
 
         var medication = await medications.GetAsync(patientId, medicationId, ct);
         if (medication?.Intakes.FirstOrDefault(i => i.Id == intakeId) is not { } intake)
         {
-            return MedicationError.NotFound;
+            return ServiceError.NotFound;
         }
 
         var now = clock.GetUtcNow();
@@ -247,7 +247,7 @@ public sealed class MedicationService(
         return true;
     }
 
-    public async Task<MedicationResult<List<MedicationIntakeDto>>> GetIntakesAsync(
+    public async Task<ServiceResult<List<MedicationIntakeDto>>> GetIntakesAsync(
         Guid userId,
         DateTimeOffset from,
         DateTimeOffset to,
@@ -255,23 +255,23 @@ public sealed class MedicationService(
     {
         if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
         {
-            return MedicationError.PatientNotFound;
+            return ServiceError.PatientNotFound;
         }
 
         var intakes = await medications.GetIntakesAsync(patientId, from.ToUniversalTime(), to.ToUniversalTime(), ct);
         return intakes.Select(MedicationIntakeDto.FromEntity).ToList();
     }
 
-    private async Task<(Guid PatientId, MedicationError? Error)> PatientForWriteAsync(Guid userId, CancellationToken ct)
+    private async Task<(Guid PatientId, ServiceError? Error)> PatientForWriteAsync(Guid userId, CancellationToken ct)
     {
         if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
         {
-            return (Guid.Empty, MedicationError.PatientNotFound);
+            return (Guid.Empty, ServiceError.PatientNotFound);
         }
 
         return await consents.IsGrantedAsync(patientId, ConsentDataType.Medication, ct)
             ? (patientId, null)
-            : (patientId, MedicationError.ConsentRequired);
+            : (patientId, ServiceError.ConsentRequired);
     }
 
     private static void Apply(Medication target, SaveMedicationRequest source)

@@ -137,3 +137,23 @@ Content-Type: application/json
 ### Dose history
 GET {{baseUrl}}/api/medications/intakes?from=2026-11-01T00:00:00Z&to=2026-12-01T00:00:00Z
 Authorization: Bearer {{login.response.body.$.token}}
+
+### Relapse log (US-01)
+GET {{baseUrl}}/api/relapse-log
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Log a new or worsening symptom (guidance must match the answers)
+POST {{baseUrl}}/api/relapse-log
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "symptomDescription": "Numbness in left leg",
+  "bodyArea": "Left leg",
+  "onsetDate": "2026-11-20",
+  "lastedOver24Hours": true,
+  "hadFever": false,
+  "heatExposure": false,
+  "guidanceShown": "ContactMsTeamToday",
+  "contactedMsTeam": false
+}
