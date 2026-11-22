@@ -41,6 +41,10 @@ namespace MSCompanion.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("deleted_at");
 
+                    b.Property<DateTimeOffset?>("EndsAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ends_at");
+
                     b.Property<string>("Location")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -63,6 +67,12 @@ namespace MSCompanion.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("starts_at");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("status");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(40)
@@ -82,7 +92,12 @@ namespace MSCompanion.Data.Migrations
                     b.HasIndex("PatientId", "StartsAt")
                         .HasDatabaseName("ix_appointment_patient_id_starts_at");
 
-                    b.ToTable("appointment", (string)null);
+                    b.ToTable("appointment", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_appointment_status", "status IN ('Booked', 'Fulfilled', 'Cancelled', 'NoShow')");
+
+                            t.HasCheckConstraint("ck_appointment_times", "ends_at IS NULL OR ends_at > starts_at");
+                        });
                 });
 
             modelBuilder.Entity("MSCompanion.Data.Models.BloodTestReminder", b =>

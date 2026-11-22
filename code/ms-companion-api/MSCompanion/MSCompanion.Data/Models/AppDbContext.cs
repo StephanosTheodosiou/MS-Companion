@@ -35,6 +35,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         StoreAsText<SideEffectSeverity>(configurationBuilder);
         StoreAsText<RelapseGuidance>(configurationBuilder);
         StoreAsText<AppointmentType>(configurationBuilder);
+        StoreAsText<AppointmentStatus>(configurationBuilder);
         StoreAsText<CheckInItem>(configurationBuilder);
         StoreAsText<TestType>(configurationBuilder);
         StoreAsText<TestSessionStatus>(configurationBuilder);

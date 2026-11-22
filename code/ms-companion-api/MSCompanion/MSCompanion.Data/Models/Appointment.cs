@@ -7,6 +7,11 @@ public class Appointment : PatientOwnedEntity
 {
     public DateTimeOffset StartsAt { get; set; }
 
+    public DateTimeOffset? EndsAt { get; set; }
+
+    /// <summary>Required by FHIR. "Since the last visit" in the visit summary means the last Fulfilled one.</summary>
+    public AppointmentStatus Status { get; set; } = AppointmentStatus.Booked;
+
     public AppointmentType Type { get; set; }
 
     public string? ClinicianName { get; set; }
