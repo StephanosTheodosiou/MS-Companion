@@ -46,6 +46,8 @@ builder.Services.AddScoped<IRelapseLogRepository, RelapseLogRepository>();
 builder.Services.AddScoped<IRelapseLogService, RelapseLogService>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IVisitQuestionRepository, VisitQuestionRepository>();
+builder.Services.AddScoped<IVisitQuestionService, VisitQuestionService>();
 
 // 4. Authentication (JWT bearer) and authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

@@ -206,6 +206,45 @@ public sealed class HealthDataSync(ISyncRepository sync, TimeProvider clock, ILo
             ct);
     }
 
+    public async Task<SyncRecordResult<VisitQuestionSyncDto>> PushVisitQuestionAsync(
+        Guid patientId,
+        VisitQuestionSyncDto incoming,
+        CancellationToken ct)
+    {
+        if (Validate(incoming) is { } problem)
+        {
+            return SyncRecordResult<VisitQuestionSyncDto>.Rejected(incoming.Id, problem);
+        }
+
+        Guid? appointmentId = null;
+        if (incoming.AppointmentId is { } id)
+        {
+            var appointment = await sync.FindAsync<Appointment>(id, ct);
+            if (appointment is null || appointment.PatientId != patientId)
+            {
+                return SyncRecordResult<VisitQuestionSyncDto>.Rejected(incoming.Id, SyncReasons.UnknownAppointment);
+            }
+
+            appointmentId = appointment.DeletedAt is null ? appointment.Id : null;
+        }
+
+        return await UpsertAsync<VisitQuestion, VisitQuestionSyncDto>(
+            patientId,
+            incoming,
+            () => new VisitQuestion { Text = "" },
+            (target, source) =>
+            {
+                target.AppointmentId = appointmentId;
+                target.Text = source.Text.Trim();
+                target.Asked = source.Asked;
+                target.AnswerNote = Clean(source.AnswerNote);
+                Stamp(target, source);
+                return Task.CompletedTask;
+            },
+            rejectExisting: null,
+            ct);
+    }
+
     private async Task<SyncRecordResult<TDto>> UpsertAsync<TEntity, TDto>(
         Guid patientId,
         TDto incoming,
@@ -355,6 +394,21 @@ public sealed class HealthDataSync(ISyncRepository sync, TimeProvider clock, ILo
                || a.Note?.Trim().Length > AppointmentRules.NoteMaxLength
                || !AppointmentRules.EndsAfterStart(a.StartsAt, a.EndsAt)
                || !AppointmentRules.StatusFitsTime(a.Status, a.StartsAt, now)
+            ? SyncReasons.InvalidFields
+            : null;
+    }
+
+    private static string? Validate(VisitQuestionSyncDto q)
+    {
+        if (CommonProblem(q) is { } problem)
+        {
+            return problem;
+        }
+
+        return string.IsNullOrWhiteSpace(q.Text)
+               || q.Text.Trim().Length > VisitQuestionRules.TextMaxLength
+               || q.AnswerNote?.Trim().Length > VisitQuestionRules.AnswerNoteMaxLength
+               || !VisitQuestionRules.AnswerFitsAsked(q.Asked, q.AnswerNote)
             ? SyncReasons.InvalidFields
             : null;
     }

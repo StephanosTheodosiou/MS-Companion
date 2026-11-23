@@ -8,6 +8,7 @@ public enum SyncType
     MedicationIntakes,
     RelapseLogEntries,
     Appointments,
+    VisitQuestions,
 }
 
 public readonly struct SyncCursorSet
