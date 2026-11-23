@@ -80,6 +80,13 @@ public sealed class SyncService(
                 : SyncRecordResult<AppointmentSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
         }
 
+        foreach (var incoming in request.VisitQuestions)
+        {
+            response.VisitQuestions.Add(symptomsAllowed
+                ? await healthData.PushVisitQuestionAsync(patientId, incoming, ct)
+                : SyncRecordResult<VisitQuestionSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
+        }
+
         await transaction.CommitAsync(ct);
         return response;
     }
@@ -104,6 +111,7 @@ public sealed class SyncService(
         var intakes = await ChangedPage<MedicationIntake>(SyncType.MedicationIntakes);
         var relapses = await ChangedPage<RelapseLogEntry>(SyncType.RelapseLogEntries);
         var appointments = await ChangedPage<Appointment>(SyncType.Appointments);
+        var questions = await ChangedPage<VisitQuestion>(SyncType.VisitQuestions);
 
         var next = SyncCursorSet.From(new Dictionary<SyncType, SyncCursor?>
         {
@@ -113,6 +121,7 @@ public sealed class SyncService(
             [SyncType.MedicationIntakes] = intakes.Next,
             [SyncType.RelapseLogEntries] = relapses.Next,
             [SyncType.Appointments] = appointments.Next,
+            [SyncType.VisitQuestions] = questions.Next,
         });
 
         return new SyncPullResponse
@@ -123,9 +132,10 @@ public sealed class SyncService(
             MedicationIntakes = intakes.Rows.Select(MedicationIntakeSyncDto.FromEntity).ToList(),
             RelapseLogEntries = relapses.Rows.Select(RelapseLogEntrySyncDto.FromEntity).ToList(),
             Appointments = appointments.Rows.Select(AppointmentSyncDto.FromEntity).ToList(),
+            VisitQuestions = questions.Rows.Select(VisitQuestionSyncDto.FromEntity).ToList(),
             Cursor = next.ToString(),
             HasMore = checkIns.More || medications.More || schedules.More || intakes.More || relapses.More
-                      || appointments.More,
+                      || appointments.More || questions.More,
         };
 
         async Task<(List<T> Rows, SyncCursor? Next, bool More)> ChangedPage<T>(SyncType type)
@@ -315,4 +325,5 @@ public static class SyncReasons
     public const string UnknownMedication = "unknown-medication";
     public const string UnknownSchedule = "unknown-schedule";
     public const string MedicationChanged = "medication-changed";
+    public const string UnknownAppointment = "unknown-appointment";
 }

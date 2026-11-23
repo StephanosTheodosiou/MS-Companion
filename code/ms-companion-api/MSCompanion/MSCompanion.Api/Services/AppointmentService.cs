@@ -16,6 +16,7 @@ public sealed class AppointmentService(
         Guid userId,
         DateTimeOffset? from,
         DateTimeOffset? to,
+        IReadOnlyCollection<AppointmentStatus>? statuses,
         CancellationToken ct = default)
     {
         if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
@@ -23,7 +24,8 @@ public sealed class AppointmentService(
             return ServiceError.PatientNotFound;
         }
 
-        var list = await appointments.GetAllAsync(patientId, from?.ToUniversalTime(), to?.ToUniversalTime(), ct);
+        var list = await appointments.GetAllAsync(
+            patientId, from?.ToUniversalTime(), to?.ToUniversalTime(), statuses, ct);
         return list.Select(AppointmentDto.FromEntity).ToList();
     }
 

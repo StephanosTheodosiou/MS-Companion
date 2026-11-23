@@ -1,4 +1,5 @@
 using MSCompanion.Api.Dto;
+using MSCompanion.Domain.Enums;
 
 namespace MSCompanion.Api.Interfaces;
 
@@ -8,6 +9,7 @@ public interface IAppointmentService
         Guid userId,
         DateTimeOffset? from,
         DateTimeOffset? to,
+        IReadOnlyCollection<AppointmentStatus>? statuses,
         CancellationToken ct = default);
 
     Task<ServiceResult<AppointmentDto>> GetAsync(Guid userId, Guid appointmentId, CancellationToken ct = default);

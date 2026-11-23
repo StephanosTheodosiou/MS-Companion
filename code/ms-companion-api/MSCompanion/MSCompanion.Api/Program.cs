@@ -46,6 +46,8 @@ builder.Services.AddScoped<IRelapseLogRepository, RelapseLogRepository>();
 builder.Services.AddScoped<IRelapseLogService, RelapseLogService>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IVisitQuestionRepository, VisitQuestionRepository>();
+builder.Services.AddScoped<IVisitQuestionService, VisitQuestionService>();
 
 // 4. Authentication (JWT bearer) and authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
@@ -98,6 +100,8 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
 builder.Services.AddControllers()
     // Enums travel as readable strings ("RelapsingRemitting"), matching how they are stored in the database.
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false)));
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddProblemDetails(); // RFC 7807 error bodies: { type, title, status, detail }
 builder.Services.AddOpenApi(options => options.AddBearerSecurityScheme());

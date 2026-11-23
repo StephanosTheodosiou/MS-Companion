@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MSCompanion.Api.Dto;
 using MSCompanion.Api.Extensions;
 using MSCompanion.Api.Interfaces;
+using MSCompanion.Domain.Enums;
 
 namespace MSCompanion.Api.Controllers;
 
@@ -10,36 +11,62 @@ namespace MSCompanion.Api.Controllers;
 [Authorize]
 [Route("api/appointments")]
 [Produces("application/json")]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public sealed class AppointmentsController(IAppointmentService appointments) : ControllerBase
 {
     [HttpGet]
+    [ProducesResponseType<List<AppointmentDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public Task<ActionResult<List<AppointmentDto>>> GetAll(
         [FromQuery] DateTimeOffset? from,
         [FromQuery] DateTimeOffset? to,
+        [FromQuery] List<AppointmentStatus>? status,
         CancellationToken ct)
     {
         if (from is not null && to is not null && to <= from)
         {
             ModelState.AddModelError(nameof(to), "'to' must be after 'from'.");
+        }
+
+        if (Request.Query["status"].Any(v => int.TryParse(v, out _)) || status?.Any(s => !Enum.IsDefined(s)) == true)
+        {
+            ModelState.AddModelError(nameof(status), "Use Booked, Fulfilled, Cancelled or NoShow.");
+        }
+
+        if (!ModelState.IsValid)
+        {
             return Task.FromResult<ActionResult<List<AppointmentDto>>>(ValidationProblem(ModelState));
         }
 
-        return Run(userId => appointments.GetAllAsync(userId, from, to, ct));
+        return Run(userId => appointments.GetAllAsync(userId, from, to, status, ct));
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType<AppointmentDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public Task<ActionResult<AppointmentDto>> Get(Guid id, CancellationToken ct) =>
         Run(userId => appointments.GetAsync(userId, id, ct));
 
     [HttpPost]
+    [ProducesResponseType<AppointmentDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public Task<ActionResult<AppointmentDto>> Create(SaveAppointmentRequest request, CancellationToken ct) =>
         Run(userId => appointments.CreateAsync(userId, request, ct));
 
     [HttpPut("{id:guid}")]
+    [ProducesResponseType<AppointmentDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public Task<ActionResult<AppointmentDto>> Update(Guid id, SaveAppointmentRequest request, CancellationToken ct) =>
         Run(userId => appointments.UpdateAsync(userId, id, request, ct));
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         if (User.GetUserId() is not { } userId)

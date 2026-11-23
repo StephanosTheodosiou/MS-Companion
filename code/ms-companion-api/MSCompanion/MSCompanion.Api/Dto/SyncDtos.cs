@@ -24,13 +24,17 @@ public sealed class SyncPushRequest
     [Required, MaxLength(50)]
     public List<AppointmentSyncDto> Appointments { get; init; } = [];
 
+    [Required, MaxLength(50)]
+    public List<VisitQuestionSyncDto> VisitQuestions { get; init; } = [];
+
     public bool IsEmpty() =>
         CheckIns.Count == 0
         && Medications.Count == 0
         && MedicationSchedules.Count == 0
         && MedicationIntakes.Count == 0
         && RelapseLogEntries.Count == 0
-        && Appointments.Count == 0;
+        && Appointments.Count == 0
+        && VisitQuestions.Count == 0;
 }
 
 public sealed class SyncPushResponse
@@ -41,6 +45,7 @@ public sealed class SyncPushResponse
     public List<SyncRecordResult<MedicationIntakeSyncDto>> MedicationIntakes { get; init; } = [];
     public List<SyncRecordResult<RelapseLogEntrySyncDto>> RelapseLogEntries { get; init; } = [];
     public List<SyncRecordResult<AppointmentSyncDto>> Appointments { get; init; } = [];
+    public List<SyncRecordResult<VisitQuestionSyncDto>> VisitQuestions { get; init; } = [];
 }
 
 public sealed class SyncPullResponse
@@ -51,6 +56,7 @@ public sealed class SyncPullResponse
     public required List<MedicationIntakeSyncDto> MedicationIntakes { get; init; }
     public required List<RelapseLogEntrySyncDto> RelapseLogEntries { get; init; }
     public required List<AppointmentSyncDto> Appointments { get; init; }
+    public required List<VisitQuestionSyncDto> VisitQuestions { get; init; }
 
     public required string? Cursor { get; init; }
 
@@ -281,5 +287,29 @@ public sealed class AppointmentSyncDto : ISyncItem
         CreatedAt = a.CreatedAt,
         UpdatedAt = a.UpdatedAt,
         DeletedAt = a.DeletedAt,
+    };
+}
+
+public sealed class VisitQuestionSyncDto : ISyncItem
+{
+    public required Guid Id { get; init; }
+    public Guid? AppointmentId { get; init; }
+    public required string Text { get; init; }
+    public bool Asked { get; init; }
+    public string? AnswerNote { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
+    public required DateTimeOffset UpdatedAt { get; init; }
+    public DateTimeOffset? DeletedAt { get; init; }
+
+    public static VisitQuestionSyncDto FromEntity(VisitQuestion q) => new()
+    {
+        Id = q.Id,
+        AppointmentId = q.AppointmentId,
+        Text = q.Text,
+        Asked = q.Asked,
+        AnswerNote = q.AnswerNote,
+        CreatedAt = q.CreatedAt,
+        UpdatedAt = q.UpdatedAt,
+        DeletedAt = q.DeletedAt,
     };
 }

@@ -206,7 +206,11 @@ Authorization: Bearer {{login.response.body.$.token}}
 GET {{baseUrl}}/api/appointments?from=2026-11-01T00:00:00Z&to=2027-01-01T00:00:00Z
 Authorization: Bearer {{login.response.body.$.token}}
 
-### Add an appointment
+### Next visit: Booked appointments from now on (status can repeat: ?status=Booked&status=Cancelled)
+GET {{baseUrl}}/api/appointments?status=Booked&from=2026-11-23T00:00:00Z
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Add an appointment (endsAt is required unless status is Cancelled)
 POST {{baseUrl}}/api/appointments
 Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
@@ -217,4 +221,17 @@ Content-Type: application/json
   "type": "Neurologist",
   "clinicianName": "Dr. Georgiou",
   "location": "Nicosia General Hospital"
+}
+
+### Questions for my doctor (status=open or asked, optional appointmentId)
+GET {{baseUrl}}/api/visit-questions?status=open
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Add a question
+POST {{baseUrl}}/api/visit-questions
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "text": "Could the tiredness in the afternoons be from the new medication?"
 }

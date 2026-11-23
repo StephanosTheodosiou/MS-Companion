@@ -61,6 +61,11 @@ public sealed class SaveAppointmentRequest : IValidatableObject
             yield break;
         }
 
+        if (!AppointmentRules.HasRequiredEnd(Status, EndsAt))
+        {
+            yield return new ValidationResult("End time is required unless the appointment is Cancelled.", [nameof(EndsAt)]);
+        }
+
         if (!AppointmentRules.EndsAfterStart(start, EndsAt))
         {
             yield return new ValidationResult("End time must be after the start time.", [nameof(EndsAt)]);
