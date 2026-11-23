@@ -59,6 +59,7 @@ public class VisitReportConfiguration : IEntityTypeConfiguration<VisitReport>
 
         builder.HasIndex(r => new { r.PatientId, r.GeneratedAt });
 
+        builder.Property(r => r.SummaryJson).HasColumnType("jsonb");
         builder.Property(r => r.FhirBundleJson).HasColumnType("jsonb");
         builder.Property(r => r.FhirVersion).HasMaxLength(10);
     }
