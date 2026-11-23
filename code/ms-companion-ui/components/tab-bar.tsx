@@ -12,6 +12,8 @@ type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>
 const TABS: Record<string, { label: string; icon: IconName }> = {
   home: { label: 'Today', icon: 'home' },
   profile: { label: 'Profile', icon: 'user' },
+  tests: { label: 'Tests', icon: 'clipboard' },
+  visit: { label: 'Visit', icon: 'file-text' },
   settings: { label: 'Settings', icon: 'settings' },
 };
 
@@ -23,7 +25,8 @@ export function TabBar({ state }: TabBarProps) {
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, space.sm) }]} accessibilityRole="tablist">
       {state.routes.map((route, index) => {
         const focused = state.index === index;
-        const tab = TABS[route.name];
+        // A tab file without an entry in TABS still gets a button instead of crashing the bar.
+        const tab = TABS[route.name] ?? { label: route.name, icon: 'circle' as IconName };
         const onPress = () => {
           if (!focused) router.navigate(`/${route.name}` as Href);
         };

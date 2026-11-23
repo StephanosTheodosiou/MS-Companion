@@ -12,7 +12,9 @@ public class VisitReport : PatientOwnedEntity
 
     public DateTimeOffset GeneratedAt { get; set; }
 
-    public required string FhirBundleJson { get; set; }
+    public required string SummaryJson { get; set; }
+
+    public string? FhirBundleJson { get; set; }
 
     public string FhirVersion { get; set; } = "4.0.1";
 }

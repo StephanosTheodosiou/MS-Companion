@@ -137,3 +137,84 @@ Content-Type: application/json
 ### Dose history
 GET {{baseUrl}}/api/medications/intakes?from=2026-11-01T00:00:00Z&to=2026-12-01T00:00:00Z
 Authorization: Bearer {{login.response.body.$.token}}
+
+### Relapse log (US-01)
+GET {{baseUrl}}/api/relapse-log
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Log a new or worsening symptom (guidance must match the answers)
+POST {{baseUrl}}/api/relapse-log
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "symptomDescription": "Numbness in left leg",
+  "bodyArea": "Left leg",
+  "onsetDate": "2026-11-20",
+  "lastedOver24Hours": true,
+  "hadFever": false,
+  "heatExposure": false,
+  "guidanceShown": "ContactMsTeamToday",
+  "contactedMsTeam": false
+}
+
+### Sync: upload rows saved offline (ids come from the phone)
+POST {{baseUrl}}/api/sync/push
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "checkIns": [
+    {
+      "id": "0193a1b2-0000-7000-8000-0000000000c1",
+      "localDate": "2026-11-21",
+      "timeZone": "Europe/Nicosia",
+      "questionnaireVersion": "2",
+      "note": "Tired after work",
+      "answers": [
+        { "item": "Fatigue", "score": 7 },
+        { "item": "Mobility", "score": 3 },
+        { "item": "Pain", "score": 2 },
+        { "item": "Mood", "score": 4 },
+        { "item": "Cognition", "score": 3 },
+        { "item": "Bladder", "score": 1 }
+      ],
+      "createdAt": "2026-11-21T08:00:00Z",
+      "updatedAt": "2026-11-21T08:00:00Z"
+    }
+  ],
+  "relapseLogEntries": [
+    {
+      "id": "0193a1b2-0000-7000-8000-000000000001",
+      "symptomDescription": "Numbness in left leg",
+      "onsetDate": "2026-11-20",
+      "lastedOver24Hours": true,
+      "hadFever": false,
+      "heatExposure": false,
+      "guidanceShown": "ContactMsTeamToday",
+      "createdAt": "2026-11-21T09:00:00Z",
+      "updatedAt": "2026-11-21T09:00:00Z"
+    }
+  ]
+}
+
+### Sync: download changes (send back the cursor from the previous pull)
+GET {{baseUrl}}/api/sync/pull
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Appointments
+GET {{baseUrl}}/api/appointments?from=2026-11-01T00:00:00Z&to=2027-01-01T00:00:00Z
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Add an appointment
+POST {{baseUrl}}/api/appointments
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "startsAt": "2026-12-10T10:30:00+02:00",
+  "endsAt": "2026-12-10T11:00:00+02:00",
+  "type": "Neurologist",
+  "clinicianName": "Dr. Georgiou",
+  "location": "Nicosia General Hospital"
+}

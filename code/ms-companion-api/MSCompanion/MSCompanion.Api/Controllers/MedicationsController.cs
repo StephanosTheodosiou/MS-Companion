@@ -71,7 +71,7 @@ public sealed class MedicationsController(IMedicationService medications) : Cont
         return Run(userId => medications.GetIntakesAsync(userId, from, to, ct));
     }
 
-    private async Task<ActionResult<T>> Run<T>(Func<Guid, Task<MedicationResult<T>>> action)
+    private async Task<ActionResult<T>> Run<T>(Func<Guid, Task<ServiceResult<T>>> action)
     {
         if (User.GetUserId() is not { } userId)
         {
@@ -82,7 +82,7 @@ public sealed class MedicationsController(IMedicationService medications) : Cont
         return result.Error is { } error ? ToProblem(error) : Ok(result.Value);
     }
 
-    private async Task<IActionResult> RunNoContent(Func<Guid, Task<MedicationResult<bool>>> action)
+    private async Task<IActionResult> RunNoContent(Func<Guid, Task<ServiceResult<bool>>> action)
     {
         if (User.GetUserId() is not { } userId)
         {
@@ -93,15 +93,15 @@ public sealed class MedicationsController(IMedicationService medications) : Cont
         return result.Error is { } error ? ToProblem(error) : NoContent();
     }
 
-    private ObjectResult ToProblem(MedicationError error) =>
+    private ObjectResult ToProblem(ServiceError error) =>
         error switch
         {
-            MedicationError.PatientNotFound => Problem(statusCode: 404, title: "Patient profile not found"),
-            MedicationError.ConsentRequired => Problem(
+            ServiceError.PatientNotFound => Problem(statusCode: 404, title: "Patient profile not found"),
+            ServiceError.ConsentRequired => Problem(
                 statusCode: 403,
                 title: "Medication consent is required",
                 detail: "Allow medication data in your consent settings first."),
-            MedicationError.AlreadyLogged => Problem(
+            ServiceError.AlreadyLogged => Problem(
                 statusCode: 409,
                 title: "Dose already logged",
                 detail: "This reminder already has an answer."),

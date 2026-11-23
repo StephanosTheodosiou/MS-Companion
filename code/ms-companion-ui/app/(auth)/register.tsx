@@ -1,51 +1,46 @@
-import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
-import { Button } from '@/components/ui/app-button';
-import { ErrorNote, Note } from '@/components/ui/notice';
-import { PasswordField } from '@/components/ui/app-password-field';
-import { Screen } from '@/components/layout/screen';
-import { Section } from '@/components/layout/section';
-import { StepHeader } from '@/components/layout/step-header';
-import { TextField } from '@/components/ui/app-text-field';
+import { router } from 'expo-router';
+import { useRef, useState } from 'react';
+import { StyleSheet, View, type TextInputInstance } from 'react-native';
+
+import { FormScreen } from '@/components/layout/form-screen';
+import { ThemedText } from '@/components/themed-text';
+import { Button } from '@/components/ui/button';
+import { Callout } from '@/components/ui/callout';
+import { IconButton } from '@/components/ui/icon-button';
+import { PasswordField } from '@/components/ui/password-field';
+import { TextField } from '@/components/ui/text-field';
+import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
+import { useForm } from '@/hooks/use-form';
 import { ApiError } from '@/utils/apiClient';
+import { getErrorMessage } from '@/utils/errorMessages';
 import { AuthLimits, validateEmail, validateName, validateNewPassword } from '@/utils/validation';
 
-const SETUP_STEPS = 4;
-
-type Field = 'firstName' | 'lastName' | 'email' | 'password' | 'confirm';
-
-// E1, step 2 of 4: create an account. The fields match the API's RegisterRequest.
 export default function RegisterScreen() {
-  const router = useRouter();
   const { signUp } = useAuth();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [errors, setErrors] = useState<Partial<Record<Field, string | null>>>({});
-  const [failure, setFailure] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const lastNameRef = useRef<TextInputInstance>(null);
+  const emailRef = useRef<TextInputInstance>(null);
+  const passwordRef = useRef<TextInputInstance>(null);
 
-  const clear = (field: Field) => setErrors((e) => (e[field] ? { ...e, [field]: null } : e));
+  const form = useForm(
+    { firstName: '', lastName: '', email: '', password: '' },
+    {
+      firstName: validateName('first name'),
+      lastName: validateName('last name'),
+      email: validateEmail,
+      password: validateNewPassword,
+    },
+  );
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string>();
 
-  const back = () => (router.canGoBack() ? router.back() : router.replace('/welcome'));
+  async function handleSubmit() {
+    if (submitting) return;
+    setFormError(undefined);
+    if (!form.validateAll()) return;
 
-  const onCreate = async () => {
-    if (busy) return;
-    const p = validateNewPassword(password) ?? null;
-    const next: Partial<Record<Field, string | null>> = {
-      firstName: validateName('first name')(firstName) ?? null,
-      lastName: validateName('last name')(lastName) ?? null,
-      email: validateEmail(email) ?? null,
-      password: p,
-      confirm: !p && confirm !== password ? 'The two passwords are not the same.' : null,
-    };
-    setErrors(next);
-    setFailure(null);
-    if (Object.values(next).some(Boolean)) return;
-    setBusy(true);
+    const { firstName, lastName, email, password } = form.values;
+    setSubmitting(true);
     try {
       await signUp({
         firstName: firstName.trim(),
@@ -53,105 +48,161 @@ export default function RegisterScreen() {
         email: email.trim(),
         password,
       });
-      // No navigation here: the auth guard switches screens and app/index.tsx opens consent (step 3).
-    } catch (err) {
-      setBusy(false);
-      if (err instanceof ApiError && err.status === 409) {
-        setErrors({ email: 'An account with this email already exists. Log in instead.' });
-      } else if (err instanceof ApiError && err.status === 400 && Object.keys(err.fieldErrors).length > 0) {
-        // The server checks the same fields; show its messages under the matching field.
-        setErrors({ ...err.fieldErrors });
-      } else if (err instanceof ApiError && err.isNetworkError) {
-        setFailure("We couldn't reach MS Companion. Check your internet connection and try again.");
-      } else {
-        setFailure('Your account was not created. Please try again.');
+      // No navigation here: the auth guard in app/_layout.tsx switches to the signed-in screens.
+    } catch (error) {
+      setSubmitting(false);
+      if (error instanceof ApiError && error.status === 409) {
+        form.setFieldErrors({
+          email: 'An account with this email already exists. Log in instead.',
+        });
+      } else if (!(error instanceof ApiError && form.setFieldErrors(error.fieldErrors))) {
+        setFormError(getErrorMessage(error));
       }
     }
-  };
+  }
+
+  function goToLogin() {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/login');
+    }
+  }
 
   return (
-    <Screen
-      topBar={<StepHeader step={2} total={SETUP_STEPS} onBack={back} />}
-      title="Create your account"
-      subtitle="Your account keeps your record safe if you change or lose your phone."
+    <FormScreen
       footer={
-        <>
-          <Button label={busy ? 'Creating account…' : 'Create account'} onPress={onCreate} disabled={busy} />
-          <Button label="I already have an account" variant="plain" onPress={() => router.push('/login')} />
-        </>
-      }
-    >
-      {failure ? <ErrorNote>{failure}</ErrorNote> : null}
-      <Section variant="plain">
-        <TextField
-          label="First name"
-          icon="user"
-          placeholder="For example: Elena"
-          value={firstName}
-          onChangeText={(t) => {
-            setFirstName(t);
-            clear('firstName');
-          }}
-          autoCapitalize="words"
-          autoComplete="given-name"
-          textContentType="givenName"
-          error={errors.firstName}
+        <View style={styles.switchRow}>
+          <ThemedText type="callout" themeColor="textSecondary">
+            Already have an account?
+          </ThemedText>
+          <Button variant="ghost" title="Log in" onPress={goToLogin} disabled={submitting} />
+        </View>
+      }>
+      <View style={styles.header}>
+        <IconButton
+          icon="back"
+          accessibilityLabel="Back to log in"
+          onPress={goToLogin}
+          disabled={submitting}
         />
+        <View style={styles.headings}>
+          <ThemedText type="display" accessibilityRole="header">
+            Create your account
+          </ThemedText>
+          <ThemedText themeColor="textSecondary">
+            Next, you&apos;ll choose what the app may store. You can change this at any time.
+          </ThemedText>
+        </View>
+      </View>
+
+      {formError ? <Callout tone="danger" message={formError} /> : null}
+
+      <View style={styles.fields}>
+        <View style={styles.nameRow}>
+          <TextField
+            containerStyle={styles.nameField}
+            label="First name"
+            value={form.values.firstName}
+            onChangeText={(value) => form.setValue('firstName', value)}
+            onBlur={() => form.handleBlur('firstName')}
+            error={form.errors.firstName}
+            editable={!submitting}
+            maxLength={AuthLimits.nameMax}
+            autoCapitalize="words"
+            autoComplete="given-name"
+            textContentType="givenName"
+            returnKeyType="next"
+            submitBehavior="submit"
+            onSubmitEditing={() => lastNameRef.current?.focus()}
+          />
+          <TextField
+            ref={lastNameRef}
+            containerStyle={styles.nameField}
+            label="Last name"
+            value={form.values.lastName}
+            onChangeText={(value) => form.setValue('lastName', value)}
+            onBlur={() => form.handleBlur('lastName')}
+            error={form.errors.lastName}
+            editable={!submitting}
+            maxLength={AuthLimits.nameMax}
+            autoCapitalize="words"
+            autoComplete="family-name"
+            textContentType="familyName"
+            returnKeyType="next"
+            submitBehavior="submit"
+            onSubmitEditing={() => emailRef.current?.focus()}
+          />
+        </View>
+
         <TextField
-          label="Last name"
-          icon="user"
-          placeholder="For example: Georgiou"
-          value={lastName}
-          onChangeText={(t) => {
-            setLastName(t);
-            clear('lastName');
-          }}
-          autoCapitalize="words"
-          autoComplete="family-name"
-          textContentType="familyName"
-          error={errors.lastName}
-        />
-        <TextField
+          ref={emailRef}
           label="Email"
-          icon="mail"
+          leadingIcon="mail"
           placeholder="name@example.com"
-          value={email}
-          onChangeText={(t) => {
-            setEmail(t);
-            clear('email');
-          }}
+          value={form.values.email}
+          onChangeText={(value) => form.setValue('email', value)}
+          onBlur={() => form.handleBlur('email')}
+          error={form.errors.email}
+          editable={!submitting}
+          maxLength={AuthLimits.emailMax}
+          inputMode="email"
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="email"
-          textContentType="emailAddress"
-          error={errors.email}
+          textContentType="username"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => passwordRef.current?.focus()}
         />
+
         <PasswordField
-          kind="new"
+          ref={passwordRef}
           label="Password"
-          placeholder="Choose a password"
+          placeholder="Create a password"
           hint={`At least ${AuthLimits.passwordMin} characters.`}
-          value={password}
-          onChangeText={(t) => {
-            setPassword(t);
-            clear('password');
-          }}
-          error={errors.password}
+          value={form.values.password}
+          onChangeText={(value) => form.setValue('password', value)}
+          onBlur={() => form.handleBlur('password')}
+          error={form.errors.password}
+          editable={!submitting}
+          maxLength={AuthLimits.passwordMax}
+          autoComplete="new-password"
+          textContentType="newPassword"
+          passwordRules={`minlength: ${AuthLimits.passwordMin};`}
+          returnKeyType="go"
+          onSubmitEditing={handleSubmit}
         />
-        <PasswordField
-          kind="new"
-          label="Repeat password"
-          placeholder="Type it again"
-          value={confirm}
-          onChangeText={(t) => {
-            setConfirm(t);
-            clear('confirm');
-          }}
-          error={errors.confirm}
-        />
-      </Section>
-      <Note>Your health data is never shared without your permission.</Note>
-    </Screen>
+      </View>
+
+      <Button title="Create account" loading={submitting} onPress={handleSubmit} />
+    </FormScreen>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    gap: Spacing.four,
+  },
+  headings: {
+    gap: Spacing.two,
+  },
+  fields: {
+    gap: Spacing.three,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  nameField: {
+    flex: 1,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
