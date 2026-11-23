@@ -12,7 +12,7 @@ public sealed class SyncService(
     IPatientRepository patients,
     ISyncRepository sync,
     IConsentService consents,
-    MedicationRelapseSync medicationRelapse,
+    HealthDataSync healthData,
     TimeProvider clock,
     ILogger<SyncService> logger) : ISyncService
 {
@@ -45,33 +45,39 @@ public sealed class SyncService(
                 : Rejected(incoming.Id, SyncReasons.ConsentRequired));
         }
 
-        // Parents before children, so a medicine created offline can be pushed with its schedules and doses.
         foreach (var incoming in request.Medications)
         {
             response.Medications.Add(medicationAllowed
-                ? await medicationRelapse.PushMedicationAsync(patientId, incoming, ct)
+                ? await healthData.PushMedicationAsync(patientId, incoming, ct)
                 : SyncRecordResult<MedicationSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
         }
 
         foreach (var incoming in request.MedicationSchedules)
         {
             response.MedicationSchedules.Add(medicationAllowed
-                ? await medicationRelapse.PushScheduleAsync(patientId, incoming, ct)
+                ? await healthData.PushScheduleAsync(patientId, incoming, ct)
                 : SyncRecordResult<MedicationScheduleSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
         }
 
         foreach (var incoming in request.MedicationIntakes)
         {
             response.MedicationIntakes.Add(medicationAllowed
-                ? await medicationRelapse.PushIntakeAsync(patientId, incoming, ct)
+                ? await healthData.PushIntakeAsync(patientId, incoming, ct)
                 : SyncRecordResult<MedicationIntakeSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
         }
 
         foreach (var incoming in request.RelapseLogEntries)
         {
             response.RelapseLogEntries.Add(symptomsAllowed
-                ? await medicationRelapse.PushRelapseLogEntryAsync(patientId, incoming, ct)
+                ? await healthData.PushRelapseLogEntryAsync(patientId, incoming, ct)
                 : SyncRecordResult<RelapseLogEntrySyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
+        }
+
+        foreach (var incoming in request.Appointments)
+        {
+            response.Appointments.Add(symptomsAllowed
+                ? await healthData.PushAppointmentAsync(patientId, incoming, ct)
+                : SyncRecordResult<AppointmentSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
         }
 
         await transaction.CommitAsync(ct);
@@ -87,17 +93,27 @@ public sealed class SyncService(
 
         var settled = clock.GetUtcNow() - SettleDelay;
 
+        var checkInCursor = after[SyncType.CheckIns];
         var checkIns = Page(
             await sync.GetCheckInsChangedAsync(
-                patientId, after.CheckIns?.ServerUpdatedAt, after.CheckIns?.Id ?? Guid.Empty, settled, limit + 1, ct),
+                patientId, checkInCursor?.ServerUpdatedAt, checkInCursor?.Id ?? Guid.Empty, settled, limit + 1, ct),
             limit,
-            after.CheckIns);
-        var medications = Page(await Changed<Medication>(after.Medications), limit, after.Medications);
-        var schedules = Page(await Changed<MedicationSchedule>(after.MedicationSchedules), limit, after.MedicationSchedules);
-        var intakes = Page(await Changed<MedicationIntake>(after.MedicationIntakes), limit, after.MedicationIntakes);
-        var relapses = Page(await Changed<RelapseLogEntry>(after.RelapseLogEntries), limit, after.RelapseLogEntries);
+            checkInCursor);
+        var medications = await ChangedPage<Medication>(SyncType.Medications);
+        var schedules = await ChangedPage<MedicationSchedule>(SyncType.MedicationSchedules);
+        var intakes = await ChangedPage<MedicationIntake>(SyncType.MedicationIntakes);
+        var relapses = await ChangedPage<RelapseLogEntry>(SyncType.RelapseLogEntries);
+        var appointments = await ChangedPage<Appointment>(SyncType.Appointments);
 
-        var next = new SyncCursorSet(checkIns.Next, medications.Next, schedules.Next, intakes.Next, relapses.Next);
+        var next = SyncCursorSet.From(new Dictionary<SyncType, SyncCursor?>
+        {
+            [SyncType.CheckIns] = checkIns.Next,
+            [SyncType.Medications] = medications.Next,
+            [SyncType.MedicationSchedules] = schedules.Next,
+            [SyncType.MedicationIntakes] = intakes.Next,
+            [SyncType.RelapseLogEntries] = relapses.Next,
+            [SyncType.Appointments] = appointments.Next,
+        });
 
         return new SyncPullResponse
         {
@@ -106,14 +122,20 @@ public sealed class SyncService(
             MedicationSchedules = schedules.Rows.Select(MedicationScheduleSyncDto.FromEntity).ToList(),
             MedicationIntakes = intakes.Rows.Select(MedicationIntakeSyncDto.FromEntity).ToList(),
             RelapseLogEntries = relapses.Rows.Select(RelapseLogEntrySyncDto.FromEntity).ToList(),
+            Appointments = appointments.Rows.Select(AppointmentSyncDto.FromEntity).ToList(),
             Cursor = next.ToString(),
-            HasMore = checkIns.More || medications.More || schedules.More || intakes.More || relapses.More,
+            HasMore = checkIns.More || medications.More || schedules.More || intakes.More || relapses.More
+                      || appointments.More,
         };
 
-        Task<IReadOnlyList<T>> Changed<T>(SyncCursor? cursor)
-            where T : PatientOwnedEntity =>
-            sync.GetChangedAsync<T>(
+        async Task<(List<T> Rows, SyncCursor? Next, bool More)> ChangedPage<T>(SyncType type)
+            where T : PatientOwnedEntity
+        {
+            var cursor = after[type];
+            var rows = await sync.GetChangedAsync<T>(
                 patientId, cursor?.ServerUpdatedAt, cursor?.Id ?? Guid.Empty, settled, limit + 1, ct);
+            return Page(rows, limit, cursor);
+        }
     }
 
     private static (List<T> Rows, SyncCursor? Next, bool More) Page<T>(

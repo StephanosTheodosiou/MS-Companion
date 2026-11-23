@@ -64,6 +64,11 @@ public class SyncRepository(AppDbContext context) : ISyncRepository
         return [.. schedules, .. intakes];
     }
 
+    public Task<List<VisitQuestion>> GetLiveQuestionsForAppointmentAsync(
+        Guid appointmentId,
+        CancellationToken ct = default) =>
+        context.VisitQuestions.Where(q => q.AppointmentId == appointmentId).ToListAsync(ct);
+
     public async Task<IReadOnlyList<T>> GetChangedAsync<T>(
         Guid patientId,
         DateTimeOffset? afterServerUpdatedAt,

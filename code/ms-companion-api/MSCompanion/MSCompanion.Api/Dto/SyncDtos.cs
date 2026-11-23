@@ -21,12 +21,16 @@ public sealed class SyncPushRequest
     [Required, MaxLength(50)]
     public List<RelapseLogEntrySyncDto> RelapseLogEntries { get; init; } = [];
 
+    [Required, MaxLength(50)]
+    public List<AppointmentSyncDto> Appointments { get; init; } = [];
+
     public bool IsEmpty() =>
         CheckIns.Count == 0
         && Medications.Count == 0
         && MedicationSchedules.Count == 0
         && MedicationIntakes.Count == 0
-        && RelapseLogEntries.Count == 0;
+        && RelapseLogEntries.Count == 0
+        && Appointments.Count == 0;
 }
 
 public sealed class SyncPushResponse
@@ -36,6 +40,7 @@ public sealed class SyncPushResponse
     public List<SyncRecordResult<MedicationScheduleSyncDto>> MedicationSchedules { get; init; } = [];
     public List<SyncRecordResult<MedicationIntakeSyncDto>> MedicationIntakes { get; init; } = [];
     public List<SyncRecordResult<RelapseLogEntrySyncDto>> RelapseLogEntries { get; init; } = [];
+    public List<SyncRecordResult<AppointmentSyncDto>> Appointments { get; init; } = [];
 }
 
 public sealed class SyncPullResponse
@@ -45,6 +50,7 @@ public sealed class SyncPullResponse
     public required List<MedicationScheduleSyncDto> MedicationSchedules { get; init; }
     public required List<MedicationIntakeSyncDto> MedicationIntakes { get; init; }
     public required List<RelapseLogEntrySyncDto> RelapseLogEntries { get; init; }
+    public required List<AppointmentSyncDto> Appointments { get; init; }
 
     public required string? Cursor { get; init; }
 
@@ -245,5 +251,35 @@ public sealed class RelapseLogEntrySyncDto : ISyncItem
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt,
         DeletedAt = e.DeletedAt,
+    };
+}
+
+public sealed class AppointmentSyncDto : ISyncItem
+{
+    public required Guid Id { get; init; }
+    public required DateTimeOffset StartsAt { get; init; }
+    public DateTimeOffset? EndsAt { get; init; }
+    public AppointmentStatus Status { get; init; }
+    public required AppointmentType Type { get; init; }
+    public string? ClinicianName { get; init; }
+    public string? Location { get; init; }
+    public string? Note { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
+    public required DateTimeOffset UpdatedAt { get; init; }
+    public DateTimeOffset? DeletedAt { get; init; }
+
+    public static AppointmentSyncDto FromEntity(Appointment a) => new()
+    {
+        Id = a.Id,
+        StartsAt = a.StartsAt,
+        EndsAt = a.EndsAt,
+        Status = a.Status,
+        Type = a.Type,
+        ClinicianName = a.ClinicianName,
+        Location = a.Location,
+        Note = a.Note,
+        CreatedAt = a.CreatedAt,
+        UpdatedAt = a.UpdatedAt,
+        DeletedAt = a.DeletedAt,
     };
 }

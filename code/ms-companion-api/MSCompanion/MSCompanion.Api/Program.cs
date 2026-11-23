@@ -38,12 +38,14 @@ builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IConsentRepository, ConsentRepository>();
 builder.Services.AddScoped<IConsentService, ConsentService>();
 builder.Services.AddScoped<ISyncRepository, SyncRepository>();
-builder.Services.AddScoped<MedicationRelapseSync>();
+builder.Services.AddScoped<HealthDataSync>();
 builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IMedicationRepository, MedicationRepository>();
 builder.Services.AddScoped<IMedicationService, MedicationService>();
 builder.Services.AddScoped<IRelapseLogRepository, RelapseLogRepository>();
 builder.Services.AddScoped<IRelapseLogService, RelapseLogService>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
 // 4. Authentication (JWT bearer) and authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

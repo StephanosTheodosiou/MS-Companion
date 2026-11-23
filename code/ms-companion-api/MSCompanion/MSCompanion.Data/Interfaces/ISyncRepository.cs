@@ -30,6 +30,8 @@ public interface ISyncRepository
 
     Task<List<PatientOwnedEntity>> GetLiveMedicationChildrenAsync(Guid medicationId, CancellationToken ct = default);
 
+    Task<List<VisitQuestion>> GetLiveQuestionsForAppointmentAsync(Guid appointmentId, CancellationToken ct = default);
+
     Task<IReadOnlyList<T>> GetChangedAsync<T>(
         Guid patientId,
         DateTimeOffset? afterServerUpdatedAt,
