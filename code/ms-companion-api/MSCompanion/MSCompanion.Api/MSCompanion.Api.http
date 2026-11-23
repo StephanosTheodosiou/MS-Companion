@@ -199,3 +199,16 @@ Content-Type: application/json
   "clinicianName": "Dr. Georgiou",
   "location": "Nicosia General Hospital"
 }
+
+### Questions for my doctor (status=open or asked, optional appointmentId)
+GET {{baseUrl}}/api/visit-questions?status=open
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Add a question
+POST {{baseUrl}}/api/visit-questions
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "text": "Could the tiredness in the afternoons be from the new medication?"
+}
