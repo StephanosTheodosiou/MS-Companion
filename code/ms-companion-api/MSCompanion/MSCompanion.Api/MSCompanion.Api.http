@@ -164,6 +164,25 @@ Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
 
 {
+  "checkIns": [
+    {
+      "id": "0193a1b2-0000-7000-8000-0000000000c1",
+      "localDate": "2026-11-21",
+      "timeZone": "Europe/Nicosia",
+      "questionnaireVersion": "2",
+      "note": "Tired after work",
+      "answers": [
+        { "item": "Fatigue", "score": 7 },
+        { "item": "Mobility", "score": 3 },
+        { "item": "Pain", "score": 2 },
+        { "item": "Mood", "score": 4 },
+        { "item": "Cognition", "score": 3 },
+        { "item": "Bladder", "score": 1 }
+      ],
+      "createdAt": "2026-11-21T08:00:00Z",
+      "updatedAt": "2026-11-21T08:00:00Z"
+    }
+  ],
   "relapseLogEntries": [
     {
       "id": "0193a1b2-0000-7000-8000-000000000001",

@@ -251,7 +251,7 @@ namespace MSCompanion.Data.Migrations
 
                     b.ToTable("check_in_answer", null, t =>
                         {
-                            t.HasCheckConstraint("ck_check_in_answer_item", "item IN ('Fatigue', 'Mobility', 'Mood')");
+                            t.HasCheckConstraint("ck_check_in_answer_item", "item IN ('Fatigue', 'Mobility', 'Mood', 'Pain', 'Cognition', 'Bladder')");
 
                             t.HasCheckConstraint("ck_check_in_answer_score", "score BETWEEN 0 AND 10");
                         });
@@ -1211,7 +1211,6 @@ namespace MSCompanion.Data.Migrations
                         .HasColumnName("deleted_at");
 
                     b.Property<string>("FhirBundleJson")
-                        .IsRequired()
                         .HasColumnType("jsonb")
                         .HasColumnName("fhir_bundle_json");
 
@@ -1240,6 +1239,11 @@ namespace MSCompanion.Data.Migrations
                     b.Property<DateTimeOffset>("ServerUpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("server_updated_at");
+
+                    b.Property<string>("SummaryJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("summary_json");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
