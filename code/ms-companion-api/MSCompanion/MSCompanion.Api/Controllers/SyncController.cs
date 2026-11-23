@@ -45,10 +45,10 @@ public sealed class SyncController(ISyncService sync) : ControllerBase
             return Unauthorized();
         }
 
-        SyncCursor? after = null;
+        SyncCursorSet after = default;
         if (cursor is not null)
         {
-            if (!SyncCursor.TryParse(cursor, out var parsed))
+            if (!SyncCursorSet.TryParse(cursor, out var parsed))
             {
                 ModelState.AddModelError(nameof(cursor), "The cursor is not valid. Send the cursor from the last pull, or none.");
                 return ValidationProblem(ModelState);

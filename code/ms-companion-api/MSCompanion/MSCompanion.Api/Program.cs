@@ -38,6 +38,7 @@ builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IConsentRepository, ConsentRepository>();
 builder.Services.AddScoped<IConsentService, ConsentService>();
 builder.Services.AddScoped<ISyncRepository, SyncRepository>();
+builder.Services.AddScoped<MedicationRelapseSync>();
 builder.Services.AddScoped<ISyncService, SyncService>();
 builder.Services.AddScoped<IMedicationRepository, MedicationRepository>();
 builder.Services.AddScoped<IMedicationService, MedicationService>();

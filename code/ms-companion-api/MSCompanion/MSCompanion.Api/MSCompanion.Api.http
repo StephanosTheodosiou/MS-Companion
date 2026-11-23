@@ -157,3 +157,28 @@ Content-Type: application/json
   "guidanceShown": "ContactMsTeamToday",
   "contactedMsTeam": false
 }
+
+### Sync: upload rows saved offline (ids come from the phone)
+POST {{baseUrl}}/api/sync/push
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "relapseLogEntries": [
+    {
+      "id": "0193a1b2-0000-7000-8000-000000000001",
+      "symptomDescription": "Numbness in left leg",
+      "onsetDate": "2026-11-20",
+      "lastedOver24Hours": true,
+      "hadFever": false,
+      "heatExposure": false,
+      "guidanceShown": "ContactMsTeamToday",
+      "createdAt": "2026-11-21T09:00:00Z",
+      "updatedAt": "2026-11-21T09:00:00Z"
+    }
+  ]
+}
+
+### Sync: download changes (send back the cursor from the previous pull)
+GET {{baseUrl}}/api/sync/pull
+Authorization: Bearer {{login.response.body.$.token}}

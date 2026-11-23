@@ -17,6 +17,28 @@ public interface ISyncRepository
 
     void ClearTracking();
 
+    Task<T?> FindAsync<T>(Guid id, CancellationToken ct = default)
+        where T : PatientOwnedEntity;
+
+    void Add<T>(T entity)
+        where T : PatientOwnedEntity;
+
+    Task<MedicationIntake?> FindLiveIntakeForSlotAsync(
+        Guid scheduleId,
+        DateTimeOffset scheduledFor,
+        CancellationToken ct = default);
+
+    Task<List<PatientOwnedEntity>> GetLiveMedicationChildrenAsync(Guid medicationId, CancellationToken ct = default);
+
+    Task<IReadOnlyList<T>> GetChangedAsync<T>(
+        Guid patientId,
+        DateTimeOffset? afterServerUpdatedAt,
+        Guid afterId,
+        DateTimeOffset settledBefore,
+        int take,
+        CancellationToken ct = default)
+        where T : PatientOwnedEntity;
+
     Task<IReadOnlyList<CheckIn>> GetCheckInsChangedAsync(
         Guid patientId,
         DateTimeOffset? afterServerUpdatedAt,

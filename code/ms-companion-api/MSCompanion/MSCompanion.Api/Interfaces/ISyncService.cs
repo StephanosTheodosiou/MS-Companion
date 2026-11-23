@@ -7,5 +7,5 @@ public interface ISyncService
 {
     Task<SyncPushResponse?> PushAsync(Guid userId, SyncPushRequest request, CancellationToken ct = default);
 
-    Task<SyncPullResponse?> PullAsync(Guid userId, SyncCursor? after, int limit, CancellationToken ct = default);
+    Task<SyncPullResponse?> PullAsync(Guid userId, SyncCursorSet after, int limit, CancellationToken ct = default);
 }
