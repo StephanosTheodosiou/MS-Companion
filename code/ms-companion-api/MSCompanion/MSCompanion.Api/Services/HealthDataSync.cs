@@ -7,7 +7,7 @@ using MSCompanion.Domain.Rules;
 
 namespace MSCompanion.Api.Services;
 
-public sealed class MedicationRelapseSync(ISyncRepository sync, ILogger<MedicationRelapseSync> logger)
+public sealed class HealthDataSync(ISyncRepository sync, TimeProvider clock, ILogger<HealthDataSync> logger)
 {
     public Task<SyncRecordResult<MedicationSyncDto>> PushMedicationAsync(
         Guid patientId,
@@ -167,6 +167,45 @@ public sealed class MedicationRelapseSync(ISyncRepository sync, ILogger<Medicati
             ct);
     }
 
+    public Task<SyncRecordResult<AppointmentSyncDto>> PushAppointmentAsync(
+        Guid patientId,
+        AppointmentSyncDto incoming,
+        CancellationToken ct)
+    {
+        if (Validate(incoming, clock.GetUtcNow()) is { } problem)
+        {
+            return Task.FromResult(SyncRecordResult<AppointmentSyncDto>.Rejected(incoming.Id, problem));
+        }
+
+        return UpsertAsync<Appointment, AppointmentSyncDto>(
+            patientId,
+            incoming,
+            () => new Appointment(),
+            async (target, source) =>
+            {
+                var deleting = target.DeletedAt is null && source.DeletedAt is not null;
+                target.StartsAt = source.StartsAt.ToUniversalTime();
+                target.EndsAt = source.EndsAt?.ToUniversalTime();
+                target.Status = source.Status;
+                target.Type = source.Type;
+                target.ClinicianName = Clean(source.ClinicianName);
+                target.Location = Clean(source.Location);
+                target.Note = Clean(source.Note);
+                Stamp(target, source);
+
+                if (deleting)
+                {
+                    foreach (var question in await sync.GetLiveQuestionsForAppointmentAsync(target.Id, ct))
+                    {
+                        question.AppointmentId = null;
+                        question.UpdatedAt = target.UpdatedAt;
+                    }
+                }
+            },
+            rejectExisting: null,
+            ct);
+    }
+
     private async Task<SyncRecordResult<TDto>> UpsertAsync<TEntity, TDto>(
         Guid patientId,
         TDto incoming,
@@ -301,6 +340,22 @@ public sealed class MedicationRelapseSync(ISyncRepository sync, ILogger<Medicati
 
         return r.GuidanceShown != RelapseGuidanceRule.For(r.LastedOver24Hours, r.HadFever, r.HeatExposure)
             ? SyncReasons.GuidanceMismatch
+            : null;
+    }
+
+    private static string? Validate(AppointmentSyncDto a, DateTimeOffset now)
+    {
+        if (CommonProblem(a) is { } problem)
+        {
+            return problem;
+        }
+
+        return a.ClinicianName?.Trim().Length > AppointmentRules.ClinicianNameMaxLength
+               || a.Location?.Trim().Length > AppointmentRules.LocationMaxLength
+               || a.Note?.Trim().Length > AppointmentRules.NoteMaxLength
+               || !AppointmentRules.EndsAfterStart(a.StartsAt, a.EndsAt)
+               || !AppointmentRules.StatusFitsTime(a.Status, a.StartsAt, now)
+            ? SyncReasons.InvalidFields
             : null;
     }
 

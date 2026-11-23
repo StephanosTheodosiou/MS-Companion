@@ -1,18 +1,43 @@
 namespace MSCompanion.Api.Services;
 
-public readonly record struct SyncCursorSet(
-    SyncCursor? CheckIns,
-    SyncCursor? Medications,
-    SyncCursor? MedicationSchedules,
-    SyncCursor? MedicationIntakes,
-    SyncCursor? RelapseLogEntries)
+public enum SyncType
+{
+    CheckIns,
+    Medications,
+    MedicationSchedules,
+    MedicationIntakes,
+    RelapseLogEntries,
+    Appointments,
+}
+
+public readonly struct SyncCursorSet
 {
     private const string Prefix = "v2.";
     private const string Empty = "-";
+    private static readonly int Count = Enum.GetValues<SyncType>().Length;
 
-    public override string ToString() =>
-        Prefix + string.Join('.', new[] { CheckIns, Medications, MedicationSchedules, MedicationIntakes, RelapseLogEntries }
-            .Select(c => c?.ToString() ?? Empty));
+    private readonly SyncCursor?[]? positions;
+
+    private SyncCursorSet(SyncCursor?[] positions) => this.positions = positions;
+
+    public SyncCursor? this[SyncType type] => positions?[(int)type];
+
+    public static SyncCursorSet From(IReadOnlyDictionary<SyncType, SyncCursor?> cursors)
+    {
+        var positions = new SyncCursor?[Count];
+        foreach (var (type, cursor) in cursors)
+        {
+            positions[(int)type] = cursor;
+        }
+
+        return new SyncCursorSet(positions);
+    }
+
+    public override string ToString()
+    {
+        var self = this;
+        return Prefix + string.Join('.', Enum.GetValues<SyncType>().Select(t => self[t]?.ToString() ?? Empty));
+    }
 
     public static bool TryParse(string? value, out SyncCursorSet cursors)
     {
@@ -22,7 +47,8 @@ public readonly record struct SyncCursorSet(
             return false;
         }
 
-        // Cursors issued before medication and relapse sync only cover check-ins.
+        var positions = new SyncCursor?[Count];
+
         if (!value.StartsWith(Prefix, StringComparison.Ordinal))
         {
             if (!SyncCursor.TryParse(value, out var checkIns))
@@ -30,17 +56,17 @@ public readonly record struct SyncCursorSet(
                 return false;
             }
 
-            cursors = new SyncCursorSet(checkIns, null, null, null, null);
+            positions[(int)SyncType.CheckIns] = checkIns;
+            cursors = new SyncCursorSet(positions);
             return true;
         }
 
         var parts = value[Prefix.Length..].Split('.');
-        if (parts.Length != 5)
+        if (parts.Length > Count)
         {
             return false;
         }
 
-        var parsed = new SyncCursor?[parts.Length];
         for (var i = 0; i < parts.Length; i++)
         {
             if (parts[i] == Empty)
@@ -53,10 +79,10 @@ public readonly record struct SyncCursorSet(
                 return false;
             }
 
-            parsed[i] = cursor;
+            positions[i] = cursor;
         }
 
-        cursors = new SyncCursorSet(parsed[0], parsed[1], parsed[2], parsed[3], parsed[4]);
+        cursors = new SyncCursorSet(positions);
         return true;
     }
 }

@@ -182,3 +182,20 @@ Content-Type: application/json
 ### Sync: download changes (send back the cursor from the previous pull)
 GET {{baseUrl}}/api/sync/pull
 Authorization: Bearer {{login.response.body.$.token}}
+
+### Appointments
+GET {{baseUrl}}/api/appointments?from=2026-11-01T00:00:00Z&to=2027-01-01T00:00:00Z
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Add an appointment
+POST {{baseUrl}}/api/appointments
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "startsAt": "2026-12-10T10:30:00+02:00",
+  "endsAt": "2026-12-10T11:00:00+02:00",
+  "type": "Neurologist",
+  "clinicianName": "Dr. Georgiou",
+  "location": "Nicosia General Hospital"
+}
