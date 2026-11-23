@@ -12,6 +12,7 @@ public sealed class SyncService(
     IPatientRepository patients,
     ISyncRepository sync,
     IConsentService consents,
+    MedicationRelapseSync medicationRelapse,
     TimeProvider clock,
     ILogger<SyncService> logger) : ISyncService
 {
@@ -26,58 +27,107 @@ public sealed class SyncService(
             return null;
         }
 
-        if (request.CheckIns.Count == 0)
+        var response = new SyncPushResponse();
+        if (request.IsEmpty())
         {
-            return new SyncPushResponse { CheckIns = [] };
+            return response;
         }
 
-        if (!await consents.IsGrantedAsync(patientId, ConsentDataType.SymptomCheckins, ct))
-        {
-            return new SyncPushResponse
-            {
-                CheckIns = request.CheckIns.Select(c => Rejected(c.Id, SyncReasons.ConsentRequired)).ToList(),
-            };
-        }
+        var symptomsAllowed = await consents.IsGrantedAsync(patientId, ConsentDataType.SymptomCheckins, ct);
+        var medicationAllowed = await consents.IsGrantedAsync(patientId, ConsentDataType.Medication, ct);
 
-        var results = new List<SyncRecordResult>(request.CheckIns.Count);
         await using var transaction = await sync.BeginTransactionAsync(ct);
 
         foreach (var incoming in request.CheckIns)
         {
-            results.Add(await PushCheckInAsync(patientId, incoming, ct));
+            response.CheckIns.Add(symptomsAllowed
+                ? await PushCheckInAsync(patientId, incoming, ct)
+                : Rejected(incoming.Id, SyncReasons.ConsentRequired));
+        }
+
+        // Parents before children, so a medicine created offline can be pushed with its schedules and doses.
+        foreach (var incoming in request.Medications)
+        {
+            response.Medications.Add(medicationAllowed
+                ? await medicationRelapse.PushMedicationAsync(patientId, incoming, ct)
+                : SyncRecordResult<MedicationSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
+        }
+
+        foreach (var incoming in request.MedicationSchedules)
+        {
+            response.MedicationSchedules.Add(medicationAllowed
+                ? await medicationRelapse.PushScheduleAsync(patientId, incoming, ct)
+                : SyncRecordResult<MedicationScheduleSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
+        }
+
+        foreach (var incoming in request.MedicationIntakes)
+        {
+            response.MedicationIntakes.Add(medicationAllowed
+                ? await medicationRelapse.PushIntakeAsync(patientId, incoming, ct)
+                : SyncRecordResult<MedicationIntakeSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
+        }
+
+        foreach (var incoming in request.RelapseLogEntries)
+        {
+            response.RelapseLogEntries.Add(symptomsAllowed
+                ? await medicationRelapse.PushRelapseLogEntryAsync(patientId, incoming, ct)
+                : SyncRecordResult<RelapseLogEntrySyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
         }
 
         await transaction.CommitAsync(ct);
-        return new SyncPushResponse { CheckIns = results };
+        return response;
     }
 
-    public async Task<SyncPullResponse?> PullAsync(Guid userId, SyncCursor? after, int limit, CancellationToken ct = default)
+    public async Task<SyncPullResponse?> PullAsync(Guid userId, SyncCursorSet after, int limit, CancellationToken ct = default)
     {
         if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
         {
             return null;
         }
 
-        var rows = await sync.GetCheckInsChangedAsync(
-            patientId,
-            after?.ServerUpdatedAt,
-            after?.Id ?? Guid.Empty,
-            clock.GetUtcNow() - SettleDelay,
-            limit + 1,
-            ct);
+        var settled = clock.GetUtcNow() - SettleDelay;
 
-        var page = rows.Take(limit).ToList();
-        var next = page.Count > 0 ? new SyncCursor(page[^1].ServerUpdatedAt, page[^1].Id) : after;
+        var checkIns = Page(
+            await sync.GetCheckInsChangedAsync(
+                patientId, after.CheckIns?.ServerUpdatedAt, after.CheckIns?.Id ?? Guid.Empty, settled, limit + 1, ct),
+            limit,
+            after.CheckIns);
+        var medications = Page(await Changed<Medication>(after.Medications), limit, after.Medications);
+        var schedules = Page(await Changed<MedicationSchedule>(after.MedicationSchedules), limit, after.MedicationSchedules);
+        var intakes = Page(await Changed<MedicationIntake>(after.MedicationIntakes), limit, after.MedicationIntakes);
+        var relapses = Page(await Changed<RelapseLogEntry>(after.RelapseLogEntries), limit, after.RelapseLogEntries);
+
+        var next = new SyncCursorSet(checkIns.Next, medications.Next, schedules.Next, intakes.Next, relapses.Next);
 
         return new SyncPullResponse
         {
-            CheckIns = page.Select(CheckInSyncDto.FromEntity).ToList(),
-            Cursor = next?.ToString(),
-            HasMore = rows.Count > limit,
+            CheckIns = checkIns.Rows.Select(CheckInSyncDto.FromEntity).ToList(),
+            Medications = medications.Rows.Select(MedicationSyncDto.FromEntity).ToList(),
+            MedicationSchedules = schedules.Rows.Select(MedicationScheduleSyncDto.FromEntity).ToList(),
+            MedicationIntakes = intakes.Rows.Select(MedicationIntakeSyncDto.FromEntity).ToList(),
+            RelapseLogEntries = relapses.Rows.Select(RelapseLogEntrySyncDto.FromEntity).ToList(),
+            Cursor = next.ToString(),
+            HasMore = checkIns.More || medications.More || schedules.More || intakes.More || relapses.More,
         };
+
+        Task<IReadOnlyList<T>> Changed<T>(SyncCursor? cursor)
+            where T : PatientOwnedEntity =>
+            sync.GetChangedAsync<T>(
+                patientId, cursor?.ServerUpdatedAt, cursor?.Id ?? Guid.Empty, settled, limit + 1, ct);
     }
 
-    private async Task<SyncRecordResult> PushCheckInAsync(Guid patientId, CheckInSyncDto incoming, CancellationToken ct)
+    private static (List<T> Rows, SyncCursor? Next, bool More) Page<T>(
+        IReadOnlyList<T> rows,
+        int limit,
+        SyncCursor? previous)
+        where T : SyncedEntity
+    {
+        var page = rows.Take(limit).ToList();
+        var next = page.Count > 0 ? new SyncCursor(page[^1].ServerUpdatedAt, page[^1].Id) : previous;
+        return (page, next, rows.Count > limit);
+    }
+
+    private async Task<SyncRecordResult<CheckInSyncDto>> PushCheckInAsync(Guid patientId, CheckInSyncDto incoming, CancellationToken ct)
     {
         if (Validate(incoming) is { } problem)
         {
@@ -107,12 +157,7 @@ public sealed class SyncService(
                 }
 
                 return await sync.TrySaveChangesAsync(ct)
-                    ? new SyncRecordResult
-                    {
-                        Id = incoming.Id,
-                        Outcome = SyncOutcome.Conflict,
-                        ServerCopy = CheckInSyncDto.FromEntity(sameDay),
-                    }
+                    ? SyncRecordResult<CheckInSyncDto>.Conflict(incoming.Id, CheckInSyncDto.FromEntity(sameDay))
                     : Rejected(incoming.Id, SyncReasons.RetryLater);
             }
 
@@ -226,10 +271,10 @@ public sealed class SyncService(
         }
     }
 
-    private static SyncRecordResult Accepted(Guid id) => new() { Id = id, Outcome = SyncOutcome.Accepted };
+    private static SyncRecordResult<CheckInSyncDto> Accepted(Guid id) => SyncRecordResult<CheckInSyncDto>.Accepted(id);
 
-    private static SyncRecordResult Rejected(Guid id, string reason) =>
-        new() { Id = id, Outcome = SyncOutcome.Rejected, Reason = reason };
+    private static SyncRecordResult<CheckInSyncDto> Rejected(Guid id, string reason) =>
+        SyncRecordResult<CheckInSyncDto>.Rejected(id, reason);
 }
 
 public static class SyncReasons
@@ -244,4 +289,9 @@ public static class SyncReasons
     public const string NotFound = "not-found";
     public const string ConsentRequired = "consent-required";
     public const string RetryLater = "retry-later";
+    public const string InvalidFields = "invalid-fields";
+    public const string GuidanceMismatch = "guidance-mismatch";
+    public const string UnknownMedication = "unknown-medication";
+    public const string UnknownSchedule = "unknown-schedule";
+    public const string MedicationChanged = "medication-changed";
 }
