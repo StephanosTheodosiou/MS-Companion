@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/app-button';
 import { Screen } from '@/components/layout/screen';
 import { Row } from '@/components/ui/row';
 import { Section } from '@/components/layout/section';
-import { colors } from '@/constants/design-tokens';
+import { useColors } from '@/hooks/use-colors';
 import { useProfileForm } from '@/hooks/use-profile-form';
 
 // E1: the Profile tab, for changing the profile later.
 // Medicines have their own screen since E3, so the profile links to it instead of a text field.
 export default function ProfileTabScreen() {
+  const colors = useColors();
   const router = useRouter();
   const form = useProfileForm();
   const [saved, setSaved] = useState(false);

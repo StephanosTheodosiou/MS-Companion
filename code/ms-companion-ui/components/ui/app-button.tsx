@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet } from 'react-native';
-import { colors, MIN_TOUCH, radius, space } from '@/constants/design-tokens';
+import { MIN_TOUCH, radius, space } from '@/constants/design-tokens';
+import { useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function Button({ label, onPress, variant = 'primary', disabled, accessibilityHint }: Props) {
+  const colors = useColors();
   const textColor = variant === 'primary' ? colors.onAccent : colors.accent;
   return (
     <Pressable

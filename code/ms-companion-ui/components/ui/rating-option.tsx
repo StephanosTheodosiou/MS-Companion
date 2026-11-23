@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/constants/design-tokens';
+import { Pressable, View } from 'react-native';
+import { MIN_TOUCH, radius, shadow, space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 
 interface Props {
@@ -14,6 +15,8 @@ const BAR_HEIGHTS = [10, 16, 22, 28];
 
 // One answer of the 0-4 scale: number, words and a small level graphic.
 export function RatingOption({ value, label, selected, onPress }: Props) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <Pressable
       onPress={onPress}
@@ -36,7 +39,7 @@ export function RatingOption({ value, label, selected, onPress }: Props) {
             key={i}
             style={[
               styles.bar,
-              { height: h, backgroundColor: i < value ? (selected ? colors.accent : '#A6B4BE') : colors.separator },
+              { height: h, backgroundColor: i < value ? (selected ? colors.accent : colors.ratingIdle) : colors.separator },
             ]}
           />
         ))}
@@ -45,7 +48,7 @@ export function RatingOption({ value, label, selected, onPress }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   card: {
     minHeight: MIN_TOUCH + 8,
     flexDirection: 'row',
@@ -74,4 +77,4 @@ const styles = StyleSheet.create({
   bold: { fontWeight: '700' },
   bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 5 },
   bar: { width: 9, borderRadius: 3 },
-});
+}));

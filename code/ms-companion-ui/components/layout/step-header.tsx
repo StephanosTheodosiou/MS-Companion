@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, radius, shadow, space } from '@/constants/design-tokens';
+import { Pressable, View } from 'react-native';
+import { radius, shadow, space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 import { Icon } from '@/components/ui/app-icon';
 
@@ -16,6 +17,8 @@ interface Props {
 }
 
 export function BackButton({ onPress }: { onPress: () => void }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <Pressable
       onPress={onPress}
@@ -30,6 +33,8 @@ export function BackButton({ onPress }: { onPress: () => void }) {
 }
 
 function Bars({ step, total, short }: { step: number; total: number; short?: boolean }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View
       style={[styles.bars, short && styles.barsShort]}
@@ -47,6 +52,8 @@ function Bars({ step, total, short }: { step: number; total: number; short?: boo
 }
 
 export function StepHeader({ step, total, onBack, variant = 'setup' }: Props) {
+  const styles = useStyles();
+  const colors = useColors();
   const back = onBack ? <BackButton onPress={onBack} /> : <View style={styles.backSpace} />;
   if (variant === 'flow') {
     return (
@@ -75,7 +82,7 @@ export function StepHeader({ step, total, onBack, variant = 'setup' }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   wrap: { gap: space.xl },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   back: {
@@ -95,4 +102,4 @@ const styles = StyleSheet.create({
   barsShort: { width: 110 },
   bar: { flex: 1, height: 6, borderRadius: 3 },
   barShort: { height: 5 },
-});
+}));

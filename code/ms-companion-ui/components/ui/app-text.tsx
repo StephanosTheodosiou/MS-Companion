@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, TextProps } from 'react-native';
-import { colors, type } from '@/constants/design-tokens';
+import { type } from '@/constants/design-tokens';
+import { useColors } from '@/hooks/use-colors';
 import { useTextSize } from '@/context/text-size-context';
 
 export type TextVariant = keyof typeof type;
@@ -12,6 +13,7 @@ interface Props extends TextProps {
 
 // All text goes through this component so the text-size setting applies everywhere.
 export function AppText({ variant = 'body', color, style, children, ...rest }: Props) {
+  const colors = useColors();
   const { scale } = useTextSize();
   const { size, weight } = type[variant];
   const fontSize = size * scale;

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, MIN_TOUCH, radius, space } from '@/constants/design-tokens';
+import { Pressable, View } from 'react-native';
+import { MIN_TOUCH, radius, space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { DoseStatus } from '@/types/health';
 import { AppText } from '@/components/ui/app-text';
 import { IconCircle } from '@/components/ui/app-icon';
@@ -16,6 +17,8 @@ interface Props {
 // One scheduled dose for today: two clear choices, or the result with an undo.
 // Button labels name the medicine, so a screen reader does not just say "Taken" three times.
 export function DoseRow({ title, subtitle, status, onLog, onUndo }: Props) {
+  const styles = useStyles();
+  const colors = useColors();
   const spoken = `${title}, ${subtitle}`;
   return (
     <View style={styles.row}>
@@ -46,6 +49,8 @@ export function DoseRow({ title, subtitle, status, onLog, onUndo }: Props) {
 }
 
 function Pill({ label, spoken, onPress, filled }: { label: string; spoken: string; onPress: () => void; filled?: boolean }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <Pressable
       onPress={onPress}
@@ -65,7 +70,7 @@ function Pill({ label, spoken, onPress, filled }: { label: string; spoken: strin
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   row: {
     minHeight: MIN_TOUCH,
     flexDirection: 'row',
@@ -90,4 +95,4 @@ const styles = StyleSheet.create({
   pillLabel: { textAlign: 'center', alignSelf: 'stretch' },
   pillFilled: { backgroundColor: colors.accent },
   pillPlain: { backgroundColor: colors.accentSoft },
-});
+}));

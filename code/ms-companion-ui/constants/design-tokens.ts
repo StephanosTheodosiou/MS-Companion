@@ -3,7 +3,10 @@
 // Based on the team's Figma screens: a calm teal on soft grey, white cards with
 // soft shadows and icon circles, and a peach card for safety messages.
 // All text colours pass WCAG AA (4.5:1) on the backgrounds they are used on.
-export const colors = {
+//
+// Colours come in a light and a dark set. Components get the right one with
+// useColors() or makeStyles() from hooks/use-colors.ts, never by importing a set directly.
+export const lightColors = {
   page: '#F4F6F8',
   surface: '#FFFFFF',
   ink: '#0F1B2A',
@@ -24,6 +27,40 @@ export const colors = {
   warningText: '#7A4520',
   destructive: '#B42318',
   rowPressed: '#F0F3F5',
+  /** Bars of an unselected rating option. */
+  ratingIdle: '#A6B4BE',
+  /** Background of error notes. */
+  destructiveSoft: '#FDECEA',
+};
+
+export type ColorPalette = { [K in keyof typeof lightColors]: string };
+
+/**
+ * Dark mode, used when the phone is set to dark (app.json: userInterfaceStyle "automatic").
+ * Matches the dark theme in constants/theme.ts, so the login screens and these screens look alike.
+ */
+export const darkColors: ColorPalette = {
+  page: '#0B141B',
+  surface: '#15212A',
+  ink: '#E9EFF3',
+  secondary: '#A4B2BE',
+  overline: '#9AA8B4',
+  separator: '#253541',
+  inputBorder: '#3A4D5B',
+  track: '#3A4D5B',
+  muted: '#1D2B35',
+  accent: '#5DBAC6',
+  accentPressed: '#4AA5B1',
+  accentSoft: '#16363C',
+  onAccent: '#05252A',
+  onAccentSoft: '#123F45',
+  warningBg: '#33251A',
+  warningIcon: '#F29A55',
+  warningText: '#F6CDA8',
+  destructive: '#F28B82',
+  rowPressed: '#1D2B35',
+  ratingIdle: '#5A6D7B',
+  destructiveSoft: '#3B1F1E',
 };
 
 export const space = {

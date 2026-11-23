@@ -1,7 +1,8 @@
 import React from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, space } from '@/constants/design-tokens';
+import { space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 
 export type ScrollViewRef = React.ComponentRef<typeof ScrollView>;
@@ -39,6 +40,8 @@ export function Screen({
   scrollRef,
   children,
 }: Props) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <SafeAreaView style={styles.safe} edges={inTabs ? ['top', 'left', 'right'] : ['top', 'left', 'right', 'bottom']}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -72,7 +75,7 @@ export function Screen({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   safe: { flex: 1, backgroundColor: colors.page },
   flex: { flex: 1 },
   topBar: { paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.md },
@@ -81,4 +84,4 @@ const styles = StyleSheet.create({
   titleBlock: { gap: space.sm },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   footer: { paddingHorizontal: space.xl, paddingTop: space.md, paddingBottom: space.md, gap: space.xs },
-});
+}));

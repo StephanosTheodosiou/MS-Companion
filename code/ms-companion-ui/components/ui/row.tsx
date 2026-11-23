@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, Switch, View } from 'react-native';
-import { colors, MIN_TOUCH, space } from '@/constants/design-tokens';
+import { Pressable, Switch, View } from 'react-native';
+import { MIN_TOUCH, space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { useTextSize } from '@/context/text-size-context';
 import { AppText } from '@/components/ui/app-text';
 import { Icon, IconCircle, IconName } from '@/components/ui/app-icon';
@@ -45,6 +46,8 @@ export function Row({
   accessibilityLabel,
   accessibilityHint,
 }: RowProps) {
+  const styles = useStyles();
+  const colors = useColors();
   // At the largest text size there is no room for label and value side by side,
   // so the value moves under the label instead of squeezing it.
   const { scale } = useTextSize();
@@ -115,6 +118,8 @@ interface SwitchRowProps {
 }
 
 export function SwitchRow({ label, description, icon, value, onChange, disabled }: SwitchRowProps) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.row}>
       {icon ? <IconCircle name={icon} /> : null}
@@ -129,7 +134,7 @@ export function SwitchRow({ label, description, icon, value, onChange, disabled 
         onValueChange={onChange}
         disabled={disabled}
         trackColor={{ false: colors.track, true: colors.accent }}
-        thumbColor={colors.surface}
+        thumbColor="#FFFFFF"
         ios_backgroundColor={colors.track}
         accessibilityLabel={label}
         accessibilityHint={description}
@@ -138,7 +143,7 @@ export function SwitchRow({ label, description, icon, value, onChange, disabled 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   row: {
     minHeight: MIN_TOUCH,
     flexDirection: 'row',
@@ -154,4 +159,4 @@ const styles = StyleSheet.create({
   title: { flexShrink: 1 },
   strong: { fontWeight: '700' },
   value: { maxWidth: '50%', textAlign: 'right' },
-});
+}));

@@ -12,7 +12,7 @@ import { Section } from '@/components/layout/section';
 import { TextField } from '@/components/ui/app-text-field';
 import { TopBar } from '@/components/layout/top-bar';
 import { getProfile, saveSymptomEntry } from '@/utils/storage';
-import { colors } from '@/constants/design-tokens';
+import { useColors } from '@/hooks/use-colors';
 import { EMPTY_PROFILE, Profile } from '@/types/health';
 import { daysAgoKey } from '@/utils/date';
 import { EMERGENCY_NOTE, GUIDANCE_TEXT, Guidance, symptomGuidance } from '@/utils/guidance';
@@ -49,6 +49,7 @@ const GUIDANCE_ICON: Record<Guidance, IconName> = {
 // E3 / US-01: log a new or worse symptom, then show what to do next.
 // The guidance text lives in the app, so it also works without internet (Scenario 2).
 export default function SymptomEntryScreen() {
+  const colors = useColors();
   const router = useRouter();
   const navigation = useNavigation();
   const [description, setDescription] = useState('');

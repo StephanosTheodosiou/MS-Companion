@@ -10,12 +10,13 @@ import { Section } from '@/components/layout/section';
 import { TextField } from '@/components/ui/app-text-field';
 import { TopBar } from '@/components/layout/top-bar';
 import { deleteQuestion, listQuestions, saveQuestion } from '@/utils/storage';
-import { colors } from '@/constants/design-tokens';
+import { useColors } from '@/hooks/use-colors';
 import { DoctorQuestion } from '@/types/health';
 import { newId } from '@/utils/id';
 
 // E7: questions to ask at the next visit. Tap a question to tick it off once asked.
 export default function QuestionsScreen() {
+  const colors = useColors();
   const router = useRouter();
   const [questions, setQuestions] = useState<DoctorQuestion[]>([]);
   const [draft, setDraft] = useState('');

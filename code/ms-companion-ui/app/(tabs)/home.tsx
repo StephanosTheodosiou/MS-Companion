@@ -12,7 +12,7 @@ import { Section } from '@/components/layout/section';
 import { WeekDay, WeekStrip } from '@/components/week-strip';
 import { getCheckIn, getDoseLogs, getProfile, listAppointments, listBloodTests, listMedications, listQuestions } from '@/utils/storage';
 import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
-import { colors } from '@/constants/design-tokens';
+import { useColors } from '@/hooks/use-colors';
 import { Appointment, CheckIn, EMPTY_PROFILE, Profile } from '@/types/health';
 import { formatLongDate, formatTime, todayKey, weekKeys } from '@/utils/date';
 import { bloodTestSummary } from '@/utils/bloodTest';
@@ -24,6 +24,7 @@ const NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday
 // The check-in button uses a non-breaking hyphen so "check-in" never splits over two lines.
 // Today tab: the daily check-in first, this week's progress, the health log, and the MS team one tap away.
 export default function HomeScreen() {
+  const colors = useColors();
   const router = useRouter();
   const [profile, setProfile] = useState<Profile>({ ...EMPTY_PROFILE });
   const [todaysCheckIn, setTodaysCheckIn] = useState<CheckIn | null>(null);

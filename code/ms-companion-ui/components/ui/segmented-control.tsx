@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, MIN_TOUCH, radius, shadow } from '@/constants/design-tokens';
+import { Pressable, View } from 'react-native';
+import { MIN_TOUCH, radius, shadow } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 
 interface Props<T extends string> {
@@ -10,6 +11,8 @@ interface Props<T extends string> {
 }
 
 export function SegmentedControl<T extends string>({ options, selected, onSelect }: Props<T>) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.track} accessibilityRole="radiogroup">
       {options.map((option) => {
@@ -38,7 +41,7 @@ export function SegmentedControl<T extends string>({ options, selected, onSelect
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   track: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.button, padding: 4, ...shadow },
   segment: {
     flex: 1,
@@ -49,4 +52,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   selected: { backgroundColor: colors.accent },
-});
+}));

@@ -11,12 +11,13 @@ import { TextField } from '@/components/ui/app-text-field';
 import { TopBar } from '@/components/layout/top-bar';
 import { DOSE_TIMES, sortTimes } from '@/constants/medication';
 import { deleteMedication, getMedication, saveMedication } from '@/utils/storage';
-import { colors } from '@/constants/design-tokens';
+import { useColors } from '@/hooks/use-colors';
 import { DoseTime } from '@/types/health';
 import { newId } from '@/utils/id';
 
 // E3: add or edit a medicine and when it is taken.
 export default function MedicationEditScreen() {
+  const colors = useColors();
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string }>();
   const editingId = params.id;

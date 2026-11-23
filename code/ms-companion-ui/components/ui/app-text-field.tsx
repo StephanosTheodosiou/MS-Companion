@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
-import { colors, MIN_TOUCH, radius, shadow, space, type } from '@/constants/design-tokens';
+import { TextInput, TextInputProps, View } from 'react-native';
+import { MIN_TOUCH, radius, shadow, space, type } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { useTextSize } from '@/context/text-size-context';
 import { AppText } from '@/components/ui/app-text';
 import { Icon, IconName } from '@/components/ui/app-icon';
@@ -16,6 +17,8 @@ interface Props extends Omit<TextInputProps, 'style'> {
 }
 
 export function TextField({ label, icon, hint, error, trailing, multiline, onFocus, onBlur, ...rest }: Props) {
+  const styles = useStyles();
+  const colors = useColors();
   const { scale } = useTextSize();
   const [focused, setFocused] = useState(false);
   const fontSize = type.body.size * scale;
@@ -70,7 +73,7 @@ export function TextField({ label, icon, hint, error, trailing, multiline, onFoc
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   wrap: { gap: space.sm },
   label: { paddingHorizontal: space.xs },
   box: {
@@ -89,4 +92,4 @@ const styles = StyleSheet.create({
   iconTop: { paddingTop: 2 },
   input: { flex: 1, color: colors.ink, paddingVertical: space.md },
   multiline: { textAlignVertical: 'top', paddingTop: 0 },
-});
+}));

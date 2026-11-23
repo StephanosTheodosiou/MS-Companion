@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, MIN_TOUCH, radius, shadow, space } from '@/constants/design-tokens';
+import { Pressable, View } from 'react-native';
+import { MIN_TOUCH, radius, shadow, space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 import { Icon } from '@/components/ui/app-icon';
 
@@ -20,6 +21,8 @@ interface Props<T extends string> {
 
 // Single choice as separate cards, with a radio circle on the right (e.g. type of MS).
 export function ChoiceCards<T extends string>({ header, options, selected, onSelect }: Props<T>) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.wrap} accessibilityRole="radiogroup">
       {header ? (
@@ -56,7 +59,7 @@ export function ChoiceCards<T extends string>({ header, options, selected, onSel
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   wrap: { gap: space.sm },
   header: { paddingHorizontal: space.xs, marginBottom: space.xs },
   card: {
@@ -84,7 +87,7 @@ const styles = StyleSheet.create({
   },
   radioSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
   box: { borderRadius: 7 },
-});
+}));
 
 interface CheckProps<T extends string> {
   header?: string;
@@ -95,6 +98,8 @@ interface CheckProps<T extends string> {
 
 // Several choices as separate cards with a tick box (e.g. the times a medicine is taken).
 export function CheckCards<T extends string>({ header, options, selected, onToggle }: CheckProps<T>) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.wrap}>
       {header ? (

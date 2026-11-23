@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
-import { colors, radius, shadow } from '@/constants/design-tokens';
+import { Pressable } from 'react-native';
+import { radius, shadow } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { Icon, IconName } from '@/components/ui/app-icon';
 
 /** A round white icon button, e.g. the bell next to "Today". */
@@ -15,6 +16,8 @@ export function RoundButton({
   hint?: string;
   onPress: () => void;
 }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <Pressable
       onPress={onPress}
@@ -29,7 +32,7 @@ export function RoundButton({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   button: {
     width: 56,
     height: 56,
@@ -39,4 +42,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     ...shadow,
   },
-});
+}));

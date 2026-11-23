@@ -1,6 +1,7 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { colors, MIN_TOUCH, radius, space } from '@/constants/design-tokens';
+import { Pressable, View } from 'react-native';
+import { MIN_TOUCH, radius, space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 import { Icon, IconCircle } from '@/components/ui/app-icon';
 
@@ -18,6 +19,8 @@ interface Props {
 // One blood test in the list: tap the text to edit it, or tap "Done" once the test has been taken.
 // The "Done" label names the test, so a screen reader does not just say "Done" three times.
 export function BloodTestRow({ title, subtitle, overdue, onDone, onOpen }: Props) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.row}>
       <Pressable
@@ -54,7 +57,7 @@ export function BloodTestRow({ title, subtitle, overdue, onDone, onOpen }: Props
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   row: {
     minHeight: MIN_TOUCH,
     flexDirection: 'row',
@@ -80,4 +83,4 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   pillLabel: { textAlign: 'center', alignSelf: 'stretch' },
-});
+}));

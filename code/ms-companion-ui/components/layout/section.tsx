@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { colors, radius, space } from '@/constants/design-tokens';
+import { radius, space } from '@/constants/design-tokens';
+import { makeStyles } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 import { Card } from '@/components/ui/card';
 
@@ -16,6 +17,7 @@ interface Props {
 
 // A titled group of rows, like a section in the phone's Settings app.
 export function Section({ header, footer, variant = 'grouped', iconInset, children }: Props) {
+  const styles = useStyles();
   const items = React.Children.toArray(children).filter(Boolean);
   return (
     <View style={styles.section}>
@@ -49,11 +51,11 @@ export function Section({ header, footer, variant = 'grouped', iconInset, childr
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   section: { gap: space.md },
   header: { paddingHorizontal: space.xs },
   clip: { borderRadius: radius.card, overflow: 'hidden' },
   divider: { height: StyleSheet.hairlineWidth * 2, backgroundColor: colors.separator },
   plain: { gap: space.md },
   footerText: { paddingHorizontal: space.xs },
-});
+}));

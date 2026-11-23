@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, View } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { colors, space } from '@/constants/design-tokens';
+import { space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 import { Row } from '@/components/ui/row';
 
@@ -28,6 +29,8 @@ function toWebTimeValue(d: Date): string {
 }
 
 export function PickerRow({ label, mode, value, display, onChange, error }: Props) {
+  const styles = useStyles();
+  const colors = useColors();
   const [open, setOpen] = useState(false);
   const initial = value ?? defaultValue(mode);
 
@@ -130,9 +133,9 @@ function defaultValue(mode: 'date' | 'time'): Date {
   return d;
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   value: { fontWeight: '700' },
   inline: { backgroundColor: colors.surface, paddingHorizontal: space.sm },
   webInline: { backgroundColor: colors.surface, paddingHorizontal: space.lg, paddingBottom: space.md },
   error: { paddingHorizontal: space.lg, paddingBottom: space.md, backgroundColor: colors.surface },
-});
+}));

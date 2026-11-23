@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { colors, radius, space } from '@/constants/design-tokens';
+import { View } from 'react-native';
+import { radius, space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
 
 // The teal card at the top of Today, with two soft decorative circles.
 export function HeroCard({ overline, title, subtitle, action }: Props) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.card}>
       <View style={[styles.circle, styles.circleOne]} importantForAccessibility="no" />
@@ -31,7 +34,7 @@ export function HeroCard({ overline, title, subtitle, action }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   card: {
     backgroundColor: colors.accent,
     borderRadius: radius.card + 4,
@@ -46,4 +49,4 @@ const styles = StyleSheet.create({
   text: { gap: space.sm },
   title: { fontWeight: '800' },
   action: {},
-});
+}));

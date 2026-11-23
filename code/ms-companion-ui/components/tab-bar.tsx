@@ -2,7 +2,8 @@ import React, { type ComponentProps } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter, type Href, type Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, space } from '@/constants/design-tokens';
+import { space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 import { Icon, IconName } from '@/components/ui/app-icon';
 
@@ -19,6 +20,8 @@ const TABS: Record<string, { label: string; icon: IconName }> = {
 
 // Bottom bar with the three main places of the app (used by app/(tabs)/_layout.tsx). The active tab gets a soft pill.
 export function TabBar({ state }: TabBarProps) {
+  const styles = useStyles();
+  const colors = useColors();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   return (
@@ -58,7 +61,7 @@ export function TabBar({ state }: TabBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   bar: {
     flexDirection: 'row',
     backgroundColor: colors.surface,
@@ -71,4 +74,4 @@ const styles = StyleSheet.create({
   pillActive: { backgroundColor: colors.accentSoft },
   label: { fontSize: 13, lineHeight: 17 },
   labelActive: { fontWeight: '700' },
-});
+}));

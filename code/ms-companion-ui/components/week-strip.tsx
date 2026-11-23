@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { colors, space } from '@/constants/design-tokens';
+import { View } from 'react-native';
+import { space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 import { Card } from '@/components/ui/card';
 import { Icon } from '@/components/ui/app-icon';
@@ -20,6 +21,8 @@ export interface WeekDay {
 
 // Monday to Sunday of this week: a filled tick for days with a check-in, a ring for today.
 export function WeekStrip({ days }: { days: WeekDay[] }) {
+  const styles = useStyles();
+  const colors = useColors();
   const done = days.filter((d) => d.checkedIn).length;
   return (
     <Card style={styles.card}>
@@ -65,7 +68,7 @@ export function WeekStrip({ days }: { days: WeekDay[] }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   card: { paddingVertical: space.lg, paddingHorizontal: space.sm },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
   day: { flex: 1, alignItems: 'center', gap: space.md },
@@ -75,4 +78,4 @@ const styles = StyleSheet.create({
   other: { backgroundColor: colors.muted },
   todayLetter: { fontWeight: '800' },
   otherNumber: { fontWeight: '500' },
-});
+}));

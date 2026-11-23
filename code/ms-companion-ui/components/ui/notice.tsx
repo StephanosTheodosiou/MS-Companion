@@ -1,11 +1,14 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { colors, radius, space } from '@/constants/design-tokens';
+import { View } from 'react-native';
+import { radius, space } from '@/constants/design-tokens';
+import { makeStyles, useColors } from '@/hooks/use-colors';
 import { AppText } from '@/components/ui/app-text';
 import { Icon, IconName } from '@/components/ui/app-icon';
 
 /** A small note with an icon, e.g. the privacy reminder with a shield. */
 export function Note({ icon = 'shield', children }: { icon?: IconName; children: string }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.note} accessible accessibilityLabel={children}>
       <Icon name={icon} size={20} color={colors.accent} />
@@ -18,6 +21,8 @@ export function Note({ icon = 'shield', children }: { icon?: IconName; children:
 
 /** The peach safety card ("In an emergency, call 112."). */
 export function SafetyCard({ children }: { children: string }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.safety} accessible accessibilityLabel={children}>
       <Icon name="alert-circle" size={22} color={colors.warningIcon} />
@@ -30,6 +35,8 @@ export function SafetyCard({ children }: { children: string }) {
 
 /** A red message for something that went wrong, e.g. a failed login. Read out straight away. */
 export function ErrorNote({ children }: { children: string }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.error} accessible accessibilityLabel={children} accessibilityLiveRegion="polite" accessibilityRole="alert">
       <Icon name="alert-circle" size={20} color={colors.destructive} />
@@ -42,6 +49,8 @@ export function ErrorNote({ children }: { children: string }) {
 
 /** A small rounded label, e.g. "Always on" with a lock. */
 export function Badge({ icon, label }: { icon?: IconName; label: string }) {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.badge}>
       {icon ? <Icon name={icon} size={15} color={colors.accent} /> : null}
@@ -54,6 +63,7 @@ export function Badge({ icon, label }: { icon?: IconName; label: string }) {
 
 /** Dots that show the step in a short sequence (Welcome screen). */
 export function PageDots({ index, total }: { index: number; total: number }) {
+  const styles = useStyles();
   return (
     <View
       style={styles.dots}
@@ -67,7 +77,7 @@ export function PageDots({ index, total }: { index: number; total: number }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   flex: { flex: 1 },
   note: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, paddingHorizontal: space.xs },
   safety: {
@@ -83,7 +93,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: space.md,
-    backgroundColor: '#FDECEA',
+    backgroundColor: colors.destructiveSoft,
     borderRadius: radius.control,
     padding: space.lg,
   },
@@ -101,4 +111,4 @@ const styles = StyleSheet.create({
   dots: { flexDirection: 'row', gap: 6, alignSelf: 'center' },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.track },
   dotActive: { width: 22, backgroundColor: colors.accent },
-});
+}));
