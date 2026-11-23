@@ -11,9 +11,10 @@ import { completeOnboarding } from '@/utils/storage';
 export default function ProfileSetupScreen() {
   const router = useRouter();
   const form = useProfileForm();
+  const { load } = form;
   useEffect(() => {
-    form.load();
-  }, [form.load]);
+    load();
+  }, [load]);
 
   const finish = async () => {
     try {

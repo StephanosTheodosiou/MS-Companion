@@ -63,7 +63,7 @@ export default function MedicationsScreen() {
           <Button label="Open Settings" onPress={() => router.navigate('/settings')} />
         }
       >
-        <Note icon="info">To track doses and get reminders, turn on Medication under "What the app may use".</Note>
+        <Note icon="info">To track doses and get reminders, turn on Medication under “What the app may use”.</Note>
       </Screen>
     );
   }

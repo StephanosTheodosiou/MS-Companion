@@ -10,7 +10,7 @@ import { Row } from '@/components/ui/row';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
 import { WeekDay, WeekStrip } from '@/components/week-strip';
-import { getCheckIn, getDoseLogs, getProfile, listAppointments, listBloodTests, listMedications, listQuestions } from '@/utils/storage';
+import { getCheckIn, getDoseLogs, getProfile, listAppointments, listBloodTests, listMedications } from '@/utils/storage';
 import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
 import { useColors } from '@/hooks/use-colors';
 import { Appointment, CheckIn, EMPTY_PROFILE, Profile } from '@/types/health';
@@ -31,7 +31,6 @@ export default function HomeScreen() {
   const [week, setWeek] = useState<WeekDay[]>([]);
   const [doseSummary, setDoseSummary] = useState<string | undefined>(undefined);
   const [nextVisit, setNextVisit] = useState<Appointment | null>(null);
-  const [openQuestions, setOpenQuestions] = useState(0);
   const [bloodTestNote, setBloodTestNote] = useState<string | undefined>(undefined);
 
   // Reload whenever the screen is shown, so changes made elsewhere appear straight away.
@@ -71,9 +70,6 @@ export default function HomeScreen() {
       listBloodTests()
         .then((tests) => setBloodTestNote(bloodTestSummary(tests, today)))
         .catch((e) => console.warn('Could not load blood tests', e));
-      listQuestions()
-        .then((qs) => setOpenQuestions(qs.filter((q) => !q.asked).length))
-        .catch((e) => console.warn('Could not load questions', e));
     }, [])
   );
 
@@ -129,6 +125,7 @@ export default function HomeScreen() {
         <Row icon="list" label="Symptom log" chevron onPress={() => router.push('/symptom-log')} />
       </Section>
 
+      {/* Only the next appointment here; questions, summary and all appointments are in the Visit tab. */}
       <Section header="Next visit" iconInset>
         {nextVisit ? (
           <Row
@@ -137,19 +134,12 @@ export default function HomeScreen() {
             label={appointmentTitle(nextVisit)}
             description={appointmentDetails(nextVisit)}
             chevron
-            onPress={() => router.push('/appointments')}
+            accessibilityHint="Opens the Visit tab"
+            onPress={() => router.navigate('/visit')}
           />
         ) : (
-          <Row icon="calendar" label="Add an appointment" chevron onPress={() => router.push('/appointments')} />
+          <Row icon="calendar" label="No visit planned" chevron onPress={() => router.navigate('/visit')} />
         )}
-        <Row
-          icon="help-circle"
-          label="Questions for my doctor"
-          value={openQuestions > 0 ? `${openQuestions} to ask` : undefined}
-          chevron
-          onPress={() => router.push('/questions')}
-        />
-        <Row icon="file-text" label="Visit summary" chevron onPress={() => router.push('/visit-summary')} />
       </Section>
 
       <Section header="Your MS team">

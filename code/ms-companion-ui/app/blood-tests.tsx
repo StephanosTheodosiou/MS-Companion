@@ -53,7 +53,7 @@ export default function BloodTestsScreen() {
         subtitle="You chose not to let the app store your medication."
         footer={<Button label="Open Settings" onPress={() => router.navigate('/settings')} />}
       >
-        <Note icon="info">To get blood test reminders, turn on Medication under "What the app may use".</Note>
+        <Note icon="info">To get blood test reminders, turn on Medication under “What the app may use”.</Note>
       </Screen>
     );
   }

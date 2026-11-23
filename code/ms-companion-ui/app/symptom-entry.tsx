@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Linking } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
+import { useConfirmLeave } from '@/hooks/use-confirm-leave';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/app-button';
 import { ChoiceCards } from '@/components/ui/choice-cards';
@@ -71,17 +72,7 @@ export default function SymptomEntryScreen() {
   }, [navigation, result]);
 
   const dirty = description !== '' || started !== null || lasted !== null || fever !== null;
-  // Uses expo-router's own navigation (a separate @react-navigation install would not be connected to it).
-  useEffect(() => {
-    if (!(dirty && !result)) return;
-    return navigation.addListener('beforeRemove', (e) => {
-      e.preventDefault();
-      Alert.alert('Leave without saving?', 'This symptom will not be saved.', [
-        { text: 'Keep going', style: 'cancel' },
-        { text: 'Leave', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
-      ]);
-    });
-  }, [navigation, dirty, result]);
+  useConfirmLeave(dirty && !result, 'This symptom will not be saved.');
 
   const onSave = async () => {
     if (description.trim() === '' || !started || !lasted || !fever) {

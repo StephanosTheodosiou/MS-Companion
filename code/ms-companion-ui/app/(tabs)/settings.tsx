@@ -5,7 +5,6 @@ import { Row, SwitchRow } from '@/components/ui/row';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
 import { SegmentedControl } from '@/components/ui/segmented-control';
-import { loadDemoData } from '@/utils/demoData';
 import { useAuth } from '@/context/auth-context';
 import { deleteAllData, exportAllData, getConsents, setConsent } from '@/utils/storage';
 import { useTextSize } from '@/context/text-size-context';

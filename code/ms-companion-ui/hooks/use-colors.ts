@@ -1,7 +1,10 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, type ImageStyle, type TextStyle, type ViewStyle } from 'react-native';
 
 import { darkColors, lightColors, type ColorPalette } from '@/constants/design-tokens';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+
+/** A set of named styles, like the object passed to StyleSheet.create. */
+type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
 
 /** The colour set for the phone's current light/dark setting. */
 export function useColors(): ColorPalette {
@@ -17,9 +20,11 @@ export function useColors(): ColorPalette {
  *
  * Both versions are created once when the file loads, and the hook picks the one that matches the phone.
  */
-export function makeStyles<T extends StyleSheet.NamedStyles<T>>(factory: (colors: ColorPalette) => T) {
-  const light = StyleSheet.create(factory(lightColors));
-  const dark = StyleSheet.create(factory(darkColors));
+export function makeStyles<T extends NamedStyles<T> | NamedStyles<any>>(
+  factory: (colors: ColorPalette) => T | NamedStyles<T>,
+) {
+  const light = StyleSheet.create(factory(lightColors) as T) as T;
+  const dark = StyleSheet.create(factory(darkColors) as T) as T;
   return function useStyles(): T {
     return useColorScheme() === 'dark' ? dark : light;
   };

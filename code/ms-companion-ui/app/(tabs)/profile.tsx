@@ -15,11 +15,12 @@ export default function ProfileTabScreen() {
   const router = useRouter();
   const form = useProfileForm();
   const [saved, setSaved] = useState(false);
+  const { load } = form;
   useFocusEffect(
     useCallback(() => {
-      form.load();
+      load();
       setSaved(false);
-    }, [form.load])
+    }, [load])
   );
 
   return (

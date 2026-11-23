@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Linking, View } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
+import { useConfirmLeave } from '@/hooks/use-confirm-leave';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/app-button';
 import { IconCircle } from '@/components/ui/app-icon';
@@ -59,17 +60,7 @@ export default function CheckInScreen() {
   }, [navigation, saved]);
 
   // Ask before leaving with unsaved answers (back button or swipe).
-  // Uses expo-router's own navigation (a separate @react-navigation install would not be connected to it).
-  useEffect(() => {
-    if (!(dirty && !saved)) return;
-    return navigation.addListener('beforeRemove', (e) => {
-      e.preventDefault();
-      Alert.alert('Leave without saving?', 'Your answers for today will not be saved.', [
-        { text: 'Keep going', style: 'cancel' },
-        { text: 'Leave', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
-      ]);
-    });
-  }, [navigation, dirty, saved]);
+  useConfirmLeave(dirty && !saved, 'Your answers for today will not be saved.');
 
   const back = () => (step > 0 ? setStep(step - 1) : router.back());
 
