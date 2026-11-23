@@ -1,136 +1,100 @@
-import { router } from 'expo-router';
-import { useRef, useState } from 'react';
-import { StyleSheet, View, type TextInputInstance } from 'react-native';
-
-import { AppLogo } from '@/components/brand/app-logo';
-import { FormScreen } from '@/components/layout/form-screen';
-import { ThemedText } from '@/components/themed-text';
-import { Button } from '@/components/ui/button';
-import { Callout } from '@/components/ui/callout';
-import { PasswordField } from '@/components/ui/password-field';
-import { TextField } from '@/components/ui/text-field';
-import { Spacing } from '@/constants/theme';
+import React, { useState } from 'react';
+import { useRouter } from 'expo-router';
+import { AppTile } from '@/components/brand/app-tile';
+import { Button } from '@/components/ui/app-button';
+import { ErrorNote, SafetyCard } from '@/components/ui/notice';
+import { PasswordField } from '@/components/ui/app-password-field';
+import { Screen } from '@/components/layout/screen';
+import { Section } from '@/components/layout/section';
+import { TextField } from '@/components/ui/app-text-field';
+import { TopBar } from '@/components/layout/top-bar';
 import { useAuth } from '@/context/auth-context';
-import { useForm } from '@/hooks/use-form';
 import { ApiError } from '@/utils/apiClient';
-import { getErrorMessage } from '@/utils/errorMessages';
 import { validateEmail, validateLoginPassword } from '@/utils/validation';
 
+// E1: log in to an existing account. Looks like the Welcome screen, as the way back in.
 export default function LoginScreen() {
+  const router = useRouter();
   const { signIn } = useAuth();
-  const passwordRef = useRef<TextInputInstance>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const form = useForm(
-    { email: '', password: '' },
-    { email: validateEmail, password: validateLoginPassword },
-  );
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string>();
-
-  async function handleSubmit() {
-    if (submitting) return;
-    setFormError(undefined);
-    if (!form.validateAll()) return;
-
-    setSubmitting(true);
+  const onLogin = async () => {
+    if (busy) return;
+    const e = validateEmail(email) ?? null;
+    const p = validateLoginPassword(password) ?? null;
+    setEmailError(e);
+    setPasswordError(p);
+    setFailure(null);
+    if (e || p) return;
+    setBusy(true);
     try {
-      await signIn({ email: form.values.email.trim(), password: form.values.password });
-      // No navigation here: the auth guard in app/_layout.tsx switches to the signed-in screens.
-    } catch (error) {
-      setSubmitting(false);
-      if (error instanceof ApiError && error.status === 401) {
-        setFormError('The email or password is incorrect.');
-      } else if (!(error instanceof ApiError && form.setFieldErrors(error.fieldErrors))) {
-        setFormError(getErrorMessage(error));
+      await signIn({ email: email.trim(), password });
+      // No navigation here: the auth guard in app/_layout.tsx switches to the signed-in screens,
+      // and app/index.tsx sends the user to Today or, on a new phone, to consent and profile setup.
+    } catch (err) {
+      setBusy(false);
+      if (err instanceof ApiError && err.status === 401) {
+        setFailure('The email or password is not correct.');
+      } else if (err instanceof ApiError && err.isNetworkError) {
+        setFailure("We couldn't reach MS Companion. Check your internet connection and try again.");
+      } else if (err instanceof ApiError && (err.fieldErrors.email || err.fieldErrors.password)) {
+        setEmailError(err.fieldErrors.email ?? null);
+        setPasswordError(err.fieldErrors.password ?? null);
+      } else {
+        setFailure('You were not logged in. Please try again.');
       }
     }
-  }
+  };
 
   return (
-    <FormScreen
+    <Screen
+      topBar={router.canGoBack() ? <TopBar onBack={() => router.back()} /> : undefined}
+      header={<AppTile />}
+      title="Welcome back"
+      subtitle="Log in to see your check-ins and your visit summary."
       footer={
-        <View style={styles.switchRow}>
-          <ThemedText type="callout" themeColor="textSecondary">
-            New to MS Companion?
-          </ThemedText>
-          <Button
-            variant="ghost"
-            title="Create an account"
-            onPress={() => router.push('/register')}
-            disabled={submitting}
-          />
-        </View>
-      }>
-      <View style={styles.header}>
-        <AppLogo />
-        <View style={styles.headings}>
-          <ThemedText type="display" accessibilityRole="header">
-            Welcome back
-          </ThemedText>
-          <ThemedText themeColor="textSecondary">
-            Log in to record how you feel and get ready for your next MS appointment.
-          </ThemedText>
-        </View>
-      </View>
-
-      {formError ? <Callout tone="danger" message={formError} /> : null}
-
-      <View style={styles.fields}>
+        <>
+          <Button label={busy ? 'Logging in…' : 'Log in'} onPress={onLogin} disabled={busy} />
+          <Button label="Create an account" variant="plain" onPress={() => router.push('/register')} />
+        </>
+      }
+    >
+      {failure ? <ErrorNote>{failure}</ErrorNote> : null}
+      <Section variant="plain">
         <TextField
           label="Email"
-          leadingIcon="mail"
+          icon="mail"
           placeholder="name@example.com"
-          value={form.values.email}
-          onChangeText={(value) => form.setValue('email', value)}
-          onBlur={() => form.handleBlur('email')}
-          error={form.errors.email}
-          editable={!submitting}
-          inputMode="email"
+          value={email}
+          onChangeText={(t) => {
+            setEmail(t);
+            if (emailError) setEmailError(null);
+          }}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="email"
-          textContentType="username"
-          returnKeyType="next"
-          submitBehavior="submit"
-          onSubmitEditing={() => passwordRef.current?.focus()}
+          textContentType="emailAddress"
+          error={emailError}
         />
         <PasswordField
-          ref={passwordRef}
+          kind="current"
           label="Password"
           placeholder="Your password"
-          value={form.values.password}
-          onChangeText={(value) => form.setValue('password', value)}
-          onBlur={() => form.handleBlur('password')}
-          error={form.errors.password}
-          editable={!submitting}
-          autoComplete="current-password"
-          textContentType="password"
-          returnKeyType="go"
-          onSubmitEditing={handleSubmit}
+          value={password}
+          onChangeText={(t) => {
+            setPassword(t);
+            if (passwordError) setPasswordError(null);
+          }}
+          error={passwordError}
         />
-      </View>
-
-      <Button title="Log in" loading={submitting} onPress={handleSubmit} />
-    </FormScreen>
+      </Section>
+      <SafetyCard>In an emergency, call 112. You do not need to log in for that.</SafetyCard>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  header: {
-    gap: Spacing.four,
-    paddingTop: Spacing.three,
-  },
-  headings: {
-    gap: Spacing.two,
-  },
-  fields: {
-    gap: Spacing.three,
-  },
-  switchRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
