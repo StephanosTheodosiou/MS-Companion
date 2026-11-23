@@ -94,6 +94,8 @@ namespace MSCompanion.Data.Migrations
 
                     b.ToTable("appointment", null, t =>
                         {
+                            t.HasCheckConstraint("ck_appointment_end_required", "status = 'Cancelled' OR ends_at IS NOT NULL");
+
                             t.HasCheckConstraint("ck_appointment_status", "status IN ('Booked', 'Fulfilled', 'Cancelled', 'NoShow')");
 
                             t.HasCheckConstraint("ck_appointment_times", "ends_at IS NULL OR ends_at > starts_at");

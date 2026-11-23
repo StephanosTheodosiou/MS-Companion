@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MSCompanion.Data.Interfaces;
 using MSCompanion.Data.Models;
+using MSCompanion.Domain.Enums;
 
 namespace MSCompanion.Data.Repositories;
 
@@ -10,6 +11,7 @@ public class AppointmentRepository(AppDbContext context) : IAppointmentRepositor
         Guid patientId,
         DateTimeOffset? from,
         DateTimeOffset? to,
+        IReadOnlyCollection<AppointmentStatus>? statuses,
         CancellationToken ct = default)
     {
         var query = context.Appointments.AsNoTracking().Where(a => a.PatientId == patientId);
@@ -22,6 +24,11 @@ public class AppointmentRepository(AppDbContext context) : IAppointmentRepositor
         if (to is { } end)
         {
             query = query.Where(a => a.StartsAt < end);
+        }
+
+        if (statuses is { Count: > 0 })
+        {
+            query = query.Where(a => statuses.Contains(a.Status));
         }
 
         return query.OrderBy(a => a.StartsAt).ToListAsync(ct);

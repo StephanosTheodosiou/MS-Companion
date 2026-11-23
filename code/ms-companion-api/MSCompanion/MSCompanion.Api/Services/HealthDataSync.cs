@@ -392,6 +392,7 @@ public sealed class HealthDataSync(ISyncRepository sync, TimeProvider clock, ILo
         return a.ClinicianName?.Trim().Length > AppointmentRules.ClinicianNameMaxLength
                || a.Location?.Trim().Length > AppointmentRules.LocationMaxLength
                || a.Note?.Trim().Length > AppointmentRules.NoteMaxLength
+               || !AppointmentRules.HasRequiredEnd(a.Status, a.EndsAt)
                || !AppointmentRules.EndsAfterStart(a.StartsAt, a.EndsAt)
                || !AppointmentRules.StatusFitsTime(a.Status, a.StartsAt, now)
             ? SyncReasons.InvalidFields
