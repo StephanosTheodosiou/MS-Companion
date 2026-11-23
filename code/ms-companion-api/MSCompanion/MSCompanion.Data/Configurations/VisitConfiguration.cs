@@ -13,6 +13,9 @@ public class AppointmentConfiguration : IEntityTypeConfiguration<Appointment>
         {
             t.HasCheckConstraint("ck_appointment_status", CheckConstraintSql.OneOf<AppointmentStatus>("status"));
             t.HasCheckConstraint("ck_appointment_times", "ends_at IS NULL OR ends_at > starts_at");
+            t.HasCheckConstraint(
+                "ck_appointment_end_required",
+                $"status = '{nameof(AppointmentStatus.Cancelled)}' OR ends_at IS NOT NULL");
         });
 
         builder.OwnedByPatient(p => p.Appointments);

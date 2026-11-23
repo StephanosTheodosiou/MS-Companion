@@ -206,7 +206,11 @@ Authorization: Bearer {{login.response.body.$.token}}
 GET {{baseUrl}}/api/appointments?from=2026-11-01T00:00:00Z&to=2027-01-01T00:00:00Z
 Authorization: Bearer {{login.response.body.$.token}}
 
-### Add an appointment
+### Next visit: Booked appointments from now on (status can repeat: ?status=Booked&status=Cancelled)
+GET {{baseUrl}}/api/appointments?status=Booked&from=2026-11-23T00:00:00Z
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Add an appointment (endsAt is required unless status is Cancelled)
 POST {{baseUrl}}/api/appointments
 Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json

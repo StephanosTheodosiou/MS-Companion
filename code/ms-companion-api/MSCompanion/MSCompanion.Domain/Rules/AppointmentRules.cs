@@ -10,6 +10,9 @@ public static class AppointmentRules
 
     private static readonly TimeSpan ClockTolerance = TimeSpan.FromMinutes(5);
 
+    public static bool HasRequiredEnd(AppointmentStatus status, DateTimeOffset? endsAt) =>
+        status == AppointmentStatus.Cancelled || endsAt is not null;
+
     public static bool EndsAfterStart(DateTimeOffset startsAt, DateTimeOffset? endsAt) =>
         endsAt is null || endsAt > startsAt;
 
