@@ -235,13 +235,12 @@ public sealed class SyncService(
             return SyncReasons.Invalid;
         }
 
-        if (checkIn.QuestionnaireVersion != DailyCheckInQuestionnaire.Version)
+        if (!DailyCheckInQuestionnaire.ItemsByVersion.TryGetValue(checkIn.QuestionnaireVersion, out var expected))
         {
             return SyncReasons.UnknownQuestionnaireVersion;
         }
 
         var items = checkIn.Answers.Select(a => a.Item).ToList();
-        var expected = DailyCheckInQuestionnaire.Items;
         if (items.Count != expected.Count
             || items.Distinct().Count() != items.Count
             || !expected.All(items.Contains)
