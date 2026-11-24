@@ -245,6 +245,40 @@ public sealed class HealthDataSync(ISyncRepository sync, TimeProvider clock, ILo
             ct);
     }
 
+    public async Task<SyncRecordResult<SideEffectSyncDto>> PushSideEffectAsync(
+        Guid patientId,
+        SideEffectSyncDto incoming,
+        CancellationToken ct)
+    {
+        if (Validate(incoming) is { } problem)
+        {
+            return SyncRecordResult<SideEffectSyncDto>.Rejected(incoming.Id, problem);
+        }
+
+        if (incoming.MedicationId is { } medicationId && !await OwnsMedicationAsync(patientId, medicationId, ct))
+        {
+            return SyncRecordResult<SideEffectSyncDto>.Rejected(incoming.Id, SyncReasons.UnknownMedication);
+        }
+
+        return await UpsertAsync<SideEffect, SideEffectSyncDto>(
+            patientId,
+            incoming,
+            () => new SideEffect { Description = "" },
+            (target, source) =>
+            {
+                target.MedicationId = source.MedicationId;
+                target.Description = source.Description.Trim();
+                target.Severity = source.Severity;
+                target.StartedOn = source.StartedOn;
+                target.EndedOn = source.EndedOn;
+                target.Note = Clean(source.Note);
+                Stamp(target, source);
+                return Task.CompletedTask;
+            },
+            rejectExisting: null,
+            ct);
+    }
+
     private async Task<SyncRecordResult<TDto>> UpsertAsync<TEntity, TDto>(
         Guid patientId,
         TDto incoming,
@@ -410,6 +444,22 @@ public sealed class HealthDataSync(ISyncRepository sync, TimeProvider clock, ILo
                || q.Text.Trim().Length > VisitQuestionRules.TextMaxLength
                || q.AnswerNote?.Trim().Length > VisitQuestionRules.AnswerNoteMaxLength
                || !VisitQuestionRules.AnswerFitsAsked(q.Asked, q.AnswerNote)
+            ? SyncReasons.InvalidFields
+            : null;
+    }
+
+    private static string? Validate(SideEffectSyncDto s)
+    {
+        if (CommonProblem(s) is { } problem)
+        {
+            return problem;
+        }
+
+        var latest = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
+        return string.IsNullOrWhiteSpace(s.Description)
+               || s.Description.Trim().Length > SideEffectRules.DescriptionMaxLength
+               || s.Note?.Trim().Length > SideEffectRules.NoteMaxLength
+               || !SideEffectRules.DatesValid(s.StartedOn, s.EndedOn, latest)
             ? SyncReasons.InvalidFields
             : null;
     }

@@ -66,6 +66,13 @@ public sealed class SyncService(
                 : SyncRecordResult<MedicationIntakeSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
         }
 
+        foreach (var incoming in request.SideEffects)
+        {
+            response.SideEffects.Add(medicationAllowed
+                ? await healthData.PushSideEffectAsync(patientId, incoming, ct)
+                : SyncRecordResult<SideEffectSyncDto>.Rejected(incoming.Id, SyncReasons.ConsentRequired));
+        }
+
         foreach (var incoming in request.RelapseLogEntries)
         {
             response.RelapseLogEntries.Add(symptomsAllowed
@@ -112,6 +119,7 @@ public sealed class SyncService(
         var relapses = await ChangedPage<RelapseLogEntry>(SyncType.RelapseLogEntries);
         var appointments = await ChangedPage<Appointment>(SyncType.Appointments);
         var questions = await ChangedPage<VisitQuestion>(SyncType.VisitQuestions);
+        var sideEffects = await ChangedPage<SideEffect>(SyncType.SideEffects);
 
         var next = SyncCursorSet.From(new Dictionary<SyncType, SyncCursor?>
         {
@@ -122,6 +130,7 @@ public sealed class SyncService(
             [SyncType.RelapseLogEntries] = relapses.Next,
             [SyncType.Appointments] = appointments.Next,
             [SyncType.VisitQuestions] = questions.Next,
+            [SyncType.SideEffects] = sideEffects.Next,
         });
 
         return new SyncPullResponse
@@ -133,9 +142,10 @@ public sealed class SyncService(
             RelapseLogEntries = relapses.Rows.Select(RelapseLogEntrySyncDto.FromEntity).ToList(),
             Appointments = appointments.Rows.Select(AppointmentSyncDto.FromEntity).ToList(),
             VisitQuestions = questions.Rows.Select(VisitQuestionSyncDto.FromEntity).ToList(),
+            SideEffects = sideEffects.Rows.Select(SideEffectSyncDto.FromEntity).ToList(),
             Cursor = next.ToString(),
             HasMore = checkIns.More || medications.More || schedules.More || intakes.More || relapses.More
-                      || appointments.More || questions.More,
+                      || appointments.More || questions.More || sideEffects.More,
         };
 
         async Task<(List<T> Rows, SyncCursor? Next, bool More)> ChangedPage<T>(SyncType type)

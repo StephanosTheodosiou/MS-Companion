@@ -27,6 +27,9 @@ public sealed class SyncPushRequest
     [Required, MaxLength(50)]
     public List<VisitQuestionSyncDto> VisitQuestions { get; init; } = [];
 
+    [Required, MaxLength(50)]
+    public List<SideEffectSyncDto> SideEffects { get; init; } = [];
+
     public bool IsEmpty() =>
         CheckIns.Count == 0
         && Medications.Count == 0
@@ -34,7 +37,8 @@ public sealed class SyncPushRequest
         && MedicationIntakes.Count == 0
         && RelapseLogEntries.Count == 0
         && Appointments.Count == 0
-        && VisitQuestions.Count == 0;
+        && VisitQuestions.Count == 0
+        && SideEffects.Count == 0;
 }
 
 public sealed class SyncPushResponse
@@ -46,6 +50,7 @@ public sealed class SyncPushResponse
     public List<SyncRecordResult<RelapseLogEntrySyncDto>> RelapseLogEntries { get; init; } = [];
     public List<SyncRecordResult<AppointmentSyncDto>> Appointments { get; init; } = [];
     public List<SyncRecordResult<VisitQuestionSyncDto>> VisitQuestions { get; init; } = [];
+    public List<SyncRecordResult<SideEffectSyncDto>> SideEffects { get; init; } = [];
 }
 
 public sealed class SyncPullResponse
@@ -57,6 +62,7 @@ public sealed class SyncPullResponse
     public required List<RelapseLogEntrySyncDto> RelapseLogEntries { get; init; }
     public required List<AppointmentSyncDto> Appointments { get; init; }
     public required List<VisitQuestionSyncDto> VisitQuestions { get; init; }
+    public required List<SideEffectSyncDto> SideEffects { get; init; }
 
     public required string? Cursor { get; init; }
 
@@ -311,5 +317,33 @@ public sealed class VisitQuestionSyncDto : ISyncItem
         CreatedAt = q.CreatedAt,
         UpdatedAt = q.UpdatedAt,
         DeletedAt = q.DeletedAt,
+    };
+}
+
+public sealed class SideEffectSyncDto : ISyncItem
+{
+    public required Guid Id { get; init; }
+    public Guid? MedicationId { get; init; }
+    public required string Description { get; init; }
+    public required SideEffectSeverity Severity { get; init; }
+    public required DateOnly StartedOn { get; init; }
+    public DateOnly? EndedOn { get; init; }
+    public string? Note { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
+    public required DateTimeOffset UpdatedAt { get; init; }
+    public DateTimeOffset? DeletedAt { get; init; }
+
+    public static SideEffectSyncDto FromEntity(SideEffect s) => new()
+    {
+        Id = s.Id,
+        MedicationId = s.MedicationId,
+        Description = s.Description,
+        Severity = s.Severity,
+        StartedOn = s.StartedOn,
+        EndedOn = s.EndedOn,
+        Note = s.Note,
+        CreatedAt = s.CreatedAt,
+        UpdatedAt = s.UpdatedAt,
+        DeletedAt = s.DeletedAt,
     };
 }
