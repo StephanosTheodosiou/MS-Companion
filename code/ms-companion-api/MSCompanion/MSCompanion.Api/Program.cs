@@ -48,6 +48,8 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IVisitQuestionRepository, VisitQuestionRepository>();
 builder.Services.AddScoped<IVisitQuestionService, VisitQuestionService>();
+builder.Services.AddScoped<ISideEffectRepository, SideEffectRepository>();
+builder.Services.AddScoped<ISideEffectService, SideEffectService>();
 
 // 4. Authentication (JWT bearer) and authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

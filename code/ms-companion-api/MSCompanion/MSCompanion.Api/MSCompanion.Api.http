@@ -235,3 +235,18 @@ Content-Type: application/json
 {
   "text": "Could the tiredness in the afternoons be from the new medication?"
 }
+
+### Side effects (ongoing=true for current ones, optional medicationId)
+GET {{baseUrl}}/api/side-effects?ongoing=true
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Report a side effect (medicationId is optional; needs Medication consent)
+POST {{baseUrl}}/api/side-effects
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "description": "Flushing and warm face after the morning dose",
+  "severity": "Mild",
+  "startedOn": "2026-11-18"
+}
