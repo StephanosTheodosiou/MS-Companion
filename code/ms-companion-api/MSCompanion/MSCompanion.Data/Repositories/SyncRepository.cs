@@ -61,7 +61,8 @@ public class SyncRepository(AppDbContext context) : ISyncRepository
     {
         var schedules = await context.MedicationSchedules.Where(s => s.MedicationId == medicationId).ToListAsync(ct);
         var intakes = await context.MedicationIntakes.Where(i => i.MedicationId == medicationId).ToListAsync(ct);
-        return [.. schedules, .. intakes];
+        var bloodTests = await context.BloodTestReminders.Where(b => b.MedicationId == medicationId).ToListAsync(ct);
+        return [.. schedules, .. intakes, .. bloodTests];
     }
 
     public Task<List<VisitQuestion>> GetLiveQuestionsForAppointmentAsync(

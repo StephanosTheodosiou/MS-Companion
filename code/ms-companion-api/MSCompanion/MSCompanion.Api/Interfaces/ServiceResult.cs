@@ -6,6 +6,8 @@ public enum ServiceError
     ConsentRequired,
     NotFound,
     AlreadyLogged,
+    AlreadyCompleted,
+    DateInFuture,
 }
 
 public readonly record struct ServiceResult<T>(T? Value, ServiceError? Error)

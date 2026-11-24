@@ -50,6 +50,8 @@ builder.Services.AddScoped<IVisitQuestionRepository, VisitQuestionRepository>();
 builder.Services.AddScoped<IVisitQuestionService, VisitQuestionService>();
 builder.Services.AddScoped<ISideEffectRepository, SideEffectRepository>();
 builder.Services.AddScoped<ISideEffectService, SideEffectService>();
+builder.Services.AddScoped<IBloodTestRepository, BloodTestRepository>();
+builder.Services.AddScoped<IBloodTestService, BloodTestService>();
 
 // 4. Authentication (JWT bearer) and authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

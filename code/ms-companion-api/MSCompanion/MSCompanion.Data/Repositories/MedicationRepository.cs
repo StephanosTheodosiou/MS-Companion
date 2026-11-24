@@ -19,6 +19,7 @@ public class MedicationRepository(AppDbContext context) : IMedicationRepository
         context.Medications
             .Include(m => m.Schedules)
             .Include(m => m.Intakes)
+            .Include(m => m.BloodTestReminders)
             .FirstOrDefaultAsync(m => m.PatientId == patientId && m.Id == medicationId, ct);
 
     public Task<List<MedicationIntake>> GetIntakesAsync(

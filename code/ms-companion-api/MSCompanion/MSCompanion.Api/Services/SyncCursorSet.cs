@@ -10,6 +10,7 @@ public enum SyncType
     Appointments,
     VisitQuestions,
     SideEffects,
+    BloodTests,
 }
 
 public readonly struct SyncCursorSet
