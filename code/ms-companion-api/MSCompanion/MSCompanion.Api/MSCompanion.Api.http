@@ -250,3 +250,28 @@ Content-Type: application/json
   "severity": "Mild",
   "startedOn": "2026-11-18"
 }
+
+### Blood tests (status=Upcoming, Overdue or Completed; optional medicationId)
+GET {{baseUrl}}/api/blood-tests?status=Upcoming
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Add a blood test reminder (needs Medication consent)
+# @name addBloodTest
+POST {{baseUrl}}/api/blood-tests
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "testName": "Full blood count",
+  "dueDate": "2026-12-01",
+  "repeatEveryWeeks": 12
+}
+
+### Mark it done (creates the next one when it repeats)
+POST {{baseUrl}}/api/blood-tests/{{addBloodTest.response.body.$.id}}/complete
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "completedOn": "2026-11-24"
+}

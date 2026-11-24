@@ -279,6 +279,40 @@ public sealed class HealthDataSync(ISyncRepository sync, TimeProvider clock, ILo
             ct);
     }
 
+    public async Task<SyncRecordResult<BloodTestSyncDto>> PushBloodTestAsync(
+        Guid patientId,
+        BloodTestSyncDto incoming,
+        CancellationToken ct)
+    {
+        if (Validate(incoming) is { } problem)
+        {
+            return SyncRecordResult<BloodTestSyncDto>.Rejected(incoming.Id, problem);
+        }
+
+        if (incoming.MedicationId is { } medicationId && !await OwnsMedicationAsync(patientId, medicationId, ct))
+        {
+            return SyncRecordResult<BloodTestSyncDto>.Rejected(incoming.Id, SyncReasons.UnknownMedication);
+        }
+
+        return await UpsertAsync<BloodTestReminder, BloodTestSyncDto>(
+            patientId,
+            incoming,
+            () => new BloodTestReminder { TestName = "" },
+            (target, source) =>
+            {
+                target.TestName = source.TestName.Trim();
+                target.MedicationId = source.MedicationId;
+                target.DueDate = source.DueDate;
+                target.RepeatEveryWeeks = source.RepeatEveryWeeks;
+                target.CompletedOn = source.CompletedOn;
+                target.ReminderEnabled = source.ReminderEnabled;
+                Stamp(target, source);
+                return Task.CompletedTask;
+            },
+            rejectExisting: null,
+            ct);
+    }
+
     private async Task<SyncRecordResult<TDto>> UpsertAsync<TEntity, TDto>(
         Guid patientId,
         TDto incoming,
@@ -460,6 +494,22 @@ public sealed class HealthDataSync(ISyncRepository sync, TimeProvider clock, ILo
                || s.Description.Trim().Length > SideEffectRules.DescriptionMaxLength
                || s.Note?.Trim().Length > SideEffectRules.NoteMaxLength
                || !SideEffectRules.DatesValid(s.StartedOn, s.EndedOn, latest)
+            ? SyncReasons.InvalidFields
+            : null;
+    }
+
+    private static string? Validate(BloodTestSyncDto b)
+    {
+        if (CommonProblem(b) is { } problem)
+        {
+            return problem;
+        }
+
+        var latest = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
+        return string.IsNullOrWhiteSpace(b.TestName)
+               || b.TestName.Trim().Length > BloodTestRules.TestNameMaxLength
+               || !BloodTestRules.RepeatValid(b.RepeatEveryWeeks)
+               || b.CompletedOn > latest
             ? SyncReasons.InvalidFields
             : null;
     }

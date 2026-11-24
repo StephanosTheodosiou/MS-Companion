@@ -90,7 +90,8 @@ public sealed class MedicationService(
         }
 
         var now = clock.GetUtcNow();
-        IEnumerable<PatientOwnedEntity> rows = [medication, .. medication.Schedules, .. medication.Intakes];
+        IEnumerable<PatientOwnedEntity> rows =
+            [medication, .. medication.Schedules, .. medication.Intakes, .. medication.BloodTestReminders];
         foreach (var row in rows)
         {
             row.DeletedAt = now;
