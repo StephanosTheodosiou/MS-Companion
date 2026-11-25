@@ -11,4 +11,6 @@ public interface IUserRepository
 
     /// <summary>Inserts the user. Returns false if the email is already registered.</summary>
     Task<bool> TryAddAsync(User user, CancellationToken ct = default);
+
+    Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
 }

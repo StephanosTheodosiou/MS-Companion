@@ -86,6 +86,32 @@ public sealed class AuthController(IAuthService auth) : ControllerBase
         return NoContent();
     }
 
+    /// <summary>Permanently deletes the account and all of its health data. Every device is signed out.</summary>
+    [Authorize]
+    [HttpPost("delete-account")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeleteAccount(DeleteAccountRequest request, CancellationToken ct)
+    {
+        if (User.GetUserId() is not { } userId)
+        {
+            return Unauthorized();
+        }
+
+        var result = await auth.DeleteAccountAsync(userId, request.Password, ct);
+        return result.Error switch
+        {
+            null => NoContent(),
+            ServiceError.IncorrectPassword => Problem(
+                statusCode: StatusCodes.Status403Forbidden,
+                title: "Incorrect password",
+                detail: "The account was not deleted."),
+            _ => Unauthorized(),
+        };
+    }
+
     /// <summary>Returns the signed-in user. Requires a Bearer token.</summary>
     [Authorize]
     [HttpGet("me")]

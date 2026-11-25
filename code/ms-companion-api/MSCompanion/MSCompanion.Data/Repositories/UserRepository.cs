@@ -34,4 +34,7 @@ public class UserRepository(AppDbContext context) : IUserRepository
             return false;
         }
     }
+
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default) =>
+        await context.Users.Where(u => u.Id == id).ExecuteDeleteAsync(ct) > 0;
 }

@@ -20,4 +20,6 @@ public interface IAuthService
     Task LogoutAsync(Guid sessionId, CancellationToken ct = default);
 
     Task<UserDto?> GetUserAsync(Guid userId, CancellationToken ct = default);
+
+    Task<ServiceResult<bool>> DeleteAccountAsync(Guid userId, string password, CancellationToken ct = default);
 }
