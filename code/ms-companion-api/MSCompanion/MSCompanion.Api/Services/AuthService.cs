@@ -113,6 +113,21 @@ public sealed class AuthService(
         return user is null ? null : UserDto.FromEntity(user);
     }
 
+    public async Task<ServiceResult<bool>> DeleteAccountAsync(Guid userId, string password, CancellationToken ct = default)
+    {
+        if (await users.GetByIdAsync(userId, ct) is not { } user)
+        {
+            return ServiceError.NotFound;
+        }
+
+        if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+        {
+            return ServiceError.IncorrectPassword;
+        }
+
+        return await users.DeleteAsync(userId, ct) ? true : ServiceError.NotFound;
+    }
+
     private async Task<AuthResponse> StartSessionAsync(User user, bool rememberMe, CancellationToken ct)
     {
         var now = clock.GetUtcNow();

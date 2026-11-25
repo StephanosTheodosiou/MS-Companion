@@ -48,6 +48,15 @@ Content-Type: application/json
 POST {{baseUrl}}/api/auth/logout
 Authorization: Bearer {{login.response.body.$.token}}
 
+### Delete my account and all my data (cannot be undone)
+POST {{baseUrl}}/api/auth/delete-account
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "password": "ChangeMe123!"
+}
+
 ### Current user (uses the token from the "login" request above)
 GET {{baseUrl}}/api/auth/me
 Authorization: Bearer {{login.response.body.$.token}}
