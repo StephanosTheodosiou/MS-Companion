@@ -68,7 +68,7 @@ export function useProfileForm() {
           label="MS team phone number"
           icon="phone"
           placeholder="Phone number"
-          hint="Used for the call button on the Today screen."
+          hint="Used for the call button on the Home screen."
           value={profile.teamPhone}
           onChangeText={(teamPhone) => {
             update({ teamPhone });

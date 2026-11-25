@@ -49,7 +49,7 @@ export default function WelcomeScreen() {
         />
       </Section>
 
-      <Note>Change your choices or delete your data any time in Settings.</Note>
+      <Note>Change your choices or delete your data any time in Profile.</Note>
 
       <SafetyCard>
         {
