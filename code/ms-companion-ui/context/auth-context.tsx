@@ -4,6 +4,7 @@ import type { LoginRequest, RegisterRequest, Session, User } from '@/types/auth'
 import { ApiError, setUnauthorizedHandler } from '@/utils/apiClient';
 import { authApi } from '@/utils/authApi';
 import { clearSession, getSession, saveSession } from '@/utils/authStorage';
+import { closeUserDatabase, openUserDatabase } from '@/utils/localDatabase';
 
 export type AuthStatus = 'loading' | 'signedIn' | 'signedOut';
 
@@ -35,7 +36,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     await clearSession();
+    const closing = closeUserDatabase();
     setState({ status: 'signedOut', user: null });
+    await closing;
   }, []);
 
   useEffect(() => {
@@ -51,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      openUserDatabase(session.user.id);
       setState({ status: 'signedIn', user: session.user });
 
       try {
@@ -81,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function startSession(session: Session) {
     await saveSession(session);
+    openUserDatabase(session.user.id);
     setState({ status: 'signedIn', user: session.user });
   }
 
