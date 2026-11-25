@@ -206,11 +206,7 @@ Authorization: Bearer {{login.response.body.$.token}}
 GET {{baseUrl}}/api/appointments?from=2026-11-01T00:00:00Z&to=2027-01-01T00:00:00Z
 Authorization: Bearer {{login.response.body.$.token}}
 
-### Next visit: Booked appointments from now on (status can repeat: ?status=Booked&status=Cancelled)
-GET {{baseUrl}}/api/appointments?status=Booked&from=2026-11-23T00:00:00Z
-Authorization: Bearer {{login.response.body.$.token}}
-
-### Add an appointment (endsAt is required unless status is Cancelled)
+### Add an appointment
 POST {{baseUrl}}/api/appointments
 Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
@@ -222,6 +218,31 @@ Content-Type: application/json
   "clinicianName": "Dr. Georgiou",
   "location": "Nicosia General Hospital"
 }
+
+### Visit report: build and save the one-page summary for the next booked appointment
+# @name report
+POST {{baseUrl}}/api/visit-reports
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{}
+
+### Visit report for a specific appointment
+POST {{baseUrl}}/api/visit-reports
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "appointmentId": "00000000-0000-0000-0000-000000000000"
+}
+
+### Visit reports: list (newest first)
+GET {{baseUrl}}/api/visit-reports
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Visit report: the saved copy
+GET {{baseUrl}}/api/visit-reports/{{report.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.token}}
 
 ### Questions for my doctor (status=open or asked, optional appointmentId)
 GET {{baseUrl}}/api/visit-questions?status=open
