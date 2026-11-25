@@ -142,7 +142,7 @@ export default function SymptomEntryScreen() {
               label="Add your MS team's number"
               description="To call them with one tap."
               chevron
-              onPress={() => router.navigate('/profile')}
+              onPress={() => router.push('/profile-edit')}
             />
           ) : null}
         </Section>

@@ -1,55 +1,36 @@
 import React, { useCallback, useState } from 'react';
-import { Alert } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Button } from '@/components/ui/app-button';
-import { DoseRow } from '@/components/dose-row';
 import { Note } from '@/components/ui/notice';
 import { Row } from '@/components/ui/row';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
 import { TopBar } from '@/components/layout/top-bar';
-import { doseTimeLabel, sortTimes } from '@/constants/medication';
-import {
-  clearDoseLog,
-  getConsents,
-  getDoseLogs,
-  listMedications,
-  listSideEffects,
-  logDose,
-} from '@/utils/storage';
-import { DoseLog, DoseStatus, DoseTime, Medication, SideEffect } from '@/types/health';
+import { sortTimes } from '@/constants/medication';
+import { getConsents, listMedications, listSideEffects } from '@/utils/storage';
+import { Medication, SideEffect } from '@/types/health';
 import { formatShortDate, todayKey } from '@/utils/date';
 
-interface ScheduledDose {
-  medication: Medication;
-  time: DoseTime;
-}
-
-// E3: today's doses (taken / skipped), the medicine list and side effects.
 export default function MedicationsScreen() {
   const router = useRouter();
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [medications, setMedications] = useState<Medication[]>([]);
-  const [logs, setLogs] = useState<DoseLog[]>([]);
   const [sideEffects, setSideEffects] = useState<SideEffect[]>([]);
-  const today = todayKey();
 
   const load = useCallback(async () => {
     try {
-      const [consents, meds, todaysLogs, effects] = await Promise.all([
+      const [consents, meds, effects] = await Promise.all([
         getConsents(),
         listMedications(),
-        getDoseLogs(today),
         listSideEffects(),
       ]);
       setAllowed(consents.medication);
       setMedications(meds);
-      setLogs(todaysLogs);
       setSideEffects(effects);
     } catch (e) {
       console.warn('Could not load medication', e);
     }
-  }, [today]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -59,82 +40,30 @@ export default function MedicationsScreen() {
 
   const topBar = <TopBar onBack={() => router.back()} />;
 
-  // GDPR: medication data is only used if the person allowed it.
   if (allowed === false) {
     return (
       <Screen
         topBar={topBar}
-        title="Medication"
+        title="My medicines"
         subtitle="You chose not to let the app store your medication."
-        footer={<Button label="Open Settings" onPress={() => router.navigate('/settings')} />}>
+        footer={<Button label="Open Profile" onPress={() => router.navigate('/profile')} />}>
         <Note icon="info">
-          To track doses and get reminders, turn on Medication under “What the app may use”.
+          To track doses and get reminders, turn on Medication under “What the app may use” in
+          Profile.
         </Note>
       </Screen>
     );
   }
 
-  const doses: ScheduledDose[] = medications
-    .flatMap((medication) => medication.times.map((time) => ({ medication, time })))
-    .sort(
-      (a, b) => a.time.localeCompare(b.time) || a.medication.name.localeCompare(b.medication.name),
-    );
-
-  const statusOf = (dose: ScheduledDose) =>
-    logs.find((l) => l.medicationId === dose.medication.id && l.time === dose.time)?.status ?? null;
-  const takenCount = doses.filter((d) => statusOf(d) === 'taken').length;
-
-  const onLog = async (dose: ScheduledDose, status: DoseStatus) => {
-    try {
-      await logDose({
-        medicationId: dose.medication.id,
-        date: today,
-        time: dose.time,
-        status,
-        loggedAt: new Date().toISOString(),
-      });
-      setLogs(await getDoseLogs(today));
-    } catch (e) {
-      console.warn('Could not log dose', e);
-      Alert.alert('The dose was not saved', 'Please try again.');
-    }
-  };
-
-  const onUndo = async (dose: ScheduledDose) => {
-    try {
-      await clearDoseLog(dose.medication.id, today, dose.time);
-      setLogs(await getDoseLogs(today));
-    } catch (e) {
-      console.warn('Could not undo dose', e);
-    }
-  };
-
   const medName = (id: string) => medications.find((m) => m.id === id)?.name ?? 'Removed medicine';
 
   return (
-    <Screen topBar={topBar} title="Medication">
-      {doses.length > 0 ? (
-        <Section
-          header="Today"
-          iconInset
-          footer={`${takenCount} of ${doses.length} doses taken today.`}>
-          {doses.map((dose) => (
-            <DoseRow
-              key={`${dose.medication.id}-${dose.time}`}
-              title={dose.medication.name}
-              subtitle={[doseTimeLabel(dose.time), dose.medication.dose]
-                .filter(Boolean)
-                .join(' · ')}
-              status={statusOf(dose)}
-              onLog={(status) => onLog(dose, status)}
-              onUndo={() => onUndo(dose)}
-            />
-          ))}
-        </Section>
-      ) : null}
-
+    <Screen
+      topBar={topBar}
+      title="My medicines"
+      subtitle="Tick off each dose on Home. Change a medicine or its times here.">
       <Section
-        header="My medicines"
+        header="Medicines"
         iconInset
         footer={medications.length === 0 ? 'Add the medicines you take for your MS.' : undefined}>
         {medications.map((m) => (

@@ -3,87 +3,67 @@ import { Alert, Linking } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/app-button';
+import { DoseRow } from '@/components/dose-row';
 import { HeroCard } from '@/components/hero-card';
 import { SafetyCard } from '@/components/ui/notice';
-import { RoundButton } from '@/components/ui/round-button';
 import { Row } from '@/components/ui/row';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
-import { WeekDay, WeekStrip } from '@/components/week-strip';
-import {
-  getCheckIn,
-  getDoseLogs,
-  getProfile,
-  listAppointments,
-  listBloodTests,
-  listMedications,
-} from '@/utils/storage';
-import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
+import { doseTimeLabel } from '@/constants/medication';
+import { useAuth } from '@/context/auth-context';
 import { useColors } from '@/hooks/use-colors';
+import { useTodaysDoses } from '@/hooks/use-todays-doses';
 import { Appointment, CheckIn, EMPTY_PROFILE, Profile } from '@/types/health';
-import { formatLongDate, formatTime, todayKey, weekKeys } from '@/utils/date';
+import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
 import { bloodTestSummary } from '@/utils/bloodTest';
+import { daysBetween, formatLongDate, formatTime, todayKey } from '@/utils/date';
+import { getCheckIn, getProfile, listAppointments, listBloodTests } from '@/utils/storage';
 import { toDialNumber } from '@/utils/validation';
 
-const LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-const NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const VISIT_SOON_DAYS = 7;
 
-// The check-in button uses a non-breaking hyphen so "check-in" never splits over two lines.
-// Today tab: the daily check-in first, this week's progress, the health log, and the MS team one tap away.
+function visitWhen(days: number): string {
+  if (days <= 0) return 'Today';
+  if (days === 1) return 'Tomorrow';
+  return `In ${days} days`;
+}
+
 export default function HomeScreen() {
   const colors = useColors();
   const router = useRouter();
+  const { user } = useAuth();
+  const { allowed: medicationAllowed, doses, reload: reloadDoses, log, undo } = useTodaysDoses();
   const [profile, setProfile] = useState<Profile>({ ...EMPTY_PROFILE });
   const [todaysCheckIn, setTodaysCheckIn] = useState<CheckIn | null>(null);
-  const [week, setWeek] = useState<WeekDay[]>([]);
-  const [doseSummary, setDoseSummary] = useState<string | undefined>(undefined);
-  const [nextVisit, setNextVisit] = useState<Appointment | null>(null);
+  const [soonVisit, setSoonVisit] = useState<Appointment | null>(null);
   const [bloodTestNote, setBloodTestNote] = useState<string | undefined>(undefined);
 
-  // Reload whenever the screen is shown, so changes made elsewhere appear straight away.
   useFocusEffect(
     useCallback(() => {
       const today = todayKey();
       getProfile()
         .then(setProfile)
         .catch((e) => console.warn('Could not load profile', e));
-      const keys = weekKeys();
-      Promise.all(keys.map((k) => getCheckIn(k)))
-        .then((checkIns) => {
-          setTodaysCheckIn(checkIns[keys.indexOf(today)] ?? null);
-          setWeek(
-            keys.map((date, i) => ({
-              date,
-              dayOfMonth: Number(date.slice(8)),
-              letter: LETTERS[i],
-              name: NAMES[i],
-              isToday: date === today,
-              isFuture: date > today,
-              checkedIn: !!checkIns[i],
-            })),
-          );
-        })
-        .catch((e) => console.warn('Could not load check-ins', e));
-      Promise.all([listMedications(), getDoseLogs(today)])
-        .then(([meds, logs]) => {
-          const total = meds.reduce((sum, m) => sum + m.times.length, 0);
-          const taken = logs.filter(
-            (l) => l.status === 'taken' && meds.some((m) => m.id === l.medicationId),
-          ).length;
-          setDoseSummary(total > 0 ? `${taken} of ${total} taken` : undefined);
-        })
-        .catch((e) => console.warn('Could not load medication', e));
+      getCheckIn(today)
+        .then(setTodaysCheckIn)
+        .catch((e) => console.warn('Could not load check-in', e));
+      reloadDoses();
       listAppointments()
-        .then((all) => setNextVisit(all.find((a) => a.date >= today) ?? null))
+        .then((all) => {
+          const next = all.find((a) => a.date >= today) ?? null;
+          setSoonVisit(next && daysBetween(today, next.date) <= VISIT_SOON_DAYS ? next : null);
+        })
         .catch((e) => console.warn('Could not load appointments', e));
       listBloodTests()
         .then((tests) => setBloodTestNote(bloodTestSummary(tests, today)))
         .catch((e) => console.warn('Could not load blood tests', e));
-    }, []),
+    }, [reloadDoses]),
   );
 
+  const takenCount = doses.filter((dose) => dose.status === 'taken').length;
   const teamName = profile.teamName.trim() || 'your MS team';
   const hasPhone = profile.teamPhone.trim() !== '';
+  const visitDays = soonVisit ? daysBetween(todayKey(), soonVisit.date) : 0;
 
   const callTeam = () => {
     Linking.openURL(`tel:${toDialNumber(profile.teamPhone)}`).catch(() =>
@@ -95,15 +75,7 @@ export default function HomeScreen() {
     <Screen
       inTabs
       overline={formatLongDate()}
-      title="Today"
-      titleAccessory={
-        <RoundButton
-          icon="bell"
-          label="Reminders"
-          hint="Opens Settings, where you choose reminders"
-          onPress={() => router.navigate('/settings')}
-        />
-      }>
+      title={user?.firstName ? `Hello, ${user.firstName}` : 'Home'}>
       {todaysCheckIn ? (
         <HeroCard
           overline="Daily check-in"
@@ -132,63 +104,65 @@ export default function HomeScreen() {
         />
       )}
 
-      {week.length ? (
-        <Section header="This week" variant="plain">
-          <WeekStrip days={week} />
+      {medicationAllowed && doses.length > 0 ? (
+        <Section
+          header="Today's medicines"
+          iconInset
+          footer={`${takenCount} of ${doses.length} taken today.`}>
+          {doses.map((dose) => (
+            <DoseRow
+              key={`${dose.medication.id}-${dose.time}`}
+              title={dose.medication.name}
+              subtitle={[doseTimeLabel(dose.time), dose.medication.dose]
+                .filter(Boolean)
+                .join(' · ')}
+              status={dose.status}
+              onLog={(status) => log(dose, status)}
+              onUndo={() => undo(dose)}
+            />
+          ))}
         </Section>
       ) : null}
 
-      <Section header="Health log" iconInset>
-        <Row
-          icon="plus-square"
-          label="Medication"
-          value={doseSummary}
-          chevron
-          onPress={() => router.push('/medications')}
-        />
-        <Row
-          icon="droplet"
-          label="Blood tests"
-          value={bloodTestNote}
-          chevron
-          onPress={() => router.push('/blood-tests')}
-        />
+      {bloodTestNote || soonVisit ? (
+        <Section header="Needs attention" iconInset>
+          {bloodTestNote ? (
+            <Row
+              icon="droplet"
+              label="Blood tests"
+              value={bloodTestNote}
+              chevron
+              onPress={() => router.push('/blood-tests')}
+            />
+          ) : null}
+          {soonVisit ? (
+            <Row
+              icon="calendar"
+              strong
+              label={`Visit ${visitWhen(visitDays).toLowerCase()}`}
+              description={[appointmentTitle(soonVisit), appointmentDetails(soonVisit)]
+                .filter(Boolean)
+                .join(' · ')}
+              chevron
+              accessibilityHint="Opens the Visit tab"
+              onPress={() => router.navigate('/visit')}
+            />
+          ) : null}
+        </Section>
+      ) : null}
+
+      <Section header="Not feeling right?" iconInset>
         <Row
           icon="alert-triangle"
+          strong
           label="New or worse symptom"
+          description="Log it and see what to do next."
           chevron
           onPress={() => router.push('/symptom-entry')}
         />
-        <Row icon="list" label="Symptom log" chevron onPress={() => router.push('/symptom-log')} />
-      </Section>
-
-      {/* Only the next appointment here; questions, summary and all appointments are in the Visit tab. */}
-      <Section header="Next visit" iconInset>
-        {nextVisit ? (
-          <Row
-            icon="calendar"
-            strong
-            label={appointmentTitle(nextVisit)}
-            description={appointmentDetails(nextVisit)}
-            chevron
-            accessibilityHint="Opens the Visit tab"
-            onPress={() => router.navigate('/visit')}
-          />
-        ) : (
-          <Row
-            icon="calendar"
-            label="No visit planned"
-            chevron
-            onPress={() => router.navigate('/visit')}
-          />
-        )}
-      </Section>
-
-      <Section header="Your MS team">
         {hasPhone ? (
           <Row
             icon="phone"
-            strong
             label={profile.teamName.trim() || 'MS team'}
             description={profile.teamPhone}
             onPress={callTeam}
@@ -203,11 +177,10 @@ export default function HomeScreen() {
         ) : (
           <Row
             icon="phone"
-            strong
-            label="Add phone number"
-            description="Call your MS team with one tap."
+            label="Add your MS team's number"
+            description="Call them with one tap."
             chevron
-            onPress={() => router.navigate('/profile')}
+            onPress={() => router.push('/profile-edit')}
           />
         )}
       </Section>

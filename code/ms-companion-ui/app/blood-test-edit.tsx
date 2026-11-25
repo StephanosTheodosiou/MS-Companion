@@ -174,7 +174,7 @@ export default function BloodTestEditScreen() {
         selected={remind}
         onSelect={setRemind}
       />
-      <AppText variant="footnote">Reminders need Reminders to be turned on in Settings.</AppText>
+      <AppText variant="footnote">Reminders need Reminders to be turned on in Profile.</AppText>
 
       <Section variant="plain">
         <TextField

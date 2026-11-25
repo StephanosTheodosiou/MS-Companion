@@ -56,7 +56,7 @@ export default function BloodTestsScreen() {
         topBar={topBar}
         title="Blood tests"
         subtitle="You chose not to let the app store your medication."
-        footer={<Button label="Open Settings" onPress={() => router.navigate('/settings')} />}>
+        footer={<Button label="Open Profile" onPress={() => router.navigate('/profile')} />}>
         <Note icon="info">
           To get blood test reminders, turn on Medication under “What the app may use”.
         </Note>
@@ -88,7 +88,7 @@ export default function BloodTestsScreen() {
       subtitle="Reminders for the blood tests your MS team asks for."
       footer={<Button label="Add a blood test" onPress={() => router.push('/blood-test-edit')} />}>
       {!remindersOn ? (
-        <Note icon="bell">Reminders are off. Turn on Reminders in Settings to be reminded.</Note>
+        <Note icon="bell">Reminders are off. Turn on Reminders in Profile to be reminded.</Note>
       ) : null}
 
       {tests.length === 0 ? (

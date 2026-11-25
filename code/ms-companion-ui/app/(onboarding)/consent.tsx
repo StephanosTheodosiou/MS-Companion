@@ -55,9 +55,9 @@ export default function ConsentScreen() {
         />
       }
       title="Your data, your choice"
-      subtitle="Choose what the app may use. You can change this later in Settings."
+      subtitle="Choose what the app may use. You can change this later in Profile."
       footer={<Button label="Continue" onPress={onContinue} disabled={saving} />}>
-      <Section footer="The app needs these to work. To stop them, delete your data in Settings.">
+      <Section footer="The app needs these to work. To stop them, delete your data in Profile.">
         <Row
           icon="clipboard"
           strong

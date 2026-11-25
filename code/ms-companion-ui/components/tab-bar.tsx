@@ -11,14 +11,12 @@ import { Icon, IconName } from '@/components/ui/app-icon';
 type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
 
 const TABS: Record<string, { label: string; icon: IconName }> = {
-  home: { label: 'Today', icon: 'home' },
-  profile: { label: 'Profile', icon: 'user' },
+  home: { label: 'Home', icon: 'home' },
   tests: { label: 'Tests', icon: 'clipboard' },
   visit: { label: 'Visit', icon: 'file-text' },
-  settings: { label: 'Settings', icon: 'settings' },
+  profile: { label: 'Profile', icon: 'user' },
 };
 
-// Bottom bar with the three main places of the app (used by app/(tabs)/_layout.tsx). The active tab gets a soft pill.
 export function TabBar({ state }: TabBarProps) {
   const styles = useStyles();
   const colors = useColors();
