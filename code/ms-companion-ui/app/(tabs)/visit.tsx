@@ -47,7 +47,7 @@ export default function VisitScreen() {
       listBloodTests()
         .then((tests) => setBloodTestNote(bloodTestSummary(tests, now)))
         .catch((e) => console.warn('Could not load blood tests', e));
-    }, [])
+    }, []),
   );
 
   return (
@@ -71,7 +71,11 @@ export default function VisitScreen() {
           title="No visit planned yet"
           subtitle="Add your next appointment to get a reminder and a summary for your doctor."
           action={
-            <Button variant="light" label="Add an appointment" onPress={() => router.push('/appointment-edit')} />
+            <Button
+              variant="light"
+              label="Add an appointment"
+              onPress={() => router.push('/appointment-edit')}
+            />
           }
         />
       )}
@@ -91,7 +95,13 @@ export default function VisitScreen() {
           chevron
           onPress={() => router.push('/visit-summary')}
         />
-        <Row icon="droplet" label="Blood tests" value={bloodTestNote} chevron onPress={() => router.push('/blood-tests')} />
+        <Row
+          icon="droplet"
+          label="Blood tests"
+          value={bloodTestNote}
+          chevron
+          onPress={() => router.push('/blood-tests')}
+        />
       </Section>
 
       <Section header="Appointments" iconInset>
@@ -102,10 +112,17 @@ export default function VisitScreen() {
           chevron
           onPress={() => router.push('/appointments')}
         />
-        <Row icon="plus" label="Add an appointment" chevron onPress={() => router.push('/appointment-edit')} />
+        <Row
+          icon="plus"
+          label="Add an appointment"
+          chevron
+          onPress={() => router.push('/appointment-edit')}
+        />
       </Section>
 
-      <Note icon="info">The summary shows observations from your check-ins. It does not diagnose a relapse.</Note>
+      <Note icon="info">
+        The summary shows observations from your check-ins. It does not diagnose a relapse.
+      </Note>
     </Screen>
   );
 }

@@ -39,13 +39,11 @@ export function ChoiceCards<T extends string>({ header, options, selected, onSel
             accessibilityRole="radio"
             accessibilityLabel={option.label}
             accessibilityState={{ checked: isSelected }}
-            style={[styles.card, isSelected && styles.cardSelected]}
-          >
+            style={[styles.card, isSelected && styles.cardSelected]}>
             <AppText
               variant="label"
               color={isSelected ? colors.accent : colors.ink}
-              style={styles.label}
-            >
+              style={styles.label}>
               {option.label}
             </AppText>
             {option.detail ? <AppText color={colors.secondary}>{option.detail}</AppText> : null}
@@ -74,7 +72,12 @@ const useStyles = makeStyles((colors) => ({
     borderWidth: 1.5,
     borderColor: colors.inputBorder,
   },
-  cardSelected: { borderColor: colors.accent, backgroundColor: colors.accentSoft, ...shadow, shadowOpacity: 0 },
+  cardSelected: {
+    borderColor: colors.accent,
+    backgroundColor: colors.accentSoft,
+    ...shadow,
+    shadowOpacity: 0,
+  },
   label: { flex: 1, fontWeight: '600' },
   radio: {
     width: 26,
@@ -97,7 +100,12 @@ interface CheckProps<T extends string> {
 }
 
 // Several choices as separate cards with a tick box (e.g. the times a medicine is taken).
-export function CheckCards<T extends string>({ header, options, selected, onToggle }: CheckProps<T>) {
+export function CheckCards<T extends string>({
+  header,
+  options,
+  selected,
+  onToggle,
+}: CheckProps<T>) {
   const styles = useStyles();
   const colors = useColors();
   return (
@@ -116,9 +124,11 @@ export function CheckCards<T extends string>({ header, options, selected, onTogg
             accessibilityRole="checkbox"
             accessibilityLabel={[option.label, option.detail].filter(Boolean).join(', ')}
             accessibilityState={{ checked: isSelected }}
-            style={[styles.card, isSelected && styles.cardSelected]}
-          >
-            <AppText variant="label" color={isSelected ? colors.accent : colors.ink} style={styles.label}>
+            style={[styles.card, isSelected && styles.cardSelected]}>
+            <AppText
+              variant="label"
+              color={isSelected ? colors.accent : colors.ink}
+              style={styles.label}>
               {option.label}
             </AppText>
             {option.detail ? <AppText color={colors.secondary}>{option.detail}</AppText> : null}

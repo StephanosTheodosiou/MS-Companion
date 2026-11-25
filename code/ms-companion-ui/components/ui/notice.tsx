@@ -38,7 +38,12 @@ export function ErrorNote({ children }: { children: string }) {
   const styles = useStyles();
   const colors = useColors();
   return (
-    <View style={styles.error} accessible accessibilityLabel={children} accessibilityLiveRegion="polite" accessibilityRole="alert">
+    <View
+      style={styles.error}
+      accessible
+      accessibilityLabel={children}
+      accessibilityLiveRegion="polite"
+      accessibilityRole="alert">
       <Icon name="alert-circle" size={20} color={colors.destructive} />
       <AppText color={colors.destructive} style={styles.flex}>
         {children}
@@ -65,11 +70,7 @@ export function Badge({ icon, label }: { icon?: IconName; label: string }) {
 export function PageDots({ index, total }: { index: number; total: number }) {
   const styles = useStyles();
   return (
-    <View
-      style={styles.dots}
-      accessible
-      accessibilityLabel={`Step ${index + 1} of ${total}`}
-    >
+    <View style={styles.dots} accessible accessibilityLabel={`Step ${index + 1} of ${total}`}>
       {Array.from({ length: total }, (_, i) => (
         <View key={i} style={[styles.dot, i === index && styles.dotActive]} />
       ))}
@@ -79,7 +80,12 @@ export function PageDots({ index, total }: { index: number; total: number }) {
 
 const useStyles = makeStyles((colors) => ({
   flex: { flex: 1 },
-  note: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, paddingHorizontal: space.xs },
+  note: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: space.md,
+    paddingHorizontal: space.xs,
+  },
   safety: {
     flexDirection: 'row',
     alignItems: 'flex-start',

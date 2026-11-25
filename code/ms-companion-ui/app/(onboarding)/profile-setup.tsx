@@ -43,8 +43,7 @@ export default function ProfileSetupScreen() {
           />
           <Button label="Skip for now" variant="plain" onPress={finish} />
         </>
-      }
-    >
+      }>
       {form.fields}
     </Screen>
   );

@@ -23,23 +23,39 @@ export function RatingOption({ value, label, selected, onPress }: Props) {
       accessibilityRole="radio"
       accessibilityLabel={`${value}, ${label}`}
       accessibilityState={{ checked: selected }}
-      style={({ pressed }) => [styles.card, selected && styles.selected, pressed && !selected && styles.pressed]}
-    >
+      style={({ pressed }) => [
+        styles.card,
+        selected && styles.selected,
+        pressed && !selected && styles.pressed,
+      ]}>
       <View style={[styles.badge, selected && styles.badgeSelected]}>
-        <AppText variant="label" color={selected ? colors.onAccent : colors.secondary} style={styles.bold}>
+        <AppText
+          variant="label"
+          color={selected ? colors.onAccent : colors.secondary}
+          style={styles.bold}>
           {value}
         </AppText>
       </View>
-      <AppText variant="label" color={selected ? colors.accent : colors.ink} style={[styles.label, selected && styles.bold]}>
+      <AppText
+        variant="label"
+        color={selected ? colors.accent : colors.ink}
+        style={[styles.label, selected && styles.bold]}>
         {label}
       </AppText>
-      <View style={styles.bars} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+      <View
+        style={styles.bars}
+        importantForAccessibility="no-hide-descendants"
+        accessibilityElementsHidden>
         {BAR_HEIGHTS.map((h, i) => (
           <View
             key={i}
             style={[
               styles.bar,
-              { height: h, backgroundColor: i < value ? (selected ? colors.accent : colors.ratingIdle) : colors.separator },
+              {
+                height: h,
+                backgroundColor:
+                  i < value ? (selected ? colors.accent : colors.ratingIdle) : colors.separator,
+              },
             ]}
           />
         ))}

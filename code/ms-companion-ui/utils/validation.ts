@@ -1,5 +1,3 @@
-
-
 export const AuthLimits = {
   emailMax: 256,
   passwordMin: 8,
@@ -37,7 +35,6 @@ export const validateNewPassword: Validator = (value) => {
   }
   return undefined;
 };
-
 
 export function validateName(label: string): Validator {
   return (value) => {

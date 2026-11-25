@@ -9,7 +9,14 @@ import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
 import { TopBar } from '@/components/layout/top-bar';
 import { doseTimeLabel, sortTimes } from '@/constants/medication';
-import { clearDoseLog, getConsents, getDoseLogs, listMedications, listSideEffects, logDose } from '@/utils/storage';
+import {
+  clearDoseLog,
+  getConsents,
+  getDoseLogs,
+  listMedications,
+  listSideEffects,
+  logDose,
+} from '@/utils/storage';
 import { DoseLog, DoseStatus, DoseTime, Medication, SideEffect } from '@/types/health';
 import { formatShortDate, todayKey } from '@/utils/date';
 
@@ -47,7 +54,7 @@ export default function MedicationsScreen() {
   useFocusEffect(
     useCallback(() => {
       load();
-    }, [load])
+    }, [load]),
   );
 
   const topBar = <TopBar onBack={() => router.back()} />;
@@ -59,18 +66,19 @@ export default function MedicationsScreen() {
         topBar={topBar}
         title="Medication"
         subtitle="You chose not to let the app store your medication."
-        footer={
-          <Button label="Open Settings" onPress={() => router.navigate('/settings')} />
-        }
-      >
-        <Note icon="info">To track doses and get reminders, turn on Medication under “What the app may use”.</Note>
+        footer={<Button label="Open Settings" onPress={() => router.navigate('/settings')} />}>
+        <Note icon="info">
+          To track doses and get reminders, turn on Medication under “What the app may use”.
+        </Note>
       </Screen>
     );
   }
 
   const doses: ScheduledDose[] = medications
     .flatMap((medication) => medication.times.map((time) => ({ medication, time })))
-    .sort((a, b) => a.time.localeCompare(b.time) || a.medication.name.localeCompare(b.medication.name));
+    .sort(
+      (a, b) => a.time.localeCompare(b.time) || a.medication.name.localeCompare(b.medication.name),
+    );
 
   const statusOf = (dose: ScheduledDose) =>
     logs.find((l) => l.medicationId === dose.medication.id && l.time === dose.time)?.status ?? null;
@@ -78,7 +86,13 @@ export default function MedicationsScreen() {
 
   const onLog = async (dose: ScheduledDose, status: DoseStatus) => {
     try {
-      await logDose({ medicationId: dose.medication.id, date: today, time: dose.time, status, loggedAt: new Date().toISOString() });
+      await logDose({
+        medicationId: dose.medication.id,
+        date: today,
+        time: dose.time,
+        status,
+        loggedAt: new Date().toISOString(),
+      });
       setLogs(await getDoseLogs(today));
     } catch (e) {
       console.warn('Could not log dose', e);
@@ -100,12 +114,17 @@ export default function MedicationsScreen() {
   return (
     <Screen topBar={topBar} title="Medication">
       {doses.length > 0 ? (
-        <Section header="Today" iconInset footer={`${takenCount} of ${doses.length} doses taken today.`}>
+        <Section
+          header="Today"
+          iconInset
+          footer={`${takenCount} of ${doses.length} doses taken today.`}>
           {doses.map((dose) => (
             <DoseRow
               key={`${dose.medication.id}-${dose.time}`}
               title={dose.medication.name}
-              subtitle={[doseTimeLabel(dose.time), dose.medication.dose].filter(Boolean).join(' · ')}
+              subtitle={[doseTimeLabel(dose.time), dose.medication.dose]
+                .filter(Boolean)
+                .join(' · ')}
               status={statusOf(dose)}
               onLog={(status) => onLog(dose, status)}
               onUndo={() => onUndo(dose)}
@@ -117,8 +136,7 @@ export default function MedicationsScreen() {
       <Section
         header="My medicines"
         iconInset
-        footer={medications.length === 0 ? 'Add the medicines you take for your MS.' : undefined}
-      >
+        footer={medications.length === 0 ? 'Add the medicines you take for your MS.' : undefined}>
         {medications.map((m) => (
           <Row
             key={m.id}
@@ -130,7 +148,12 @@ export default function MedicationsScreen() {
             onPress={() => router.push({ pathname: '/medication-edit', params: { id: m.id } })}
           />
         ))}
-        <Row icon="plus" label="Add a medicine" chevron onPress={() => router.push('/medication-edit')} />
+        <Row
+          icon="plus"
+          label="Add a medicine"
+          chevron
+          onPress={() => router.push('/medication-edit')}
+        />
       </Section>
 
       {medications.length > 0 ? (
@@ -143,7 +166,12 @@ export default function MedicationsScreen() {
               description={`${medName(s.medicationId)} · ${formatShortDate(todayKey(new Date(s.loggedAt)))}`}
             />
           ))}
-          <Row icon="edit-3" label="Note a side effect" chevron onPress={() => router.push('/side-effect')} />
+          <Row
+            icon="edit-3"
+            label="Note a side effect"
+            chevron
+            onPress={() => router.push('/side-effect')}
+          />
         </Section>
       ) : null}
     </Screen>

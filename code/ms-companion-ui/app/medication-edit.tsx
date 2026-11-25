@@ -42,7 +42,9 @@ export default function MedicationEditScreen() {
   }, [editingId]);
 
   const toggleTime = (time: DoseTime) => {
-    setTimes((current) => (current.includes(time) ? current.filter((t) => t !== time) : sortTimes([...current, time])));
+    setTimes((current) =>
+      current.includes(time) ? current.filter((t) => t !== time) : sortTimes([...current, time]),
+    );
     setTimesError(false);
   };
 
@@ -53,7 +55,12 @@ export default function MedicationEditScreen() {
     if (missingName || times.length === 0) return;
     setSaving(true);
     try {
-      await saveMedication({ id: editingId ?? newId(), name: name.trim(), dose: dose.trim(), times });
+      await saveMedication({
+        id: editingId ?? newId(),
+        name: name.trim(),
+        dose: dose.trim(),
+        times,
+      });
       router.back();
     } catch (e) {
       console.warn('Could not save medicine', e);
@@ -86,8 +93,7 @@ export default function MedicationEditScreen() {
     <Screen
       topBar={<TopBar onBack={() => router.back()} />}
       title={editingId ? 'Edit medicine' : 'Add a medicine'}
-      footer={<Button label="Save" onPress={onSave} disabled={saving} />}
-    >
+      footer={<Button label="Save" onPress={onSave} disabled={saving} />}>
       <Section variant="plain">
         <TextField
           label="Name"
@@ -101,7 +107,14 @@ export default function MedicationEditScreen() {
           autoCapitalize="words"
           error={nameError}
         />
-        <TextField label="Dose" icon="info" placeholder="For example: 500 mg, 1 tablet" hint="Optional." value={dose} onChangeText={setDose} />
+        <TextField
+          label="Dose"
+          icon="info"
+          placeholder="For example: 500 mg, 1 tablet"
+          hint="Optional."
+          value={dose}
+          onChangeText={setDose}
+        />
       </Section>
 
       <CheckCards

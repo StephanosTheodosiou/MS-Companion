@@ -25,8 +25,7 @@ export function RoundButton({
       accessibilityLabel={label}
       accessibilityHint={hint}
       hitSlop={6}
-      style={({ pressed }) => [styles.button, pressed && { opacity: 0.7 }]}
-    >
+      style={({ pressed }) => [styles.button, pressed && { opacity: 0.7 }]}>
       <Icon name={icon} size={24} color={colors.ink} />
     </Pressable>
   );

@@ -3,7 +3,10 @@ import { useEffect } from 'react';
 import { Alert } from 'react-native';
 
 type BeforeRemoveEvent = { preventDefault: () => void; data: { action: unknown } };
-type AddBeforeRemove = (event: 'beforeRemove', listener: (e: BeforeRemoveEvent) => void) => () => void;
+type AddBeforeRemove = (
+  event: 'beforeRemove',
+  listener: (e: BeforeRemoveEvent) => void,
+) => () => void;
 
 /**
  * Asks "Leave without saving?" when the user goes back (button or swipe) while `when` is true.
@@ -19,7 +22,12 @@ export function useConfirmLeave(when: boolean, message: string) {
       e.preventDefault();
       Alert.alert('Leave without saving?', message, [
         { text: 'Keep going', style: 'cancel' },
-        { text: 'Leave', style: 'destructive', onPress: () => navigation.dispatch(e.data.action as Parameters<typeof navigation.dispatch>[0]) },
+        {
+          text: 'Leave',
+          style: 'destructive',
+          onPress: () =>
+            navigation.dispatch(e.data.action as Parameters<typeof navigation.dispatch>[0]),
+        },
       ]);
     });
   }, [navigation, when, message]);

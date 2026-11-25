@@ -6,7 +6,12 @@ import { Rating, SymptomKey } from '@/types/health';
 // questionnaires (e.g. MSIS-29). The team should confirm the final scale against
 // the published source cited in the report.
 export const SYMPTOMS: { key: SymptomKey; name: string; question: string; icon: IconName }[] = [
-  { key: 'fatigue', name: 'Fatigue', question: 'How much has fatigue affected you today?', icon: 'battery' },
+  {
+    key: 'fatigue',
+    name: 'Fatigue',
+    question: 'How much has fatigue affected you today?',
+    icon: 'battery',
+  },
   {
     key: 'mobility',
     name: 'Walking and balance',
@@ -14,14 +19,24 @@ export const SYMPTOMS: { key: SymptomKey; name: string; question: string; icon: 
     icon: 'mci:walk',
   },
   { key: 'pain', name: 'Pain', question: 'How much has pain affected you today?', icon: 'zap' },
-  { key: 'mood', name: 'Mood', question: 'How much has low mood affected you today?', icon: 'smile' },
+  {
+    key: 'mood',
+    name: 'Mood',
+    question: 'How much has low mood affected you today?',
+    icon: 'smile',
+  },
   {
     key: 'cognition',
     name: 'Memory and concentration',
     question: 'How much have memory or concentration problems affected you today?',
     icon: 'mci:brain',
   },
-  { key: 'bladder', name: 'Bladder', question: 'How much have bladder problems affected you today?', icon: 'droplet' },
+  {
+    key: 'bladder',
+    name: 'Bladder',
+    question: 'How much have bladder problems affected you today?',
+    icon: 'droplet',
+  },
 ];
 
 export const RATING_OPTIONS: { value: Rating; label: string }[] = [

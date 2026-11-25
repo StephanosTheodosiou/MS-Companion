@@ -29,7 +29,7 @@ export default function SettingsScreen() {
       getConsents()
         .then(setConsents)
         .catch((e) => console.warn('Could not load consents', e));
-    }, [])
+    }, []),
   );
 
   const onToggle = async (key: ConsentKey, value: boolean) => {
@@ -92,7 +92,7 @@ export default function SettingsScreen() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -106,7 +106,12 @@ export default function SettingsScreen() {
             label={`${user.firstName} ${user.lastName}`.trim() || 'Logged in'}
             description={user.email}
           />
-          <Row icon="log-out" label="Log out" onPress={onLogout} accessibilityHint="Asks you to confirm" />
+          <Row
+            icon="log-out"
+            label="Log out"
+            onPress={onLogout}
+            accessibilityHint="Asks you to confirm"
+          />
         </Section>
       ) : null}
 
@@ -117,8 +122,7 @@ export default function SettingsScreen() {
       <Section
         header="What the app may use"
         iconInset
-        footer="Symptom check-ins stay on while you use the app. To stop them, delete your data."
-      >
+        footer="Symptom check-ins stay on while you use the app. To stop them, delete your data.">
         {consents
           ? OPTIONAL_CONSENTS.map((item) => (
               <SwitchRow
@@ -137,7 +141,6 @@ export default function SettingsScreen() {
         <Row icon="download" label="Export my data" chevron onPress={onExport} />
         <Row icon="trash-2" label="Delete all my data" destructive onPress={onDelete} />
       </Section>
-
     </Screen>
   );
 }

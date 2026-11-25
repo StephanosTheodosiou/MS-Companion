@@ -33,7 +33,12 @@ export default function SideEffectScreen() {
       return;
     }
     try {
-      await addSideEffect({ id: newId(), medicationId, description: description.trim(), loggedAt: new Date().toISOString() });
+      await addSideEffect({
+        id: newId(),
+        medicationId,
+        description: description.trim(),
+        loggedAt: new Date().toISOString(),
+      });
       router.back();
     } catch (e) {
       console.warn('Could not save side effect', e);
@@ -46,8 +51,7 @@ export default function SideEffectScreen() {
       topBar={<TopBar onBack={() => router.back()} />}
       title="Note a side effect"
       subtitle="Do not stop or change a medicine on your own. Talk to your doctor first."
-      footer={<Button label="Save" onPress={onSave} />}
-    >
+      footer={<Button label="Save" onPress={onSave} />}>
       <ChoiceCards
         header="Which medicine?"
         options={medications.map((m) => ({ value: m.id, label: m.name }))}

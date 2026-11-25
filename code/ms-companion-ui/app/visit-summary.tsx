@@ -39,7 +39,16 @@ export default function VisitSummaryScreen() {
     useCallback(() => {
       (async () => {
         try {
-          const [appointments, checkIns, symptomEntries, doseLogs, meds, sideEffects, questions, prof] = await Promise.all([
+          const [
+            appointments,
+            checkIns,
+            symptomEntries,
+            doseLogs,
+            meds,
+            sideEffects,
+            questions,
+            prof,
+          ] = await Promise.all([
             listAppointments(),
             listCheckIns(),
             listSymptomEntries(),
@@ -49,18 +58,33 @@ export default function VisitSummaryScreen() {
             listQuestions(),
             getProfile(),
           ]);
-          setSummary(buildVisitSummary({ appointments, checkIns, symptomEntries, doseLogs, medications: meds, sideEffects, questions }));
+          setSummary(
+            buildVisitSummary({
+              appointments,
+              checkIns,
+              symptomEntries,
+              doseLogs,
+              medications: meds,
+              sideEffects,
+              questions,
+            }),
+          );
           setProfile(prof);
           setMedications(meds);
         } catch (e) {
           console.warn('Could not build visit summary', e);
         }
       })();
-    }, [])
+    }, []),
   );
 
   const topBar = <TopBar onBack={() => router.back()} />;
-  if (!summary || !profile) return <Screen topBar={topBar} title="Visit summary">{null}</Screen>;
+  if (!summary || !profile)
+    return (
+      <Screen topBar={topBar} title="Visit summary">
+        {null}
+      </Screen>
+    );
 
   const period = summary.lastVisit
     ? `Since your last visit on ${formatShortDate(summary.from)} (${summary.days} days)`
@@ -80,7 +104,7 @@ export default function VisitSummaryScreen() {
       const reason = e instanceof Error ? e.message : String(e);
       Alert.alert(
         action === 'share' ? 'The PDF could not be shared' : 'The summary could not be printed',
-        __DEV__ ? `Reason: ${reason}` : 'Please try again.'
+        __DEV__ ? `Reason: ${reason}` : 'Please try again.',
       );
     } finally {
       setBusy(false);
@@ -97,20 +121,32 @@ export default function VisitSummaryScreen() {
           <Button label="Share as PDF" onPress={() => run('share')} disabled={busy} />
           <Button label="Print" variant="plain" onPress={() => run('print')} disabled={busy} />
         </>
-      }
-    >
+      }>
       {summary.nextVisit ? (
         <Section header="Next visit" iconInset>
-          <Row icon="calendar" strong label={appointmentTitle(summary.nextVisit)} description={appointmentDetails(summary.nextVisit)} />
+          <Row
+            icon="calendar"
+            strong
+            label={appointmentTitle(summary.nextVisit)}
+            description={appointmentDetails(summary.nextVisit)}
+          />
         </Section>
       ) : null}
 
       <Section header="About me" iconInset>
-        <Row icon="user" label="Type of MS" value={MS_TYPES.find((t) => t.value === profile.msType)?.label ?? 'Not given'} />
+        <Row
+          icon="user"
+          label="Type of MS"
+          value={MS_TYPES.find((t) => t.value === profile.msType)?.label ?? 'Not given'}
+        />
         <Row
           icon="plus-square"
           label="Medicines"
-          description={medications.length ? medications.map((m) => [m.name, m.dose].filter(Boolean).join(' ')).join(', ') : 'None added'}
+          description={
+            medications.length
+              ? medications.map((m) => [m.name, m.dose].filter(Boolean).join(' ')).join(', ')
+              : 'None added'
+          }
         />
       </Section>
 
@@ -121,26 +157,35 @@ export default function VisitSummaryScreen() {
           summary.checkInDays > 0
             ? `${summary.checkInDays} of ${summary.days} days filled in. Scale: 0 not at all to 4 extremely.`
             : 'No check-ins in this period.'
-        }
-      >
+        }>
         {summary.checkInDays > 0
           ? summary.symptoms.map((s) => (
               <Row
                 key={s.key}
                 icon={iconFor(s.key)}
                 label={s.name}
-                description={[s.average !== null ? describeAverage(s.average) : null, describeChange(s.change)]
+                description={[
+                  s.average !== null ? describeAverage(s.average) : null,
+                  describeChange(s.change),
+                ]
                   .filter(Boolean)
                   .join(' · ')}
               />
             ))
           : null}
         {summary.lowMoodDays > 0 ? (
-          <Row icon="cloud-rain" label="Low mood" value={`${summary.lowMoodDays} ${summary.lowMoodDays === 1 ? 'day' : 'days'}`} />
+          <Row
+            icon="cloud-rain"
+            label="Low mood"
+            value={`${summary.lowMoodDays} ${summary.lowMoodDays === 1 ? 'day' : 'days'}`}
+          />
         ) : null}
       </Section>
 
-      <Section header="New or worse symptoms" iconInset footer={summary.symptomEntries.length === 0 ? 'None logged in this period.' : undefined}>
+      <Section
+        header="New or worse symptoms"
+        iconInset
+        footer={summary.symptomEntries.length === 0 ? 'None logged in this period.' : undefined}>
         {summary.symptomEntries.map((e) => (
           <Row
             key={e.id}
@@ -157,7 +202,10 @@ export default function VisitSummaryScreen() {
         ))}
       </Section>
 
-      <Section header="Medication" iconInset footer={totalDoses === 0 ? 'No doses logged in this period.' : undefined}>
+      <Section
+        header="Medication"
+        iconInset
+        footer={totalDoses === 0 ? 'No doses logged in this period.' : undefined}>
         {totalDoses > 0 ? (
           <Row
             icon="check-square"
@@ -166,17 +214,27 @@ export default function VisitSummaryScreen() {
           />
         ) : null}
         {summary.sideEffects.map((s, i) => (
-          <Row key={i} icon="alert-circle" label={s.description} description={`Side effect · ${s.medicine} · ${formatShortDate(s.date)}`} />
+          <Row
+            key={i}
+            icon="alert-circle"
+            label={s.description}
+            description={`Side effect · ${s.medicine} · ${formatShortDate(s.date)}`}
+          />
         ))}
       </Section>
 
-      <Section header="Questions for my doctor" iconInset footer={summary.openQuestions.length === 0 ? 'No open questions.' : undefined}>
+      <Section
+        header="Questions for my doctor"
+        iconInset
+        footer={summary.openQuestions.length === 0 ? 'No open questions.' : undefined}>
         {summary.openQuestions.map((q) => (
           <Row key={q.id} icon="help-circle" label={q.text} />
         ))}
       </Section>
 
-      <Note icon="info">Made with MS Companion from what you recorded. It is a record, not a diagnosis.</Note>
+      <Note icon="info">
+        Made with MS Companion from what you recorded. It is a record, not a diagnosis.
+      </Note>
     </Screen>
   );
 }

@@ -43,7 +43,8 @@ export function bloodTestStatus(test: BloodTest, today: string = todayKey()): Bl
 
 /** e.g. "Due tomorrow", "Overdue by 3 days", "Due Mon 9 Nov". */
 export function dueText(test: BloodTest, today: string = todayKey()): string {
-  if (isFinished(test)) return test.lastDoneOn ? `Done ${formatShortDate(test.lastDoneOn)}` : 'Done';
+  if (isFinished(test))
+    return test.lastDoneOn ? `Done ${formatShortDate(test.lastDoneOn)}` : 'Done';
   const days = daysBetween(today, test.dueDate);
   if (days < 0) return `Overdue by ${-days} ${-days === 1 ? 'day' : 'days'}`;
   if (days === 0) return 'Due today';
@@ -73,7 +74,10 @@ export function sortBloodTests(tests: BloodTest[]): BloodTest[] {
 }
 
 /** Short text for the Today tab, or undefined when nothing needs attention. */
-export function bloodTestSummary(tests: BloodTest[], today: string = todayKey()): string | undefined {
+export function bloodTestSummary(
+  tests: BloodTest[],
+  today: string = todayKey(),
+): string | undefined {
   const statuses = tests.map((t) => bloodTestStatus(t, today));
   const overdue = statuses.filter((s) => s === 'overdue').length;
   if (overdue > 0) return `${overdue} overdue`;

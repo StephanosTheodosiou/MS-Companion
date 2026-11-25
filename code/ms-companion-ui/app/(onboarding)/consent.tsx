@@ -47,11 +47,16 @@ export default function ConsentScreen() {
 
   return (
     <Screen
-      topBar={<StepHeader step={2} total={3} onBack={() => (router.canGoBack() ? router.back() : signOut())} />}
+      topBar={
+        <StepHeader
+          step={2}
+          total={3}
+          onBack={() => (router.canGoBack() ? router.back() : signOut())}
+        />
+      }
       title="Your data, your choice"
       subtitle="Choose what the app may use. You can change this later in Settings."
-      footer={<Button label="Continue" onPress={onContinue} disabled={saving} />}
-    >
+      footer={<Button label="Continue" onPress={onContinue} disabled={saving} />}>
       <Section footer="The app needs these to work. To stop them, delete your data in Settings.">
         <Row
           icon="clipboard"

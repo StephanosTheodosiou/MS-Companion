@@ -14,7 +14,9 @@ import { BloodTest, ConsentMap } from '@/types/health';
 import { bloodTestStatus, dueText, markDone, sortBloodTests } from '@/utils/bloodTest';
 
 function details(test: BloodTest): string {
-  return [dueText(test), test.repeat === 'none' ? '' : repeatLabel(test.repeat)].filter(Boolean).join(' · ');
+  return [dueText(test), test.repeat === 'none' ? '' : repeatLabel(test.repeat)]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 // E3: reminders for the blood tests the MS team asks for. The app only reminds.
@@ -27,7 +29,10 @@ export default function BloodTestsScreen() {
 
   const load = useCallback(async () => {
     try {
-      const [consents, all]: [ConsentMap, BloodTest[]] = await Promise.all([getConsents(), listBloodTests()]);
+      const [consents, all]: [ConsentMap, BloodTest[]] = await Promise.all([
+        getConsents(),
+        listBloodTests(),
+      ]);
       setAllowed(consents.medication);
       setRemindersOn(consents.notifications);
       setTests(sortBloodTests(all));
@@ -39,7 +44,7 @@ export default function BloodTestsScreen() {
   useFocusEffect(
     useCallback(() => {
       load();
-    }, [load])
+    }, [load]),
   );
 
   const topBar = <TopBar onBack={() => router.back()} />;
@@ -51,9 +56,10 @@ export default function BloodTestsScreen() {
         topBar={topBar}
         title="Blood tests"
         subtitle="You chose not to let the app store your medication."
-        footer={<Button label="Open Settings" onPress={() => router.navigate('/settings')} />}
-      >
-        <Note icon="info">To get blood test reminders, turn on Medication under “What the app may use”.</Note>
+        footer={<Button label="Open Settings" onPress={() => router.navigate('/settings')} />}>
+        <Note icon="info">
+          To get blood test reminders, turn on Medication under “What the app may use”.
+        </Note>
       </Screen>
     );
   }
@@ -68,7 +74,8 @@ export default function BloodTestsScreen() {
     }
   };
 
-  const open = (test: BloodTest) => router.push({ pathname: '/blood-test-edit', params: { id: test.id } });
+  const open = (test: BloodTest) =>
+    router.push({ pathname: '/blood-test-edit', params: { id: test.id } });
   const withStatus = tests.map((test) => ({ test, status: bloodTestStatus(test) }));
   const attention = withStatus.filter((x) => x.status === 'overdue' || x.status === 'soon');
   const later = withStatus.filter((x) => x.status === 'later');
@@ -79,14 +86,15 @@ export default function BloodTestsScreen() {
       topBar={topBar}
       title="Blood tests"
       subtitle="Reminders for the blood tests your MS team asks for."
-      footer={<Button label="Add a blood test" onPress={() => router.push('/blood-test-edit')} />}
-    >
+      footer={<Button label="Add a blood test" onPress={() => router.push('/blood-test-edit')} />}>
       {!remindersOn ? (
         <Note icon="bell">Reminders are off. Turn on Reminders in Settings to be reminded.</Note>
       ) : null}
 
       {tests.length === 0 ? (
-        <Section iconInset footer="Add a blood test and the date it is due. Your MS team tells you which tests you need.">
+        <Section
+          iconInset
+          footer="Add a blood test and the date it is due. Your MS team tells you which tests you need.">
           <Row icon="droplet" label="No blood tests yet" />
         </Section>
       ) : null}
@@ -109,7 +117,13 @@ export default function BloodTestsScreen() {
       {later.length > 0 ? (
         <Section header="Later" iconInset>
           {later.map(({ test }) => (
-            <BloodTestRow key={test.id} title={test.name} subtitle={details(test)} onDone={() => onDone(test)} onOpen={() => open(test)} />
+            <BloodTestRow
+              key={test.id}
+              title={test.name}
+              subtitle={details(test)}
+              onDone={() => onDone(test)}
+              onOpen={() => open(test)}
+            />
           ))}
         </Section>
       ) : null}
@@ -117,7 +131,12 @@ export default function BloodTestsScreen() {
       {done.length > 0 ? (
         <Section header="Done" iconInset>
           {done.map(({ test }) => (
-            <BloodTestRow key={test.id} title={test.name} subtitle={details(test)} onOpen={() => open(test)} />
+            <BloodTestRow
+              key={test.id}
+              title={test.name}
+              subtitle={details(test)}
+              onOpen={() => open(test)}
+            />
           ))}
         </Section>
       ) : null}

@@ -24,14 +24,12 @@ export function SegmentedControl<T extends string>({ options, selected, onSelect
             accessibilityRole="radio"
             accessibilityLabel={option.label}
             accessibilityState={{ checked: isSelected }}
-            style={[styles.segment, isSelected && styles.selected]}
-          >
+            style={[styles.segment, isSelected && styles.selected]}>
             <AppText
               variant="label"
               color={isSelected ? colors.onAccent : colors.secondary}
               numberOfLines={1}
-              adjustsFontSizeToFit
-            >
+              adjustsFontSizeToFit>
               {option.label}
             </AppText>
           </Pressable>
@@ -42,7 +40,13 @@ export function SegmentedControl<T extends string>({ options, selected, onSelect
 }
 
 const useStyles = makeStyles((colors) => ({
-  track: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.button, padding: 4, ...shadow },
+  track: {
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderRadius: radius.button,
+    padding: 4,
+    ...shadow,
+  },
   segment: {
     flex: 1,
     minHeight: MIN_TOUCH - 8,

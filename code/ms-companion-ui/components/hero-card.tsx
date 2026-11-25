@@ -24,7 +24,11 @@ export function HeroCard({ overline, title, subtitle, action }: Props) {
         <AppText variant="overline" color={colors.onAccentSoft}>
           {overline}
         </AppText>
-        <AppText variant="title" color={colors.onAccent} accessibilityRole="header" style={styles.title}>
+        <AppText
+          variant="title"
+          color={colors.onAccent}
+          accessibilityRole="header"
+          style={styles.title}>
           {title}
         </AppText>
         <AppText color={colors.onAccentSoft}>{subtitle}</AppText>

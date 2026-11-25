@@ -100,8 +100,7 @@ export default function CheckInScreen() {
         header={<IconCircle name="check" size={72} />}
         title="Saved"
         subtitle="Thank you. Your check-in for today is saved and will be part of your visit summary."
-        footer={<Button label="Done" onPress={() => router.back()} />}
-      >
+        footer={<Button label="Done" onPress={() => router.back()} />}>
         {lowMood ? (
           <>
             <Section header="You said your mood has been low" iconInset>
@@ -121,13 +120,18 @@ export default function CheckInScreen() {
                   accessibilityHint="Opens your phone app"
                   onPress={() =>
                     Linking.openURL(`tel:${toDialNumber(profile.teamPhone)}`).catch(() =>
-                      Alert.alert('The call did not start', `Dial ${profile.teamPhone} from your phone app.`)
+                      Alert.alert(
+                        'The call did not start',
+                        `Dial ${profile.teamPhone} from your phone app.`,
+                      ),
                     )
                   }
                 />
               ) : null}
             </Section>
-            <SafetyCard>If you feel unsafe or think you might harm yourself, call 112 now.</SafetyCard>
+            <SafetyCard>
+              If you feel unsafe or think you might harm yourself, call 112 now.
+            </SafetyCard>
           </>
         ) : null}
       </Screen>
@@ -148,8 +152,7 @@ export default function CheckInScreen() {
             onPress={onSave}
             disabled={saving || !allAnswered}
           />
-        }
-      >
+        }>
         <TextField
           label="Note"
           icon="edit-3"
@@ -190,8 +193,9 @@ export default function CheckInScreen() {
       header={<IconCircle name={symptom.icon} size={72} />}
       title={symptom.name}
       subtitle={symptom.question}
-      footer={<Button label="Next" onPress={() => setStep(step + 1)} disabled={current === undefined} />}
-    >
+      footer={
+        <Button label="Next" onPress={() => setStep(step + 1)} disabled={current === undefined} />
+      }>
       <View style={{ gap: space.md }} accessibilityRole="radiogroup">
         {RATING_OPTIONS.map((option) => (
           <RatingOption
@@ -204,7 +208,9 @@ export default function CheckInScreen() {
         ))}
       </View>
       {step === 0 && !editing ? (
-        <AppText variant="footnote">{'Think about today as a whole.\nThere are no wrong answers.'}</AppText>
+        <AppText variant="footnote">
+          {'Think about today as a whole.\nThere are no wrong answers.'}
+        </AppText>
       ) : null}
     </Screen>
   );

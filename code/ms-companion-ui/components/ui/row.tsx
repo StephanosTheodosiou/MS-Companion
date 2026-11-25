@@ -63,14 +63,17 @@ export function Row({
           <AppText
             variant={strong ? 'label' : 'body'}
             color={destructive ? colors.destructive : colors.ink}
-            style={[styles.title, strong && styles.strong]}
-          >
+            style={[styles.title, strong && styles.strong]}>
             {label}
           </AppText>
           {badge}
         </View>
         {stacked ? <AppText color={colors.secondary}>{value}</AppText> : null}
-        {description ? <AppText color={colors.secondary} variant={strong ? 'body' : 'footnote'}>{description}</AppText> : null}
+        {description ? (
+          <AppText color={colors.secondary} variant={strong ? 'body' : 'footnote'}>
+            {description}
+          </AppText>
+        ) : null}
       </View>
       {accessory ??
         (value && !stacked ? (
@@ -101,8 +104,7 @@ export function Row({
       accessibilityState={accessibilityState}
       accessibilityLabel={spoken}
       accessibilityHint={accessibilityHint}
-      style={({ pressed }) => [styles.row, pressed && styles.pressed]}
-    >
+      style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
       {content}
     </Pressable>
   );
@@ -155,7 +157,13 @@ const useStyles = makeStyles((colors) => ({
   },
   pressed: { backgroundColor: colors.rowPressed },
   text: { flex: 1, gap: 2 },
-  titleLine: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: space.sm, rowGap: 4 },
+  titleLine: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    columnGap: space.sm,
+    rowGap: 4,
+  },
   title: { flexShrink: 1 },
   strong: { fontWeight: '700' },
   value: { maxWidth: '50%', textAlign: 'right' },

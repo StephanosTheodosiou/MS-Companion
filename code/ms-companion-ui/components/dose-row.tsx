@@ -33,7 +33,10 @@ export function DoseRow({ title, subtitle, status, onLog, onUndo }: Props) {
       </View>
       {status ? (
         <View style={styles.actions}>
-          <AppText variant="label" color={status === 'taken' ? colors.accent : colors.secondary} style={styles.bold}>
+          <AppText
+            variant="label"
+            color={status === 'taken' ? colors.accent : colors.secondary}
+            style={styles.bold}>
             {status === 'taken' ? 'Taken' : 'Skipped'}
           </AppText>
           <Pill label="Undo" spoken={`Undo: ${spoken}`} onPress={onUndo} />
@@ -48,7 +51,17 @@ export function DoseRow({ title, subtitle, status, onLog, onUndo }: Props) {
   );
 }
 
-function Pill({ label, spoken, onPress, filled }: { label: string; spoken: string; onPress: () => void; filled?: boolean }) {
+function Pill({
+  label,
+  spoken,
+  onPress,
+  filled,
+}: {
+  label: string;
+  spoken: string;
+  onPress: () => void;
+  filled?: boolean;
+}) {
   const styles = useStyles();
   const colors = useColors();
   return (
@@ -56,14 +69,16 @@ function Pill({ label, spoken, onPress, filled }: { label: string; spoken: strin
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={spoken}
-      style={({ pressed }) => [styles.pill, filled ? styles.pillFilled : styles.pillPlain, pressed && { opacity: 0.7 }]}
-    >
+      style={({ pressed }) => [
+        styles.pill,
+        filled ? styles.pillFilled : styles.pillPlain,
+        pressed && { opacity: 0.7 },
+      ]}>
       <AppText
         variant="label"
         color={filled ? colors.onAccent : colors.accent}
         style={[styles.pillLabel, styles.bold]}
-        textBreakStrategy="simple"
-      >
+        textBreakStrategy="simple">
         {label}
       </AppText>
     </Pressable>

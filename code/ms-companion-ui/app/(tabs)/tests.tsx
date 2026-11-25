@@ -16,8 +16,7 @@ export default function TestsScreen() {
     <Screen
       inTabs
       title="Tests"
-      subtitle="Short tests on your phone that show how your hands and thinking are doing over time."
-    >
+      subtitle="Short tests on your phone that show how your hands and thinking are doing over time.">
       <View style={{ alignSelf: 'flex-start' }}>
         <Badge icon="clock" label="Coming soon" />
       </View>

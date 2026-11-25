@@ -10,7 +10,14 @@ import { Row } from '@/components/ui/row';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
 import { WeekDay, WeekStrip } from '@/components/week-strip';
-import { getCheckIn, getDoseLogs, getProfile, listAppointments, listBloodTests, listMedications } from '@/utils/storage';
+import {
+  getCheckIn,
+  getDoseLogs,
+  getProfile,
+  listAppointments,
+  listBloodTests,
+  listMedications,
+} from '@/utils/storage';
 import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
 import { useColors } from '@/hooks/use-colors';
 import { Appointment, CheckIn, EMPTY_PROFILE, Profile } from '@/types/health';
@@ -53,14 +60,16 @@ export default function HomeScreen() {
               isToday: date === today,
               isFuture: date > today,
               checkedIn: !!checkIns[i],
-            }))
+            })),
           );
         })
         .catch((e) => console.warn('Could not load check-ins', e));
       Promise.all([listMedications(), getDoseLogs(today)])
         .then(([meds, logs]) => {
           const total = meds.reduce((sum, m) => sum + m.times.length, 0);
-          const taken = logs.filter((l) => l.status === 'taken' && meds.some((m) => m.id === l.medicationId)).length;
+          const taken = logs.filter(
+            (l) => l.status === 'taken' && meds.some((m) => m.id === l.medicationId),
+          ).length;
           setDoseSummary(total > 0 ? `${taken} of ${total} taken` : undefined);
         })
         .catch((e) => console.warn('Could not load medication', e));
@@ -70,7 +79,7 @@ export default function HomeScreen() {
       listBloodTests()
         .then((tests) => setBloodTestNote(bloodTestSummary(tests, today)))
         .catch((e) => console.warn('Could not load blood tests', e));
-    }, [])
+    }, []),
   );
 
   const teamName = profile.teamName.trim() || 'your MS team';
@@ -78,7 +87,7 @@ export default function HomeScreen() {
 
   const callTeam = () => {
     Linking.openURL(`tel:${toDialNumber(profile.teamPhone)}`).catch(() =>
-      Alert.alert('The call did not start', `Dial ${profile.teamPhone} from your phone app.`)
+      Alert.alert('The call did not start', `Dial ${profile.teamPhone} from your phone app.`),
     );
   };
 
@@ -94,21 +103,32 @@ export default function HomeScreen() {
           hint="Opens Settings, where you choose reminders"
           onPress={() => router.navigate('/settings')}
         />
-      }
-    >
+      }>
       {todaysCheckIn ? (
         <HeroCard
           overline="Daily check-in"
           title="Done for today"
           subtitle={`Saved at ${formatTime(todaysCheckIn.savedAt)}. Thank you.`}
-          action={<Button variant="light" label="Change today's answers" onPress={() => router.push('/check-in')} />}
+          action={
+            <Button
+              variant="light"
+              label="Change today's answers"
+              onPress={() => router.push('/check-in')}
+            />
+          }
         />
       ) : (
         <HeroCard
           overline="Daily check-in"
           title="How are you feeling today?"
           subtitle="Six quick questions · about a minute"
-          action={<Button variant="light" label="Start today's check‑in" onPress={() => router.push('/check-in')} />}
+          action={
+            <Button
+              variant="light"
+              label="Start today's check‑in"
+              onPress={() => router.push('/check-in')}
+            />
+          }
         />
       )}
 
@@ -119,9 +139,26 @@ export default function HomeScreen() {
       ) : null}
 
       <Section header="Health log" iconInset>
-        <Row icon="plus-square" label="Medication" value={doseSummary} chevron onPress={() => router.push('/medications')} />
-        <Row icon="droplet" label="Blood tests" value={bloodTestNote} chevron onPress={() => router.push('/blood-tests')} />
-        <Row icon="alert-triangle" label="New or worse symptom" chevron onPress={() => router.push('/symptom-entry')} />
+        <Row
+          icon="plus-square"
+          label="Medication"
+          value={doseSummary}
+          chevron
+          onPress={() => router.push('/medications')}
+        />
+        <Row
+          icon="droplet"
+          label="Blood tests"
+          value={bloodTestNote}
+          chevron
+          onPress={() => router.push('/blood-tests')}
+        />
+        <Row
+          icon="alert-triangle"
+          label="New or worse symptom"
+          chevron
+          onPress={() => router.push('/symptom-entry')}
+        />
         <Row icon="list" label="Symptom log" chevron onPress={() => router.push('/symptom-log')} />
       </Section>
 
@@ -138,7 +175,12 @@ export default function HomeScreen() {
             onPress={() => router.navigate('/visit')}
           />
         ) : (
-          <Row icon="calendar" label="No visit planned" chevron onPress={() => router.navigate('/visit')} />
+          <Row
+            icon="calendar"
+            label="No visit planned"
+            chevron
+            onPress={() => router.navigate('/visit')}
+          />
         )}
       </Section>
 

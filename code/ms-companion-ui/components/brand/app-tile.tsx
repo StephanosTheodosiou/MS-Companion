@@ -9,7 +9,10 @@ export function AppTile() {
   const styles = useStyles();
   const colors = useColors();
   return (
-    <View style={styles.tile} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+    <View
+      style={styles.tile}
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden>
       <Icon name="activity" size={36} color={colors.onAccent} />
     </View>
   );

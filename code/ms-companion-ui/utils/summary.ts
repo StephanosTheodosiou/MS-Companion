@@ -59,7 +59,7 @@ export function buildVisitSummary(input: {
 }): VisitSummary {
   const today = input.today ?? todayKey();
   const sorted = [...input.appointments].sort((a, b) =>
-    `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)
+    `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`),
   );
   const past = sorted.filter((a) => a.date < today);
   const lastVisit = past.length ? past[past.length - 1] : null;
@@ -68,7 +68,9 @@ export function buildVisitSummary(input: {
   const from = lastVisit ? lastVisit.date : daysAgoKey(DEFAULT_PERIOD_DAYS, parseKey(today));
   const inPeriod = (date: string) => date >= from && date <= today;
 
-  const checkIns = input.checkIns.filter((c) => inPeriod(c.date)).sort((a, b) => a.date.localeCompare(b.date));
+  const checkIns = input.checkIns
+    .filter((c) => inPeriod(c.date))
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   const symptoms: SymptomSummary[] = SYMPTOMS.map(({ key, name }) => {
     // Skips check-ins without this question, so questions can be added to the check-in later
@@ -88,7 +90,8 @@ export function buildVisitSummary(input: {
   });
 
   const logs = input.doseLogs.filter((l) => inPeriod(l.date));
-  const medName = (id: string) => input.medications.find((m) => m.id === id)?.name ?? 'Removed medicine';
+  const medName = (id: string) =>
+    input.medications.find((m) => m.id === id)?.name ?? 'Removed medicine';
 
   return {
     from,

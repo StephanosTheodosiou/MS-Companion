@@ -32,7 +32,12 @@ export default function QuestionsScreen() {
   const onAdd = async () => {
     if (draft.trim() === '') return;
     try {
-      await saveQuestion({ id: newId(), text: draft.trim(), createdAt: new Date().toISOString(), asked: false });
+      await saveQuestion({
+        id: newId(),
+        text: draft.trim(),
+        createdAt: new Date().toISOString(),
+        asked: false,
+      });
       setDraft('');
       reload();
     } catch (e) {
@@ -67,8 +72,7 @@ export default function QuestionsScreen() {
     <Screen
       topBar={<TopBar onBack={() => router.back()} />}
       title="Questions for my doctor"
-      subtitle="Write questions down when you think of them. They appear on your visit summary."
-    >
+      subtitle="Write questions down when you think of them. They appear on your visit summary.">
       <Section variant="plain">
         <TextField
           label="New question"
@@ -84,8 +88,9 @@ export default function QuestionsScreen() {
       <Section
         header="To ask"
         iconInset
-        footer={toAsk.length === 0 ? 'No questions yet.' : 'Tap a question once you have asked it.'}
-      >
+        footer={
+          toAsk.length === 0 ? 'No questions yet.' : 'Tap a question once you have asked it.'
+        }>
         {toAsk.map((q) => (
           <Row
             key={q.id}
@@ -114,7 +119,9 @@ export default function QuestionsScreen() {
           <Row icon="trash-2" label="Remove asked questions" destructive onPress={clearAsked} />
         </Section>
       ) : null}
-      {asked.length > 0 ? <AppText variant="footnote">Asked questions no longer appear on the summary.</AppText> : null}
+      {asked.length > 0 ? (
+        <AppText variant="footnote">Asked questions no longer appear on the summary.</AppText>
+      ) : null}
     </Screen>
   );
 }

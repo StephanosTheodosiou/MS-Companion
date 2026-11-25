@@ -36,8 +36,7 @@ export function AppText({ variant = 'body', color, style, children, ...rest }: P
           textTransform: overline ? 'uppercase' : 'none',
         },
         style,
-      ]}
-    >
+      ]}>
       {children}
     </Text>
   );

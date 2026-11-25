@@ -28,14 +28,16 @@ export function BloodTestRow({ title, subtitle, overdue, onDone, onOpen }: Props
         accessibilityRole="button"
         accessibilityLabel={`${title}, ${subtitle}`}
         accessibilityHint="Opens the blood test"
-        style={({ pressed }) => [styles.main, pressed && styles.pressed]}
-      >
+        style={({ pressed }) => [styles.main, pressed && styles.pressed]}>
         <IconCircle name="droplet" />
         <View style={styles.text}>
           <AppText variant="label" style={styles.bold}>
             {title}
           </AppText>
-          <AppText color={overdue ? colors.destructive : colors.secondary} variant="footnote" style={overdue && styles.bold}>
+          <AppText
+            color={overdue ? colors.destructive : colors.secondary}
+            variant="footnote"
+            style={overdue && styles.bold}>
             {subtitle}
           </AppText>
         </View>
@@ -46,9 +48,12 @@ export function BloodTestRow({ title, subtitle, overdue, onDone, onOpen }: Props
           onPress={onDone}
           accessibilityRole="button"
           accessibilityLabel={`Mark done: ${title}`}
-          style={({ pressed }) => [styles.pill, pressed && { opacity: 0.7 }]}
-        >
-          <AppText variant="label" color={colors.onAccent} style={[styles.pillLabel, styles.bold]} textBreakStrategy="simple">
+          style={({ pressed }) => [styles.pill, pressed && { opacity: 0.7 }]}>
+          <AppText
+            variant="label"
+            color={colors.onAccent}
+            style={[styles.pillLabel, styles.bold]}
+            textBreakStrategy="simple">
             Done
           </AppText>
         </Pressable>

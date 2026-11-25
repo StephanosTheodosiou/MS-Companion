@@ -20,7 +20,7 @@ export default function ProfileTabScreen() {
     useCallback(() => {
       load();
       setSaved(false);
-    }, [load])
+    }, [load]),
   );
 
   return (
@@ -36,16 +36,24 @@ export default function ProfileTabScreen() {
             disabled={form.saving}
           />
           {saved ? (
-            <AppText variant="footnote" color={colors.accent} style={{ textAlign: 'center' }} accessibilityLiveRegion="polite">
+            <AppText
+              variant="footnote"
+              color={colors.accent}
+              style={{ textAlign: 'center' }}
+              accessibilityLiveRegion="polite">
               Saved
             </AppText>
           ) : null}
         </>
-      }
-    >
+      }>
       {form.fields}
       <Section header="Medicines" iconInset>
-        <Row icon="plus-square" label="My medicines and doses" chevron onPress={() => router.push('/medications')} />
+        <Row
+          icon="plus-square"
+          label="My medicines and doses"
+          chevron
+          onPress={() => router.push('/medications')}
+        />
       </Section>
     </Screen>
   );

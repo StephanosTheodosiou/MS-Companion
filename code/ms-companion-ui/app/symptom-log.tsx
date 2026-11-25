@@ -19,7 +19,7 @@ export default function SymptomLogScreen() {
       listSymptomEntries()
         .then(setEntries)
         .catch((e) => console.warn('Could not load symptom log', e));
-    }, [])
+    }, []),
   );
 
   return (
@@ -27,8 +27,9 @@ export default function SymptomLogScreen() {
       topBar={<TopBar onBack={() => router.back()} />}
       title="Symptom log"
       subtitle="New or worse symptoms you logged. They are added to your next visit summary."
-      footer={<Button label="Log a new or worse symptom" onPress={() => router.push('/symptom-entry')} />}
-    >
+      footer={
+        <Button label="Log a new or worse symptom" onPress={() => router.push('/symptom-entry')} />
+      }>
       <Section iconInset footer={entries.length === 0 ? 'Nothing logged yet.' : undefined}>
         {entries.map((entry) => (
           <Row

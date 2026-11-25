@@ -16,7 +16,13 @@ interface Props {
   accessibilityHint?: string;
 }
 
-export function Button({ label, onPress, variant = 'primary', disabled, accessibilityHint }: Props) {
+export function Button({
+  label,
+  onPress,
+  variant = 'primary',
+  disabled,
+  accessibilityHint,
+}: Props) {
   const colors = useColors();
   const textColor = variant === 'primary' ? colors.onAccent : colors.accent;
   return (
@@ -29,20 +35,20 @@ export function Button({ label, onPress, variant = 'primary', disabled, accessib
       accessibilityState={{ disabled: !!disabled }}
       style={({ pressed }) => [
         styles.base,
-        variant === 'primary' && { backgroundColor: pressed ? colors.accentPressed : colors.accent },
+        variant === 'primary' && {
+          backgroundColor: pressed ? colors.accentPressed : colors.accent,
+        },
         variant === 'light' && { backgroundColor: pressed ? colors.accentSoft : colors.surface },
         variant === 'plain' && pressed && { opacity: 0.6 },
         disabled && styles.disabled,
-      ]}
-    >
+      ]}>
       <AppText
         variant="label"
         color={textColor}
         // Full button width: on some Android phones bold text is measured too
         // narrow and the last word was cut off.
         style={styles.label}
-        textBreakStrategy="simple"
-      >
+        textBreakStrategy="simple">
         {label}
       </AppText>
     </Pressable>

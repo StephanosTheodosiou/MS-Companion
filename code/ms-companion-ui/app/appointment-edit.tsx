@@ -62,7 +62,14 @@ export default function AppointmentEditScreen() {
     setTimeError(time ? null : 'Choose a time.');
     if (!date || !time) return;
     try {
-      await saveAppointment({ id: editingId ?? newId(), date, time, withWhom: withWhom.trim(), place: place.trim(), notes: notes.trim() });
+      await saveAppointment({
+        id: editingId ?? newId(),
+        date,
+        time,
+        withWhom: withWhom.trim(),
+        place: place.trim(),
+        notes: notes.trim(),
+      });
       router.back();
     } catch (e) {
       console.warn('Could not save appointment', e);
@@ -90,7 +97,12 @@ export default function AppointmentEditScreen() {
   };
 
   const dateLabel = date
-    ? keyToDate(date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+    ? keyToDate(date).toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
     : null;
 
   return (
@@ -98,8 +110,7 @@ export default function AppointmentEditScreen() {
       topBar={<TopBar onBack={() => router.back()} />}
       title={editingId ? 'Edit appointment' : 'Add an appointment'}
       subtitle="Add appointments your MS clinic has booked for you, or past visits."
-      footer={<Button label="Save" onPress={onSave} />}
-    >
+      footer={<Button label="Save" onPress={onSave} />}>
       <Section header="When" iconInset>
         <PickerRow
           label="Date"
@@ -126,9 +137,32 @@ export default function AppointmentEditScreen() {
       </Section>
 
       <Section variant="plain">
-        <TextField label="With" icon="user" placeholder="For example: Dr Andreas, MS nurse" hint="Optional." value={withWhom} onChangeText={setWithWhom} autoCapitalize="words" />
-        <TextField label="Where" icon="map-pin" placeholder="Hospital or clinic" hint="Optional." value={place} onChangeText={setPlace} />
-        <TextField label="Notes" icon="edit-3" placeholder="For example: bring blood test results" hint="Optional." value={notes} onChangeText={setNotes} multiline />
+        <TextField
+          label="With"
+          icon="user"
+          placeholder="For example: Dr Andreas, MS nurse"
+          hint="Optional."
+          value={withWhom}
+          onChangeText={setWithWhom}
+          autoCapitalize="words"
+        />
+        <TextField
+          label="Where"
+          icon="map-pin"
+          placeholder="Hospital or clinic"
+          hint="Optional."
+          value={place}
+          onChangeText={setPlace}
+        />
+        <TextField
+          label="Notes"
+          icon="edit-3"
+          placeholder="For example: bring blood test results"
+          hint="Optional."
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+        />
       </Section>
 
       {editingId ? (

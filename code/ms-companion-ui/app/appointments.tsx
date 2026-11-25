@@ -20,31 +20,57 @@ export default function AppointmentsScreen() {
       listAppointments()
         .then(setAppointments)
         .catch((e) => console.warn('Could not load appointments', e));
-    }, [])
+    }, []),
   );
 
   const today = todayKey();
   const upcoming = appointments.filter((a) => a.date >= today);
-  const past = appointments.filter((a) => a.date < today).reverse().slice(0, 5);
-  const open = (a: Appointment) => router.push({ pathname: '/appointment-edit', params: { id: a.id } });
+  const past = appointments
+    .filter((a) => a.date < today)
+    .reverse()
+    .slice(0, 5);
+  const open = (a: Appointment) =>
+    router.push({ pathname: '/appointment-edit', params: { id: a.id } });
 
   return (
     <Screen
       topBar={<TopBar onBack={() => router.back()} />}
       title="Appointments"
       subtitle="Appointments your MS clinic has booked for you."
-      footer={<Button label="Add an appointment" onPress={() => router.push('/appointment-edit')} />}
-    >
-      <Section header="Upcoming" iconInset footer={upcoming.length === 0 ? 'No upcoming appointments.' : undefined}>
+      footer={
+        <Button label="Add an appointment" onPress={() => router.push('/appointment-edit')} />
+      }>
+      <Section
+        header="Upcoming"
+        iconInset
+        footer={upcoming.length === 0 ? 'No upcoming appointments.' : undefined}>
         {upcoming.map((a) => (
-          <Row key={a.id} icon="calendar" strong label={appointmentTitle(a)} description={appointmentDetails(a)} chevron onPress={() => open(a)} />
+          <Row
+            key={a.id}
+            icon="calendar"
+            strong
+            label={appointmentTitle(a)}
+            description={appointmentDetails(a)}
+            chevron
+            onPress={() => open(a)}
+          />
         ))}
       </Section>
 
       {past.length > 0 ? (
-        <Section header="Past" iconInset footer="Your visit summary covers everything since your last visit.">
+        <Section
+          header="Past"
+          iconInset
+          footer="Your visit summary covers everything since your last visit.">
           {past.map((a) => (
-            <Row key={a.id} icon="check-circle" label={appointmentTitle(a)} description={appointmentDetails(a)} chevron onPress={() => open(a)} />
+            <Row
+              key={a.id}
+              icon="check-circle"
+              label={appointmentTitle(a)}
+              description={appointmentDetails(a)}
+              chevron
+              onPress={() => open(a)}
+            />
           ))}
         </Section>
       ) : null}

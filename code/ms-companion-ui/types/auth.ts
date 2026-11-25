@@ -1,7 +1,4 @@
-
-
 export type UserRole = 'User' | 'Admin';
-
 
 export type User = {
   id: string;
@@ -18,7 +15,6 @@ export type AuthResponse = {
   user: User;
 };
 
-
 export type LoginRequest = {
   email: string;
   password: string;
@@ -30,6 +26,5 @@ export type RegisterRequest = {
   firstName: string;
   lastName: string;
 };
-
 
 export type Session = AuthResponse;

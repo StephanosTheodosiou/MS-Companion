@@ -64,8 +64,6 @@ export async function saveProfile(next: Profile): Promise<void> {
   };
 }
 
-
-
 export async function hasCompletedOnboarding(): Promise<boolean> {
   return onboardingDone;
 }
@@ -132,9 +130,13 @@ export async function logDose(log: DoseLog): Promise<void> {
 }
 
 /** Removes the log for one scheduled dose (undo). */
-export async function clearDoseLog(medicationId: string, date: string, time: string): Promise<void> {
+export async function clearDoseLog(
+  medicationId: string,
+  date: string,
+  time: string,
+): Promise<void> {
   doseLogs = doseLogs.filter(
-    (l) => !(l.medicationId === medicationId && l.date === date && l.time === time)
+    (l) => !(l.medicationId === medicationId && l.date === date && l.time === time),
   );
 }
 
@@ -173,7 +175,7 @@ export async function listAllDoseLogs(): Promise<DoseLog[]> {
 /** All appointments, earliest first. */
 export async function listAppointments(): Promise<Appointment[]> {
   return [...appointments].sort((a, b) =>
-    `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`)
+    `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`),
   );
 }
 
@@ -243,7 +245,7 @@ export async function exportAllData(): Promise<string> {
       bloodTests,
     },
     null,
-    2
+    2,
   );
 }
 

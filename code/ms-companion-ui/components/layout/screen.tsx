@@ -43,15 +43,18 @@ export function Screen({
   const styles = useStyles();
   const colors = useColors();
   return (
-    <SafeAreaView style={styles.safe} edges={inTabs ? ['top', 'left', 'right'] : ['top', 'left', 'right', 'bottom']}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <SafeAreaView
+      style={styles.safe}
+      edges={inTabs ? ['top', 'left', 'right'] : ['top', 'left', 'right', 'bottom']}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {topBar ? <View style={styles.topBar}>{topBar}</View> : null}
         <ScrollView
           ref={scrollRef}
           style={styles.flex}
           contentContainerStyle={[styles.content, !topBar && styles.contentNoBar]}
-          keyboardShouldPersistTaps="handled"
-        >
+          keyboardShouldPersistTaps="handled">
           {title ? (
             <View style={styles.titleBlock}>
               {header}
@@ -79,9 +82,19 @@ const useStyles = makeStyles((colors) => ({
   safe: { flex: 1, backgroundColor: colors.page },
   flex: { flex: 1 },
   topBar: { paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.md },
-  content: { paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xxl, gap: space.xxl },
+  content: {
+    paddingHorizontal: space.xl,
+    paddingTop: space.sm,
+    paddingBottom: space.xxl,
+    gap: space.xxl,
+  },
   contentNoBar: { paddingTop: space.xxl },
   titleBlock: { gap: space.sm },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  footer: { paddingHorizontal: space.xl, paddingTop: space.md, paddingBottom: space.md, gap: space.xs },
+  footer: {
+    paddingHorizontal: space.xl,
+    paddingTop: space.md,
+    paddingBottom: space.md,
+    gap: space.xs,
+  },
 }));

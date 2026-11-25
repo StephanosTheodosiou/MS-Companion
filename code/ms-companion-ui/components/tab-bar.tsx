@@ -25,7 +25,9 @@ export function TabBar({ state }: TabBarProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, space.sm) }]} accessibilityRole="tablist">
+    <View
+      style={[styles.bar, { paddingBottom: Math.max(insets.bottom, space.sm) }]}
+      accessibilityRole="tablist">
       {state.routes.map((route, index) => {
         const focused = state.index === index;
         // A tab file without an entry in TABS still gets a button instead of crashing the bar.
@@ -40,8 +42,7 @@ export function TabBar({ state }: TabBarProps) {
             accessibilityRole="tab"
             accessibilityLabel={tab.label}
             accessibilityState={{ selected: focused }}
-            style={styles.tab}
-          >
+            style={styles.tab}>
             <View style={[styles.pill, focused && styles.pillActive]}>
               <Icon name={tab.icon} size={24} color={focused ? colors.accent : colors.secondary} />
             </View>
@@ -50,8 +51,7 @@ export function TabBar({ state }: TabBarProps) {
               color={focused ? colors.accent : colors.secondary}
               // Fixed size: the bar must fit on small phones even at the largest text setting.
               style={[styles.label, focused && styles.labelActive]}
-              numberOfLines={1}
-            >
+              numberOfLines={1}>
               {tab.label}
             </AppText>
           </Pressable>

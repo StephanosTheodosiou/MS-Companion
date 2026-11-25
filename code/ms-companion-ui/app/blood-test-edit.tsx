@@ -81,7 +81,16 @@ export default function BloodTestEditScreen() {
   const onMarkDone = async () => {
     if (!existing) return;
     try {
-      await saveBloodTest(markDone({ ...existing, name: name.trim() || existing.name, dueDate: dueDate ?? existing.dueDate, repeat, remindDaysBefore: remind, notes: notes.trim() }));
+      await saveBloodTest(
+        markDone({
+          ...existing,
+          name: name.trim() || existing.name,
+          dueDate: dueDate ?? existing.dueDate,
+          repeat,
+          remindDaysBefore: remind,
+          notes: notes.trim(),
+        }),
+      );
       router.back();
     } catch (e) {
       console.warn('Could not mark blood test as done', e);
@@ -109,7 +118,12 @@ export default function BloodTestEditScreen() {
   };
 
   const dateLabel = dueDate
-    ? keyToDate(dueDate).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+    ? keyToDate(dueDate).toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
     : null;
   const finished = existing ? isFinished(existing) : false;
 
@@ -118,8 +132,7 @@ export default function BloodTestEditScreen() {
       topBar={<TopBar onBack={() => router.back()} />}
       title={editingId ? 'Edit blood test' : 'Add a blood test'}
       subtitle="Your MS team tells you which blood tests you need and when."
-      footer={<Button label="Save" onPress={onSave} disabled={saving} />}
-    >
+      footer={<Button label="Save" onPress={onSave} disabled={saving} />}>
       <Section variant="plain">
         <TextField
           label="Name"
@@ -149,12 +162,30 @@ export default function BloodTestEditScreen() {
         />
       </Section>
 
-      <ChoiceCards header="How often?" options={REPEAT_OPTIONS} selected={repeat} onSelect={setRepeat} />
-      <ChoiceCards header="Remind me" options={REMIND_OPTIONS} selected={remind} onSelect={setRemind} />
+      <ChoiceCards
+        header="How often?"
+        options={REPEAT_OPTIONS}
+        selected={repeat}
+        onSelect={setRepeat}
+      />
+      <ChoiceCards
+        header="Remind me"
+        options={REMIND_OPTIONS}
+        selected={remind}
+        onSelect={setRemind}
+      />
       <AppText variant="footnote">Reminders need Reminders to be turned on in Settings.</AppText>
 
       <Section variant="plain">
-        <TextField label="Notes" icon="edit-3" placeholder="For example: fasting needed, bring the form" hint="Optional." value={notes} onChangeText={setNotes} multiline />
+        <TextField
+          label="Notes"
+          icon="edit-3"
+          placeholder="For example: fasting needed, bring the form"
+          hint="Optional."
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+        />
       </Section>
 
       {editingId ? (

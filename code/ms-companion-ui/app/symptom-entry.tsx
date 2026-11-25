@@ -105,7 +105,7 @@ export default function SymptomEntryScreen() {
     const hasPhone = profile.teamPhone.trim() !== '';
     const call = () =>
       Linking.openURL(`tel:${toDialNumber(profile.teamPhone)}`).catch(() =>
-        Alert.alert('The call did not start', `Dial ${profile.teamPhone} from your phone app.`)
+        Alert.alert('The call did not start', `Dial ${profile.teamPhone} from your phone app.`),
       );
     const urgent = result === 'contact-team';
     return (
@@ -116,12 +116,19 @@ export default function SymptomEntryScreen() {
         footer={
           <>
             {hasPhone ? (
-              <Button label={`Call ${teamName}`} onPress={call} variant={urgent ? 'primary' : 'plain'} />
+              <Button
+                label={`Call ${teamName}`}
+                onPress={call}
+                variant={urgent ? 'primary' : 'plain'}
+              />
             ) : null}
-            <Button label="Done" variant={hasPhone && urgent ? 'plain' : 'primary'} onPress={() => router.back()} />
+            <Button
+              label="Done"
+              variant={hasPhone && urgent ? 'plain' : 'primary'}
+              onPress={() => router.back()}
+            />
           </>
-        }
-      >
+        }>
         <Section iconInset>
           <Row
             icon="check"
@@ -150,8 +157,7 @@ export default function SymptomEntryScreen() {
       topBar={<TopBar onBack={() => router.back()} />}
       title="New or worse symptom"
       subtitle="Answer four short questions. The app will tell you what to do next."
-      footer={<Button label="Save" onPress={onSave} />}
-    >
+      footer={<Button label="Save" onPress={onSave} />}>
       <TextField
         label="What is new or worse?"
         icon="edit-3"
@@ -163,8 +169,18 @@ export default function SymptomEntryScreen() {
         }}
         multiline
       />
-      <ChoiceCards header="When did it start?" options={STARTED} selected={started} onSelect={setStarted} />
-      <ChoiceCards header="Has it lasted more than 24 hours?" options={LASTED} selected={lasted} onSelect={setLasted} />
+      <ChoiceCards
+        header="When did it start?"
+        options={STARTED}
+        selected={started}
+        onSelect={setStarted}
+      />
+      <ChoiceCards
+        header="Has it lasted more than 24 hours?"
+        options={LASTED}
+        selected={lasted}
+        onSelect={setLasted}
+      />
       <ChoiceCards
         header="Fever, infection or very hot?"
         options={FEVER}

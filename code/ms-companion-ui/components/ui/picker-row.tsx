@@ -59,18 +59,16 @@ export function PickerRow({ label, mode, value, display, onChange, error }: Prop
         accessibilityLabel={`${label}, ${display ?? 'not chosen'}`}
         accessibilityHint={mode === 'date' ? 'Opens the calendar' : 'Opens the clock'}
         accessory={
-          <AppText variant="label" color={display ? colors.accent : colors.secondary} style={styles.value}>
+          <AppText
+            variant="label"
+            color={display ? colors.accent : colors.secondary}
+            style={styles.value}>
             {display ?? 'Choose'}
           </AppText>
         }
       />
       {open && Platform.OS === 'android' ? (
-        <DateTimePicker
-          value={initial}
-          mode={mode}
-          is24Hour
-          onChange={handleAndroidChange}
-        />
+        <DateTimePicker value={initial} mode={mode} is24Hour onChange={handleAndroidChange} />
       ) : null}
       {open && Platform.OS === 'ios' ? (
         <View style={styles.inline}>
@@ -119,7 +117,11 @@ export function PickerRow({ label, mode, value, display, onChange, error }: Prop
         </View>
       ) : null}
       {error ? (
-        <AppText variant="footnote" color={colors.destructive} style={styles.error} accessibilityLiveRegion="polite">
+        <AppText
+          variant="footnote"
+          color={colors.destructive}
+          style={styles.error}
+          accessibilityLiveRegion="polite">
           {error}
         </AppText>
       ) : null}
@@ -136,6 +138,10 @@ function defaultValue(mode: 'date' | 'time'): Date {
 const useStyles = makeStyles((colors) => ({
   value: { fontWeight: '700' },
   inline: { backgroundColor: colors.surface, paddingHorizontal: space.sm },
-  webInline: { backgroundColor: colors.surface, paddingHorizontal: space.lg, paddingBottom: space.md },
+  webInline: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: space.lg,
+    paddingBottom: space.md,
+  },
   error: { paddingHorizontal: space.lg, paddingBottom: space.md, backgroundColor: colors.surface },
 }));

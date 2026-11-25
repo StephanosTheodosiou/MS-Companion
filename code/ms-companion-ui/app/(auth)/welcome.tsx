@@ -21,10 +21,13 @@ export default function WelcomeScreen() {
           <PageDots index={0} total={4} />
           <View style={styles.gap} />
           <Button label="Create an account" onPress={() => router.push('/register')} />
-          <Button label="I already have an account" variant="plain" onPress={() => router.push('/login')} />
+          <Button
+            label="I already have an account"
+            variant="plain"
+            onPress={() => router.push('/login')}
+          />
         </>
-      }
-    >
+      }>
       <Section header="What the app stores" iconInset>
         <Row
           icon="clipboard"
@@ -49,7 +52,9 @@ export default function WelcomeScreen() {
       <Note>Change your choices or delete your data any time in Settings.</Note>
 
       <SafetyCard>
-        {'MS Companion does not diagnose relapses or give treatment advice.\nIn an emergency, call 112.'}
+        {
+          'MS Companion does not diagnose relapses or give treatment advice.\nIn an emergency, call 112.'
+        }
       </SafetyCard>
     </Screen>
   );

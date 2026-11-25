@@ -17,13 +17,11 @@ export const GUIDANCE_TEXT: Record<Guidance, { title: string; body: string }> = 
   },
   'fever-or-heat': {
     title: 'Rest, cool down and keep watching',
-    body:
-      'A fever, an infection or heat can make MS symptoms worse for a short time. If the symptom is still there 24 hours after you have cooled down or the fever has gone, contact your MS team.',
+    body: 'A fever, an infection or heat can make MS symptoms worse for a short time. If the symptom is still there 24 hours after you have cooled down or the fever has gone, contact your MS team.',
   },
   'keep-watching': {
     title: 'Keep an eye on it',
-    body:
-      'If the symptom is still there after 24 hours, contact your MS team. You can add a new entry then.',
+    body: 'If the symptom is still there after 24 hours, contact your MS team. You can add a new entry then.',
   },
 };
 

@@ -3,7 +3,13 @@ import { StyleProp, View, ViewStyle } from 'react-native';
 import { radius, shadow } from '@/constants/design-tokens';
 import { makeStyles } from '@/hooks/use-colors';
 
-export function Card({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
+export function Card({
+  children,
+  style,
+}: {
+  children: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) {
   const styles = useStyles();
   return <View style={[styles.card, style]}>{children}</View>;
 }

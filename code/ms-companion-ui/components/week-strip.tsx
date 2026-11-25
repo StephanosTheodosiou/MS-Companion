@@ -31,32 +31,31 @@ export function WeekStrip({ days }: { days: WeekDay[] }) {
         accessible
         accessibilityLabel={`This week: ${done} of 7 days checked in. ${days
           .filter((d) => !d.isFuture)
-          .map((d) => `${d.name}${d.isToday ? ' (today)' : ''}: ${d.checkedIn ? 'checked in' : 'no check-in'}`)
-          .join('. ')}`}
-      >
+          .map(
+            (d) =>
+              `${d.name}${d.isToday ? ' (today)' : ''}: ${d.checkedIn ? 'checked in' : 'no check-in'}`,
+          )
+          .join('. ')}`}>
         {days.map((d) => (
           <View key={d.date} style={styles.day}>
             <AppText
               variant="label"
               color={d.isToday ? colors.accent : colors.secondary}
-              style={d.isToday ? styles.todayLetter : undefined}
-            >
+              style={d.isToday ? styles.todayLetter : undefined}>
               {d.letter}
             </AppText>
             <View
               style={[
                 styles.circle,
                 d.checkedIn ? styles.done : d.isToday ? styles.today : styles.other,
-              ]}
-            >
+              ]}>
               {d.checkedIn ? (
                 <Icon name="check" size={20} color={colors.onAccent} />
               ) : (
                 <AppText
                   variant="label"
                   color={d.isToday ? colors.accent : colors.secondary}
-                  style={d.isToday ? styles.todayLetter : styles.otherNumber}
-                >
+                  style={d.isToday ? styles.todayLetter : styles.otherNumber}>
                   {d.dayOfMonth}
                 </AppText>
               )}
@@ -72,7 +71,13 @@ const useStyles = makeStyles((colors) => ({
   card: { paddingVertical: space.lg, paddingHorizontal: space.sm },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
   day: { flex: 1, alignItems: 'center', gap: space.md },
-  circle: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+  circle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   done: { backgroundColor: colors.accent },
   today: { backgroundColor: colors.accentSoft, borderWidth: 2, borderColor: colors.accent },
   other: { backgroundColor: colors.muted },

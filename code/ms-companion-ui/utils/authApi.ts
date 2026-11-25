@@ -9,6 +9,5 @@ export const authApi = {
   register: (request: RegisterRequest) =>
     api.post<AuthResponse>('/api/auth/register', request, { auth: false }),
 
-
   me: () => api.get<User>('/api/auth/me'),
 };

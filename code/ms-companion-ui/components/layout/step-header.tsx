@@ -25,8 +25,7 @@ export function BackButton({ onPress }: { onPress: () => void }) {
       accessibilityRole="button"
       accessibilityLabel="Back"
       hitSlop={8}
-      style={({ pressed }) => [styles.back, pressed && { opacity: 0.7 }]}
-    >
+      style={({ pressed }) => [styles.back, pressed && { opacity: 0.7 }]}>
       <Icon name="arrow-left" color={colors.ink} size={24} />
     </Pressable>
   );
@@ -39,12 +38,15 @@ function Bars({ step, total, short }: { step: number; total: number; short?: boo
     <View
       style={[styles.bars, short && styles.barsShort]}
       accessibilityRole="progressbar"
-      accessibilityValue={{ min: 0, max: total, now: step }}
-    >
+      accessibilityValue={{ min: 0, max: total, now: step }}>
       {Array.from({ length: total }, (_, i) => (
         <View
           key={i}
-          style={[styles.bar, short && styles.barShort, { backgroundColor: i < step ? colors.accent : colors.track }]}
+          style={[
+            styles.bar,
+            short && styles.barShort,
+            { backgroundColor: i < step ? colors.accent : colors.track },
+          ]}
         />
       ))}
     </View>

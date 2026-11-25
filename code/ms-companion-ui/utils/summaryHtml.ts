@@ -28,7 +28,11 @@ const row = (label: string, value: string) =>
 
 const empty = (text: string) => `<p class="empty">${escapeHtml(text)}</p>`;
 
-export function visitSummaryHtml(summary: VisitSummary, profile: Profile, medications: Medication[]): string {
+export function visitSummaryHtml(
+  summary: VisitSummary,
+  profile: Profile,
+  medications: Medication[],
+): string {
   const period = summary.lastVisit
     ? `Since the last visit on ${formatShortDate(summary.from)} (${summary.days} days)`
     : `Last ${summary.days} days`;
@@ -42,10 +46,12 @@ export function visitSummaryHtml(summary: VisitSummary, profile: Profile, medica
               s.name,
               [s.average !== null ? describeAverage(s.average) : '', describeChange(s.change) ?? '']
                 .filter(Boolean)
-                .join(' · ')
-            )
+                .join(' · '),
+            ),
           )
-          .join('')}${summary.lowMoodDays > 0 ? row('Low mood', `${summary.lowMoodDays} day(s)`) : ''}</table>
+          .join(
+            '',
+          )}${summary.lowMoodDays > 0 ? row('Low mood', `${summary.lowMoodDays} day(s)`) : ''}</table>
          <p class="note">${summary.checkInDays} of ${summary.days} days filled in. Scale: 0 not at all to 4 extremely.</p>`
       : empty('No check-ins in this period.');
 
@@ -55,7 +61,7 @@ export function visitSummaryHtml(summary: VisitSummary, profile: Profile, medica
           (e) =>
             `<li><strong>${escapeHtml(e.description)}</strong>. Started ${formatShortDate(e.startedOn)}, ${
               e.lastedOver24h ? 'lasted over 24 hours' : 'under 24 hours'
-            }${e.feverOrHeat ? ', with fever or heat' : ''}.</li>`
+            }${e.feverOrHeat ? ', with fever or heat' : ''}.</li>`,
         )
         .join('')}</ul>`
     : empty('None logged in this period.');
@@ -67,7 +73,10 @@ export function visitSummaryHtml(summary: VisitSummary, profile: Profile, medica
     ${
       summary.sideEffects.length
         ? `<ul>${summary.sideEffects
-            .map((s) => `<li>Side effect: ${escapeHtml(s.description)} (${escapeHtml(s.medicine)}, ${formatShortDate(s.date)})</li>`)
+            .map(
+              (s) =>
+                `<li>Side effect: ${escapeHtml(s.description)} (${escapeHtml(s.medicine)}, ${formatShortDate(s.date)})</li>`,
+            )
             .join('')}</ul>`
         : ''
     }`;

@@ -41,7 +41,6 @@ export class ApiError extends Error {
 
 let unauthorizedHandler: (() => void) | undefined;
 
-
 export function setUnauthorizedHandler(handler: (() => void) | undefined): void {
   unauthorizedHandler = handler;
 }

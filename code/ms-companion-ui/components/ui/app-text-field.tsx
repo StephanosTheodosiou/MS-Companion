@@ -16,7 +16,17 @@ interface Props extends Omit<TextInputProps, 'style'> {
   trailing?: React.ReactNode;
 }
 
-export function TextField({ label, icon, hint, error, trailing, multiline, onFocus, onBlur, ...rest }: Props) {
+export function TextField({
+  label,
+  icon,
+  hint,
+  error,
+  trailing,
+  multiline,
+  onFocus,
+  onBlur,
+  ...rest
+}: Props) {
   const styles = useStyles();
   const colors = useColors();
   const { scale } = useTextSize();
@@ -37,10 +47,11 @@ export function TextField({ label, icon, hint, error, trailing, multiline, onFoc
           multiline && styles.boxMultiline,
           focused && { borderColor: colors.accent },
           !!error && { borderColor: colors.destructive },
-        ]}
-      >
+        ]}>
         {icon ? (
-          <View style={multiline ? styles.iconTop : undefined} importantForAccessibility="no-hide-descendants">
+          <View
+            style={multiline ? styles.iconTop : undefined}
+            importantForAccessibility="no-hide-descendants">
             <Icon name={icon} color={colors.secondary} size={20} />
           </View>
         ) : null}
@@ -58,7 +69,12 @@ export function TextField({ label, icon, hint, error, trailing, multiline, onFoc
             setFocused(false);
             onBlur?.(e);
           }}
-          style={[styles.input, { fontSize }, multiline && styles.multiline, multiline && { minHeight: multiHeight - 2 * space.md }]}
+          style={[
+            styles.input,
+            { fontSize },
+            multiline && styles.multiline,
+            multiline && { minHeight: multiHeight - 2 * space.md },
+          ]}
         />
         {trailing}
       </View>

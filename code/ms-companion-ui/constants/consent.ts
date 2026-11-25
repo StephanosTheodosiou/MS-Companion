@@ -8,7 +8,22 @@ export const OPTIONAL_CONSENTS: {
   description: string;
   icon: IconName;
 }[] = [
-  { key: 'medication', label: 'Medication', description: 'Your medicine list and dose reminders.', icon: 'plus-square' },
-  { key: 'notifications', label: 'Reminders', description: 'A daily nudge to fill in your check-in.', icon: 'bell' },
-  { key: 'location', label: 'Location', description: 'Only used to warn you about hot days.', icon: 'map-pin' },
+  {
+    key: 'medication',
+    label: 'Medication',
+    description: 'Your medicine list and dose reminders.',
+    icon: 'plus-square',
+  },
+  {
+    key: 'notifications',
+    label: 'Reminders',
+    description: 'A daily nudge to fill in your check-in.',
+    icon: 'bell',
+  },
+  {
+    key: 'location',
+    label: 'Location',
+    description: 'Only used to warn you about hot days.',
+    icon: 'map-pin',
+  },
 ];
