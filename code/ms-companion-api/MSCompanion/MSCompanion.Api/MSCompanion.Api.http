@@ -206,11 +206,7 @@ Authorization: Bearer {{login.response.body.$.token}}
 GET {{baseUrl}}/api/appointments?from=2026-11-01T00:00:00Z&to=2027-01-01T00:00:00Z
 Authorization: Bearer {{login.response.body.$.token}}
 
-### Next visit: Booked appointments from now on (status can repeat: ?status=Booked&status=Cancelled)
-GET {{baseUrl}}/api/appointments?status=Booked&from=2026-11-23T00:00:00Z
-Authorization: Bearer {{login.response.body.$.token}}
-
-### Add an appointment (endsAt is required unless status is Cancelled)
+### Add an appointment
 POST {{baseUrl}}/api/appointments
 Authorization: Bearer {{login.response.body.$.token}}
 Content-Type: application/json
@@ -223,6 +219,31 @@ Content-Type: application/json
   "location": "Nicosia General Hospital"
 }
 
+### Visit report: build and save the one-page summary for the next booked appointment
+# @name report
+POST {{baseUrl}}/api/visit-reports
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{}
+
+### Visit report for a specific appointment
+POST {{baseUrl}}/api/visit-reports
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "appointmentId": "00000000-0000-0000-0000-000000000000"
+}
+
+### Visit reports: list (newest first)
+GET {{baseUrl}}/api/visit-reports
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Visit report: the saved copy
+GET {{baseUrl}}/api/visit-reports/{{report.response.body.$.id}}
+Authorization: Bearer {{login.response.body.$.token}}
+
 ### Questions for my doctor (status=open or asked, optional appointmentId)
 GET {{baseUrl}}/api/visit-questions?status=open
 Authorization: Bearer {{login.response.body.$.token}}
@@ -234,4 +255,44 @@ Content-Type: application/json
 
 {
   "text": "Could the tiredness in the afternoons be from the new medication?"
+}
+
+### Side effects (ongoing=true for current ones, optional medicationId)
+GET {{baseUrl}}/api/side-effects?ongoing=true
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Report a side effect (medicationId is optional; needs Medication consent)
+POST {{baseUrl}}/api/side-effects
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "description": "Flushing and warm face after the morning dose",
+  "severity": "Mild",
+  "startedOn": "2026-11-18"
+}
+
+### Blood tests (status=Upcoming, Overdue or Completed; optional medicationId)
+GET {{baseUrl}}/api/blood-tests?status=Upcoming
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Add a blood test reminder (needs Medication consent)
+# @name addBloodTest
+POST {{baseUrl}}/api/blood-tests
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "testName": "Full blood count",
+  "dueDate": "2026-12-01",
+  "repeatEveryWeeks": 12
+}
+
+### Mark it done (creates the next one when it repeats)
+POST {{baseUrl}}/api/blood-tests/{{addBloodTest.response.body.$.id}}/complete
+Authorization: Bearer {{login.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "completedOn": "2026-11-24"
 }

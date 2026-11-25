@@ -48,6 +48,12 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IVisitQuestionRepository, VisitQuestionRepository>();
 builder.Services.AddScoped<IVisitQuestionService, VisitQuestionService>();
+builder.Services.AddScoped<ISideEffectRepository, SideEffectRepository>();
+builder.Services.AddScoped<ISideEffectService, SideEffectService>();
+builder.Services.AddScoped<IBloodTestRepository, BloodTestRepository>();
+builder.Services.AddScoped<IBloodTestService, BloodTestService>();
+builder.Services.AddScoped<IVisitReportRepository, VisitReportRepository>();
+builder.Services.AddScoped<IVisitReportService, VisitReportService>();
 
 // 4. Authentication (JWT bearer) and authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
