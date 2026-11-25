@@ -1,37 +1,60 @@
-import { ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useCallback, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { AppText } from '@/components/ui/app-text';
+import { Button } from '@/components/ui/app-button';
+import { Screen } from '@/components/layout/screen';
+import { Row } from '@/components/ui/row';
+import { Section } from '@/components/layout/section';
+import { useColors } from '@/hooks/use-colors';
+import { useProfileForm } from '@/hooks/use-profile-form';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/auth-context';
-import { Spacing } from '@/constants/theme';
-import { g } from '@/styles/global';
-
-export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
+// E1: the Profile tab, for changing the profile later.
+// Medicines have their own screen since E3, so the profile links to it instead of a text field.
+export default function ProfileTabScreen() {
+  const colors = useColors();
+  const router = useRouter();
+  const form = useProfileForm();
+  const [saved, setSaved] = useState(false);
+  const { load } = form;
+  useFocusEffect(
+    useCallback(() => {
+      load();
+      setSaved(false);
+    }, [load]),
+  );
 
   return (
-    <ThemedView style={g.screen}>
-      <SafeAreaView style={g.screen} edges={['top']}>
-        <ScrollView contentContainerStyle={[g.content, g.tabContent]}>
-          <ThemedText type="title" accessibilityRole="header">
-            Profile
-          </ThemedText>
-
-          {user ? (
-            <View style={{ gap: Spacing.one }}>
-              <ThemedText type="headline">
-                {user.firstName} {user.lastName}
-              </ThemedText>
-              <ThemedText themeColor="textSecondary">{user.email}</ThemedText>
-            </View>
+    <Screen
+      inTabs
+      scrollRef={form.scrollRef}
+      title="Your profile"
+      footer={
+        <>
+          <Button
+            label="Save changes"
+            onPress={async () => setSaved(await form.save())}
+            disabled={form.saving}
+          />
+          {saved ? (
+            <AppText
+              variant="footnote"
+              color={colors.accent}
+              style={{ textAlign: 'center' }}
+              accessibilityLiveRegion="polite">
+              Saved
+            </AppText>
           ) : null}
-
-          {/* Navigation back to login happens automatically (protected routes in app/_layout.tsx). */}
-          <Button title="Log out" variant="secondary" onPress={signOut} />
-        </ScrollView>
-      </SafeAreaView>
-    </ThemedView>
+        </>
+      }>
+      {form.fields}
+      <Section header="Medicines" iconInset>
+        <Row
+          icon="plus-square"
+          label="My medicines and doses"
+          chevron
+          onPress={() => router.push('/medications')}
+        />
+      </Section>
+    </Screen>
   );
 }

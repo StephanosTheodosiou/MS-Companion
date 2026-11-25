@@ -59,7 +59,6 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-
 export const Typography = {
   display: { fontSize: 28, lineHeight: 34, fontWeight: '700', letterSpacing: -0.4 },
   title: { fontSize: 22, lineHeight: 28, fontWeight: '700', letterSpacing: -0.2 },

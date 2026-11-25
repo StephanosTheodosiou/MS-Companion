@@ -7,7 +7,6 @@ export type FormValidators<T extends FormValues> = {
   [K in keyof T]?: (value: string, values: T) => string | undefined;
 };
 
-
 export function useForm<T extends FormValues>(initialValues: T, validators: FormValidators<T>) {
   const [values, setValues] = useState<T>(initialValues);
   const [errors, setErrors] = useState<FieldMessages<T>>({});

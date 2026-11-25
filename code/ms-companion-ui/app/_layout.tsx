@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 
 import { Colors } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/context/auth-context';
+import { TextSizeProvider } from '@/context/text-size-context';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 void SplashScreen.preventAutoHideAsync();
@@ -12,7 +13,9 @@ void SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootNavigator />
+      <TextSizeProvider>
+        <RootNavigator />
+      </TextSizeProvider>
     </AuthProvider>
   );
 }
@@ -33,6 +36,21 @@ function RootNavigator() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Protected guard={isSignedIn}>
           <Stack.Screen name="(tabs)" />
+          {/* E1 first-time setup: consent per data type, then the profile. */}
+          <Stack.Screen name="(onboarding)" />
+          {/* Full-screen pages opened from the tabs. Each draws its own back button. */}
+          <Stack.Screen name="check-in" />
+          <Stack.Screen name="medications" />
+          <Stack.Screen name="medication-edit" />
+          <Stack.Screen name="side-effect" />
+          <Stack.Screen name="blood-tests" />
+          <Stack.Screen name="blood-test-edit" />
+          <Stack.Screen name="symptom-log" />
+          <Stack.Screen name="symptom-entry" />
+          <Stack.Screen name="appointments" />
+          <Stack.Screen name="appointment-edit" />
+          <Stack.Screen name="questions" />
+          <Stack.Screen name="visit-summary" />
         </Stack.Protected>
 
         <Stack.Protected guard={!isSignedIn}>
