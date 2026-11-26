@@ -25,6 +25,10 @@ public static class VisitReportPdf
 
     private static readonly string Scale = $"{DailyCheckInQuestionnaire.MinScore}–{DailyCheckInQuestionnaire.MaxScore}";
 
+    private static readonly string ScaleNote =
+        $"Scores {Scale}: {DailyCheckInQuestionnaire.MinScore} = {Lower(DailyCheckInQuestionnaire.AnswerLabel(DailyCheckInQuestionnaire.MinScore))}, " +
+        $"{DailyCheckInQuestionnaire.MaxScore} = {Lower(DailyCheckInQuestionnaire.AnswerLabel(DailyCheckInQuestionnaire.MaxScore))}";
+
     public static byte[] Render(VisitReportDto report, TimeZoneInfo zone)
     {
         var summary = report.Summary;
@@ -218,7 +222,7 @@ public static class VisitReportPdf
         });
 
     private static void CheckIns(IContainer container, VisitSummaryCheckIns checkIns) =>
-        Block(container, "Daily check-ins", $"Scores {Scale}: {DailyCheckInQuestionnaire.MinScore} = no problem, {DailyCheckInQuestionnaire.MaxScore} = worst", body =>
+        Block(container, "Daily check-ins", ScaleNote, body =>
         {
             if (checkIns.DaysCheckedIn == 0)
             {
@@ -233,7 +237,7 @@ public static class VisitReportPdf
                 {
                     text.Span("Checked in on ");
                     text.Span($"{checkIns.DaysCheckedIn} of {Days(checkIns.DaysInPeriod)}").SemiBold();
-                    text.Span($". Low mood (mood score {LowMoodRule.Threshold} or more) on ");
+                    text.Span($". Low mood (“{Lower(DailyCheckInQuestionnaire.AnswerLabel(LowMoodRule.Threshold))}” or more) on ");
                     text.Span(Days(checkIns.LowMoodDays)).SemiBold();
                     text.Span(".");
                 });
@@ -522,6 +526,8 @@ public static class VisitReportPdf
     };
 
     private static string Days(int count) => count == 1 ? "1 day" : $"{count} days";
+
+    private static string Lower(string text) => text.ToLowerInvariant();
 
     private static int Age(DateOnly born, DateOnly on)
     {
