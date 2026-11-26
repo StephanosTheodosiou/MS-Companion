@@ -43,3 +43,5 @@ public sealed class VisitReportDto
 
     public required VisitSummary Summary { get; init; }
 }
+
+public sealed record VisitReportFile(string FileName, byte[] Content);

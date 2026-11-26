@@ -12,8 +12,12 @@ using MSCompanion.Api.Services;
 using MSCompanion.Data.Interfaces;
 using MSCompanion.Data.Models;
 using MSCompanion.Data.Repositories;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+QuestPDF.Settings.License = LicenseType.Community;
+QuestPDF.Settings.ThrowOnMissingTextGlyphs = false;
 
 // 1. Database — PostgreSQL with snake_case table/column names
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -106,7 +110,8 @@ var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
     .WithOrigins(allowedOrigins)
     .AllowAnyHeader()
-    .AllowAnyMethod()));
+    .AllowAnyMethod()
+    .WithExposedHeaders("Content-Disposition")));
 
 // 6. Controllers, error responses, OpenAPI and health checks
 builder.Services.AddControllers()

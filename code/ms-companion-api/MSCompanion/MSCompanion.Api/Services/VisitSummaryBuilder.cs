@@ -35,6 +35,7 @@ public static class VisitSummaryBuilder
         },
         PeriodStart = source.PeriodStart,
         PeriodEnd = source.PeriodEnd,
+        TimeZone = source.Patient.TimeZone,
         PreviousVisit = ToAppointment(source.PreviousVisit),
         UpcomingVisit = ToAppointment(source.UpcomingVisit),
         CheckIns = BuildCheckIns(source),

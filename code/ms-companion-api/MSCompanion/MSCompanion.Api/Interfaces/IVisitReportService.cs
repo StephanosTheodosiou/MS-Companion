@@ -12,4 +12,6 @@ public interface IVisitReportService
     Task<ServiceResult<List<VisitReportListItemDto>>> GetAllAsync(Guid userId, CancellationToken ct = default);
 
     Task<ServiceResult<VisitReportDto>> GetAsync(Guid userId, Guid reportId, CancellationToken ct = default);
+
+    Task<ServiceResult<VisitReportFile>> GetPdfAsync(Guid userId, Guid reportId, CancellationToken ct = default);
 }

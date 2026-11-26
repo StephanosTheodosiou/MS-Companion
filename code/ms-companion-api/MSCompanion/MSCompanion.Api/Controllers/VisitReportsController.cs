@@ -20,6 +20,25 @@ public sealed class VisitReportsController(IVisitReportService reports) : Contro
     public Task<ActionResult<VisitReportDto>> Get(Guid id, CancellationToken ct) =>
         Run(userId => reports.GetAsync(userId, id, ct));
 
+    [HttpGet("{id:guid}/pdf")]
+    [ProducesResponseType(typeof(Stream), StatusCodes.Status200OK, "application/pdf")]
+    public async Task<ActionResult> GetPdf(Guid id, CancellationToken ct)
+    {
+        if (User.GetUserId() is not { } userId)
+        {
+            return Unauthorized();
+        }
+
+        var result = await reports.GetPdfAsync(userId, id, ct);
+        if (result.Error is { } error)
+        {
+            return ToProblem(error);
+        }
+
+        var file = result.Value!;
+        return File(file.Content, "application/pdf", file.FileName);
+    }
+
     [HttpPost]
     public Task<ActionResult<VisitReportDto>> Create(CreateVisitReportRequest request, CancellationToken ct) =>
         Run(userId => reports.CreateAsync(userId, request, ct));
@@ -39,6 +58,10 @@ public sealed class VisitReportsController(IVisitReportService reports) : Contro
         error switch
         {
             ServiceError.PatientNotFound => Problem(statusCode: 404, title: "Patient profile not found"),
+            ServiceError.AppointmentInPast => Problem(
+                statusCode: 400,
+                title: "Appointment has already happened",
+                detail: "Create the report for today's or an upcoming appointment."),
             _ => Problem(statusCode: 404, title: "Not found"),
         };
 }

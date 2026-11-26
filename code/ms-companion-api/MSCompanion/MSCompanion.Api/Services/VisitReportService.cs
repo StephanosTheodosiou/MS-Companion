@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MSCompanion.Api.Dto;
@@ -42,6 +43,11 @@ public sealed class VisitReportService(
             if (upcoming is null)
             {
                 return ServiceError.NotFound;
+            }
+
+            if (LocalDate(upcoming.StartsAt, timeZone) < today)
+            {
+                return ServiceError.AppointmentInPast;
             }
         }
         else
@@ -129,6 +135,22 @@ public sealed class VisitReportService(
 
         var summary = JsonSerializer.Deserialize<VisitSummary>(report.SummaryJson, SummaryJson)!;
         return ToDto(report, summary);
+    }
+
+    public async Task<ServiceResult<VisitReportFile>> GetPdfAsync(
+        Guid userId,
+        Guid reportId,
+        CancellationToken ct = default)
+    {
+        var result = await GetAsync(userId, reportId, ct);
+        if (result.Error is { } error)
+        {
+            return error;
+        }
+
+        var report = result.Value!;
+        var fileName = $"visit-summary-{report.PeriodEnd.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.pdf";
+        return new VisitReportFile(fileName, VisitReportPdf.Render(report, FindTimeZone(report.Summary.TimeZone)));
     }
 
     private static VisitReportDto ToDto(VisitReport report, VisitSummary summary) => new()
