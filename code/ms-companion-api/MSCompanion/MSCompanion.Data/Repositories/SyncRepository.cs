@@ -70,6 +70,18 @@ public class SyncRepository(AppDbContext context) : ISyncRepository
         CancellationToken ct = default) =>
         context.VisitQuestions.Where(q => q.AppointmentId == appointmentId).ToListAsync(ct);
 
+    public async Task<Dictionary<Type, DateTimeOffset>> GetPurgeMarksAsync(Guid patientId, CancellationToken ct = default)
+    {
+        var marks = await context.SyncPurgeMarks
+            .AsNoTracking()
+            .Where(m => m.PatientId == patientId)
+            .ToDictionaryAsync(m => m.TableName, m => m.PurgedThrough, ct);
+
+        return context.Model.GetEntityTypes()
+            .Where(t => t.GetTableName() is { } table && marks.ContainsKey(table))
+            .ToDictionary(t => t.ClrType, t => marks[t.GetTableName()!]);
+    }
+
     public async Task<IReadOnlyList<T>> GetChangedAsync<T>(
         Guid patientId,
         DateTimeOffset? afterServerUpdatedAt,

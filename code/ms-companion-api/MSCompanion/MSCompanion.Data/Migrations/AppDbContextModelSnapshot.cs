@@ -740,6 +740,27 @@ namespace MSCompanion.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("MSCompanion.Data.Models.SyncPurgeMark", b =>
+                {
+                    b.Property<Guid>("PatientId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("patient_id");
+
+                    b.Property<string>("TableName")
+                        .HasMaxLength(63)
+                        .HasColumnType("character varying(63)")
+                        .HasColumnName("table_name");
+
+                    b.Property<DateTimeOffset>("PurgedThrough")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("purged_through");
+
+                    b.HasKey("PatientId", "TableName")
+                        .HasName("pk_sync_purge_mark");
+
+                    b.ToTable("sync_purge_mark", (string)null);
+                });
+
             modelBuilder.Entity("MSCompanion.Data.Models.TestMetric", b =>
                 {
                     b.Property<string>("Code")
@@ -1441,6 +1462,18 @@ namespace MSCompanion.Data.Migrations
                         .HasConstraintName("fk_side_effect_patient_patient_id");
 
                     b.Navigation("Medication");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("MSCompanion.Data.Models.SyncPurgeMark", b =>
+                {
+                    b.HasOne("MSCompanion.Data.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sync_purge_mark_patient_patient_id");
 
                     b.Navigation("Patient");
                 });
