@@ -10,13 +10,16 @@ import { MS_TYPES } from '@/constants/profile';
 import { useAuth } from '@/context/auth-context';
 import { useTextSize } from '@/context/text-size-context';
 import { ConsentKey, ConsentMap, Profile, TextSize } from '@/types/health';
+import { ApiError } from '@/utils/apiClient';
 import { bloodTestSummary } from '@/utils/bloodTest';
+import { fetchConsents, pushConsents } from '@/utils/patientApi';
 import {
   deleteAllData,
   exportAllData,
   getConsents,
   getProfile,
   listBloodTests,
+  saveAllConsents,
   setConsent,
 } from '@/utils/storage';
 
@@ -36,8 +39,20 @@ export default function ProfileScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      // The phone's copy first, then the server's (the record of what the user agreed to).
       getConsents()
-        .then(setConsents)
+        .then(async (local) => {
+          setConsents(local);
+          try {
+            const server = await fetchConsents();
+            if (server.decided) {
+              setConsents(server.consents);
+              await saveAllConsents(server.consents);
+            }
+          } catch (e) {
+            console.warn('Could not load consents from the server', e);
+          }
+        })
         .catch((e) => console.warn('Could not load consents', e));
       getProfile()
         .then(setProfile)
@@ -51,11 +66,19 @@ export default function ProfileScreen() {
   const onToggle = async (key: ConsentKey, value: boolean) => {
     setConsents((c) => (c ? { ...c, [key]: value } : c));
     try {
+      // Recorded on the server first (GDPR: the record of the choice), then on the phone.
+      await pushConsents({ [key]: value });
       await setConsent(key, value);
     } catch (e) {
       console.warn('Could not save consent', e);
       setConsents((c) => (c ? { ...c, [key]: !value } : c));
-      Alert.alert('Your choice was not saved', 'Please try again.');
+      const offline = e instanceof ApiError && e.isNetworkError;
+      Alert.alert(
+        'Your choice was not saved',
+        offline
+          ? "MS Companion couldn't be reached. Check your internet connection and try again."
+          : 'Please try again.',
+      );
     }
   };
 

@@ -23,6 +23,7 @@ export async function loadDemoData(): Promise<void> {
     medication: '',
     teamName: 'Nicosia General MS Clinic',
     teamPhone: '22 603 000',
+    dateOfBirth: '1990-04-12',
   });
 
   await saveMedication({

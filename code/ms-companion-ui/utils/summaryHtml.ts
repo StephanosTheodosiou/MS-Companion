@@ -28,11 +28,27 @@ const row = (label: string, value: string) =>
 
 const empty = (text: string) => `<p class="empty">${escapeHtml(text)}</p>`;
 
+/** "12 March 1985" */
+function birthDate(key: string): string {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d, 12).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/**
+ * @param patientName The account's first and last name; printed at the top with the date of birth (F11).
+ */
 export function visitSummaryHtml(
   summary: VisitSummary,
   profile: Profile,
   medications: Medication[],
+  patientName = '',
 ): string {
+  const patient = [
+    patientName.trim() ? `<strong>${escapeHtml(patientName.trim())}</strong>` : '',
+    profile.dateOfBirth ? `born ${escapeHtml(birthDate(profile.dateOfBirth))}` : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
   const period = summary.lastVisit
     ? `Since the last visit on ${formatShortDate(summary.from)} (${summary.days} days)`
     : `Last ${summary.days} days`;
@@ -99,6 +115,7 @@ export function visitSummaryHtml(
   header { border-bottom: 2px solid #12707B; padding-bottom: 6pt; margin-bottom: 10pt; }
   h1 { font-size: 17pt; margin: 0; }
   .meta { color: #5D6B7A; margin: 2pt 0 0; }
+  .patient { margin: 4pt 0 0; font-size: 12pt; }
   h2 { font-size: 11pt; color: #12707B; margin: 12pt 0 4pt; text-transform: uppercase; letter-spacing: .04em; }
   table { width: 100%; border-collapse: collapse; }
   th, td { text-align: left; vertical-align: top; padding: 3pt 0; border-bottom: 1px solid #E6EAEE; }
@@ -111,6 +128,7 @@ export function visitSummaryHtml(
 <body>
   <header>
     <h1>MS Companion: visit summary</h1>
+    ${patient ? `<p class="patient">${patient}</p>` : ''}
     <p class="meta">${escapeHtml(period)}. Type of MS: ${escapeHtml(profile.msType ? MS_TYPE_LABEL[profile.msType] : 'not given')}.</p>
     ${next ? `<p class="meta">${next}</p>` : ''}
   </header>

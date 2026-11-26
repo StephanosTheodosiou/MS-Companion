@@ -15,6 +15,11 @@ interface Props {
   display: string | null;
   onChange: (value: Date) => void;
   error?: string | null;
+  /** Where the picker opens when nothing is chosen yet (default: today, or 10:00 for times). */
+  defaultDate?: Date;
+  /** Earliest and latest dates that can be picked. */
+  minimumDate?: Date;
+  maximumDate?: Date;
 }
 
 function toWebDateValue(d: Date): string {
@@ -28,11 +33,22 @@ function toWebTimeValue(d: Date): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-export function PickerRow({ label, mode, value, display, onChange, error }: Props) {
+export function PickerRow({
+  label,
+  mode,
+  value,
+  display,
+  onChange,
+  error,
+  defaultDate,
+  minimumDate,
+  maximumDate,
+}: Props) {
   const styles = useStyles();
   const colors = useColors();
   const [open, setOpen] = useState(false);
-  const initial = value ?? defaultValue(mode);
+  const initial = value ?? defaultDate ?? defaultValue(mode);
+  const limits = { minimumDate, maximumDate };
 
   const onPress = () => {
     if (Platform.OS === 'android') {
@@ -68,7 +84,13 @@ export function PickerRow({ label, mode, value, display, onChange, error }: Prop
         }
       />
       {open && Platform.OS === 'android' ? (
-        <DateTimePicker value={initial} mode={mode} is24Hour onChange={handleAndroidChange} />
+        <DateTimePicker
+          value={initial}
+          mode={mode}
+          is24Hour
+          onChange={handleAndroidChange}
+          {...limits}
+        />
       ) : null}
       {open && Platform.OS === 'ios' ? (
         <View style={styles.inline}>
@@ -78,6 +100,7 @@ export function PickerRow({ label, mode, value, display, onChange, error }: Prop
             display={mode === 'date' ? 'inline' : 'spinner'}
             accentColor={colors.accent}
             minuteInterval={5}
+            {...limits}
             onChange={(_e: DateTimePickerEvent, date?: Date) => {
               if (date) onChange(date);
             }}
@@ -89,6 +112,8 @@ export function PickerRow({ label, mode, value, display, onChange, error }: Prop
           {React.createElement('input', {
             type: mode,
             value: mode === 'date' ? toWebDateValue(initial) : toWebTimeValue(initial),
+            min: mode === 'date' && minimumDate ? toWebDateValue(minimumDate) : undefined,
+            max: mode === 'date' && maximumDate ? toWebDateValue(maximumDate) : undefined,
             onChange: (e: any) => {
               const raw: string = e.target?.value;
               if (!raw) return;
