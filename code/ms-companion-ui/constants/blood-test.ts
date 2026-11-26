@@ -1,12 +1,14 @@
 import { BloodTestRepeat, RemindBefore } from '@/types/health';
 
 // Fixed choices keep setting up a reminder to a few big taps.
+// The API counts in weeks (repeatEveryWeeks), so the values are weeks; the labels add the months
+// patients usually hear from their clinic.
 export const REPEAT_OPTIONS: { value: BloodTestRepeat; label: string }[] = [
   { value: 'none', label: 'Just once' },
-  { value: '1', label: 'Every month' },
-  { value: '3', label: 'Every 3 months' },
-  { value: '6', label: 'Every 6 months' },
-  { value: '12', label: 'Every year' },
+  { value: '4', label: 'Every 4 weeks' },
+  { value: '13', label: 'Every 13 weeks (about 3 months)' },
+  { value: '26', label: 'Every 26 weeks (about 6 months)' },
+  { value: '52', label: 'Every 52 weeks (1 year)' },
 ];
 
 export const REMIND_OPTIONS: { value: RemindBefore; label: string }[] = [

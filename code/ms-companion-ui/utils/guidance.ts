@@ -4,8 +4,14 @@
 
 export type Guidance = 'contact-team' | 'fever-or-heat' | 'keep-watching';
 
-export function symptomGuidance(lastedOver24h: boolean, feverOrHeat: boolean): Guidance {
-  if (feverOrHeat) return 'fever-or-heat';
+// Matches the API's RelapseGuidanceRule: 'contact-team' is ContactMsTeamToday, and both
+// 'fever-or-heat' and 'keep-watching' are MonitorAndRecheck.
+export function symptomGuidance(
+  lastedOver24h: boolean,
+  hadFever: boolean,
+  heatExposure: boolean,
+): Guidance {
+  if (hadFever || heatExposure) return 'fever-or-heat';
   if (lastedOver24h) return 'contact-team';
   return 'keep-watching';
 }

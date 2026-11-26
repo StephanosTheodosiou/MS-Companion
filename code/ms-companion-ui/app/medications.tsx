@@ -9,7 +9,7 @@ import { TopBar } from '@/components/layout/top-bar';
 import { sortTimes } from '@/constants/medication';
 import { getConsents, listMedications, listSideEffects } from '@/utils/storage';
 import { Medication, SideEffect } from '@/types/health';
-import { formatShortDate, todayKey } from '@/utils/date';
+import { formatShortDate } from '@/utils/date';
 
 export default function MedicationsScreen() {
   const router = useRouter();
@@ -55,7 +55,8 @@ export default function MedicationsScreen() {
     );
   }
 
-  const medName = (id: string) => medications.find((m) => m.id === id)?.name ?? 'Removed medicine';
+  const medName = (id: string | null) =>
+    id === null ? 'Medicine not known' : (medications.find((m) => m.id === id)?.name ?? 'Removed medicine');
 
   return (
     <Screen
@@ -92,7 +93,9 @@ export default function MedicationsScreen() {
               key={s.id}
               icon="alert-circle"
               label={s.description}
-              description={`${medName(s.medicationId)} · ${formatShortDate(todayKey(new Date(s.loggedAt)))}`}
+              description={[s.severity, medName(s.medicationId), formatShortDate(s.startedOn)]
+                .filter(Boolean)
+                .join(' · ')}
             />
           ))}
           <Row

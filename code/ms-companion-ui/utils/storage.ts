@@ -26,6 +26,7 @@ import {
   setDeviceValue,
   setUserValue,
 } from '@/utils/localDatabase';
+import { todayKey } from '@/utils/date';
 
 const CONSENT_KEYS: ConsentKey[] = ['symptoms', 'medication', 'location', 'notifications'];
 
@@ -33,6 +34,47 @@ const consentValueKey = (key: ConsentKey) => `consent.${key}`;
 
 const doseKey = (medicationId: string, date: string, time: string) =>
   `${medicationId}|${date}|${time}`;
+
+// ---------- Entries saved before the N3 form changes ----------
+// The phone may still hold entries in the older shape. They are upgraded when read, so screens
+// only ever see the current types. Nothing is guessed: unknown answers stay empty (null).
+
+type Legacy<T> = Partial<T> & Record<string, unknown>;
+
+/** Old blood tests repeated in months (1, 3, 6, 12); now it is weeks (4, 13, 26, 52). */
+const MONTHS_TO_WEEKS: Record<string, BloodTest['repeat']> = { '1': '4', '3': '13', '6': '26', '12': '52' };
+
+function upgradeSideEffect(e: Legacy<SideEffect>): SideEffect {
+  const loggedAt = e.loggedAt ?? new Date().toISOString();
+  return {
+    id: e.id ?? '',
+    medicationId: e.medicationId ?? null,
+    description: e.description ?? '',
+    severity: e.severity ?? null,
+    startedOn: e.startedOn ?? todayKey(new Date(loggedAt)),
+    loggedAt,
+  };
+}
+
+function upgradeSymptomEntry(e: Legacy<SymptomEntry>): SymptomEntry {
+  // Old entries asked one combined question ("fever, infection or very hot?").
+  // A "yes" there is kept as hadFever, which leads to the same guidance.
+  const combined = e.feverOrHeat === true;
+  return {
+    ...(e as SymptomEntry),
+    hadFever: e.hadFever ?? combined,
+    heatExposure: e.heatExposure ?? false,
+  };
+}
+
+function upgradeAppointment(a: Legacy<Appointment>): Appointment {
+  return { ...(a as Appointment), type: a.type ?? 'Other', endTime: a.endTime ?? null };
+}
+
+function upgradeBloodTest(b: Legacy<BloodTest>): BloodTest {
+  const repeat = String(b.repeat ?? 'none');
+  return { ...(b as BloodTest), repeat: MONTHS_TO_WEEKS[repeat] ?? (repeat as BloodTest['repeat']) };
+}
 
 export async function getConsents(): Promise<ConsentMap> {
   const values = await Promise.all(
@@ -130,9 +172,9 @@ export async function clearDoseLog(
 }
 
 export async function listSideEffects(): Promise<SideEffect[]> {
-  return (await listRecords<SideEffect>('sideEffect')).sort((a, b) =>
-    b.loggedAt.localeCompare(a.loggedAt),
-  );
+  return (await listRecords<Legacy<SideEffect>>('sideEffect'))
+    .map(upgradeSideEffect)
+    .sort((a, b) => b.loggedAt.localeCompare(a.loggedAt));
 }
 
 export async function addSideEffect(entry: SideEffect): Promise<void> {
@@ -140,9 +182,9 @@ export async function addSideEffect(entry: SideEffect): Promise<void> {
 }
 
 export async function listSymptomEntries(): Promise<SymptomEntry[]> {
-  return (await listRecords<SymptomEntry>('symptomEntry')).sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt),
-  );
+  return (await listRecords<Legacy<SymptomEntry>>('symptomEntry'))
+    .map(upgradeSymptomEntry)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function saveSymptomEntry(entry: SymptomEntry): Promise<void> {
@@ -158,13 +200,14 @@ export async function listAllDoseLogs(): Promise<DoseLog[]> {
 }
 
 export async function listAppointments(): Promise<Appointment[]> {
-  return (await listRecords<Appointment>('appointment')).sort((a, b) =>
-    `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`),
-  );
+  return (await listRecords<Legacy<Appointment>>('appointment'))
+    .map(upgradeAppointment)
+    .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
 }
 
 export async function getAppointment(id: string): Promise<Appointment | null> {
-  return findRecord<Appointment>('appointment', id);
+  const found = await findRecord<Legacy<Appointment>>('appointment', id);
+  return found ? upgradeAppointment(found) : null;
 }
 
 export async function saveAppointment(appointment: Appointment): Promise<void> {
@@ -190,13 +233,14 @@ export async function deleteQuestion(id: string): Promise<void> {
 }
 
 export async function listBloodTests(): Promise<BloodTest[]> {
-  return (await listRecords<BloodTest>('bloodTest')).sort((a, b) =>
-    a.dueDate.localeCompare(b.dueDate),
-  );
+  return (await listRecords<Legacy<BloodTest>>('bloodTest'))
+    .map(upgradeBloodTest)
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
 }
 
 export async function getBloodTest(id: string): Promise<BloodTest | null> {
-  return findRecord<BloodTest>('bloodTest', id);
+  const found = await findRecord<Legacy<BloodTest>>('bloodTest', id);
+  return found ? upgradeBloodTest(found) : null;
 }
 
 export async function saveBloodTest(test: BloodTest): Promise<void> {
