@@ -94,6 +94,7 @@ export default function RegisterScreen() {
           }}
           autoCapitalize="words"
           autoComplete="given-name"
+          maxLength={AuthLimits.nameMax}
           textContentType="givenName"
           error={errors.firstName}
         />
@@ -108,6 +109,7 @@ export default function RegisterScreen() {
           }}
           autoCapitalize="words"
           autoComplete="family-name"
+          maxLength={AuthLimits.nameMax}
           textContentType="familyName"
           error={errors.lastName}
         />
@@ -124,11 +126,13 @@ export default function RegisterScreen() {
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="email"
+          maxLength={AuthLimits.emailMax}
           textContentType="emailAddress"
           error={errors.email}
         />
         <PasswordField
           kind="new"
+          maxLength={AuthLimits.passwordMax}
           label="Password"
           placeholder="Choose a password"
           hint={`At least ${AuthLimits.passwordMin} characters.`}
@@ -141,6 +145,7 @@ export default function RegisterScreen() {
         />
         <PasswordField
           kind="new"
+          maxLength={AuthLimits.passwordMax}
           label="Repeat password"
           placeholder="Type it again"
           value={confirm}
