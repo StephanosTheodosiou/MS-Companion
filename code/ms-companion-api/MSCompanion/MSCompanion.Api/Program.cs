@@ -26,6 +26,10 @@ builder.Services.AddOptions<JwtOptions>()
     .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
+builder.Services.AddOptions<PurgeOptions>()
+    .Bind(builder.Configuration.GetSection(PurgeOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 // 3. Dependency injection — register repositories and services here
 builder.Services.AddSingleton(TimeProvider.System);
@@ -54,6 +58,8 @@ builder.Services.AddScoped<IBloodTestRepository, BloodTestRepository>();
 builder.Services.AddScoped<IBloodTestService, BloodTestService>();
 builder.Services.AddScoped<IVisitReportRepository, VisitReportRepository>();
 builder.Services.AddScoped<IVisitReportService, VisitReportService>();
+builder.Services.AddScoped<IPurgeRepository, PurgeRepository>();
+builder.Services.AddHostedService<PurgeDeletedDataService>();
 
 // 4. Authentication (JWT bearer) and authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

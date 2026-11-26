@@ -25,6 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<VisitQuestion> VisitQuestions => Set<VisitQuestion>();
     public DbSet<VisitReport> VisitReports => Set<VisitReport>();
+    public DbSet<SyncPurgeMark> SyncPurgeMarks => Set<SyncPurgeMark>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

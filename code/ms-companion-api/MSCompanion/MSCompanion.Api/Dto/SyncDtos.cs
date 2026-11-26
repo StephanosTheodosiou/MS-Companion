@@ -73,6 +73,24 @@ public sealed class SyncPullResponse
     public required string? Cursor { get; init; }
 
     public required bool HasMore { get; init; }
+
+    public bool ResetRequired { get; init; }
+
+    public static SyncPullResponse Reset() => new()
+    {
+        CheckIns = [],
+        Medications = [],
+        MedicationSchedules = [],
+        MedicationIntakes = [],
+        RelapseLogEntries = [],
+        Appointments = [],
+        VisitQuestions = [],
+        SideEffects = [],
+        BloodTests = [],
+        Cursor = null,
+        HasMore = false,
+        ResetRequired = true,
+    };
 }
 
 public enum SyncOutcome

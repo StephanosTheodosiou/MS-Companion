@@ -112,6 +112,11 @@ public sealed class SyncService(
             return null;
         }
 
+        if (await NeedsResetAsync(patientId, after, ct))
+        {
+            return SyncPullResponse.Reset();
+        }
+
         var settled = clock.GetUtcNow() - SettleDelay;
 
         var checkInCursor = after[SyncType.CheckIns];
@@ -167,6 +172,28 @@ public sealed class SyncService(
             return Page(rows, limit, cursor);
         }
     }
+
+    private async Task<bool> NeedsResetAsync(Guid patientId, SyncCursorSet after, CancellationToken ct)
+    {
+        var marks = await sync.GetPurgeMarksAsync(patientId, ct);
+        return marks.Count > 0 && SyncTypes.Any(t =>
+            after[t.Key] is { } cursor
+            && marks.TryGetValue(t.Value, out var purgedThrough)
+            && cursor.ServerUpdatedAt < purgedThrough);
+    }
+
+    private static readonly Dictionary<SyncType, Type> SyncTypes = new()
+    {
+        [SyncType.CheckIns] = typeof(CheckIn),
+        [SyncType.Medications] = typeof(Medication),
+        [SyncType.MedicationSchedules] = typeof(MedicationSchedule),
+        [SyncType.MedicationIntakes] = typeof(MedicationIntake),
+        [SyncType.RelapseLogEntries] = typeof(RelapseLogEntry),
+        [SyncType.Appointments] = typeof(Appointment),
+        [SyncType.VisitQuestions] = typeof(VisitQuestion),
+        [SyncType.SideEffects] = typeof(SideEffect),
+        [SyncType.BloodTests] = typeof(BloodTestReminder),
+    };
 
     private static (List<T> Rows, SyncCursor? Next, bool More) Page<T>(
         IReadOnlyList<T> rows,

@@ -41,6 +41,8 @@ public interface ISyncRepository
         CancellationToken ct = default)
         where T : PatientOwnedEntity;
 
+    Task<Dictionary<Type, DateTimeOffset>> GetPurgeMarksAsync(Guid patientId, CancellationToken ct = default);
+
     Task<IReadOnlyList<CheckIn>> GetCheckInsChangedAsync(
         Guid patientId,
         DateTimeOffset? afterServerUpdatedAt,
