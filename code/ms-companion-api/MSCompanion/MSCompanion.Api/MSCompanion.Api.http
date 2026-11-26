@@ -253,6 +253,10 @@ Authorization: Bearer {{login.response.body.$.token}}
 GET {{baseUrl}}/api/visit-reports/{{report.response.body.$.id}}
 Authorization: Bearer {{login.response.body.$.token}}
 
+### Visit report: download the one-page PDF
+GET {{baseUrl}}/api/visit-reports/{{report.response.body.$.id}}/pdf
+Authorization: Bearer {{login.response.body.$.token}}
+
 ### Questions for my doctor (status=open or asked, optional appointmentId)
 GET {{baseUrl}}/api/visit-questions?status=open
 Authorization: Bearer {{login.response.body.$.token}}

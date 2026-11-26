@@ -10,6 +10,8 @@ public sealed class VisitSummary
 
     public required DateOnly PeriodEnd { get; init; }
 
+    public string TimeZone { get; init; } = "UTC";
+
     public VisitSummaryAppointment? PreviousVisit { get; init; }
 
     public VisitSummaryAppointment? UpcomingVisit { get; init; }

@@ -116,14 +116,14 @@ public class VisitReportRepository(AppDbContext context) : IVisitReportRepositor
     public Task<List<VisitReport>> GetAllAsync(Guid patientId, CancellationToken ct = default) =>
         context.VisitReports
             .AsNoTracking()
-            .Where(r => r.PatientId == patientId)
+            .Where(r => r.PatientId == patientId && r.DeletedAt == null)
             .OrderByDescending(r => r.GeneratedAt)
             .ToListAsync(ct);
 
     public Task<VisitReport?> GetAsync(Guid patientId, Guid reportId, CancellationToken ct = default) =>
         context.VisitReports
             .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.PatientId == patientId && r.Id == reportId, ct);
+            .FirstOrDefaultAsync(r => r.PatientId == patientId && r.Id == reportId && r.DeletedAt == null, ct);
 
     public void Add(VisitReport report) => context.VisitReports.Add(report);
 

@@ -9,6 +9,7 @@ public enum ServiceError
     AlreadyCompleted,
     DateInFuture,
     IncorrectPassword,
+    AppointmentInPast,
 }
 
 public readonly record struct ServiceResult<T>(T? Value, ServiceError? Error)
