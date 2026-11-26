@@ -99,6 +99,7 @@ public sealed class VisitReportService(
             UpdatedAt = now,
             SummaryJson = JsonSerializer.Serialize(summary, SummaryJson),
         };
+        report.FhirBundleJson = VisitReportFhir.Build(report, patient, source.CheckIns);
         reports.Add(report);
         await reports.SaveChangesAsync(ct);
 
@@ -151,6 +152,29 @@ public sealed class VisitReportService(
         var report = result.Value!;
         var fileName = $"visit-summary-{report.PeriodEnd.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.pdf";
         return new VisitReportFile(fileName, VisitReportPdf.Render(report, FindTimeZone(report.Summary.TimeZone)));
+    }
+
+    public async Task<ServiceResult<string>> GetFhirAsync(
+        Guid userId,
+        Guid reportId,
+        CancellationToken ct = default)
+    {
+        if (await patients.GetIdByUserIdAsync(userId, ct) is not { } patientId)
+        {
+            return ServiceError.PatientNotFound;
+        }
+
+        if (await reports.GetAsync(patientId, reportId, ct) is not { } report)
+        {
+            return ServiceError.NotFound;
+        }
+
+        if (report.FhirBundleJson is null)
+        {
+            return ServiceError.FhirNotAvailable;
+        }
+
+        return VisitReportFhir.Export(report.FhirBundleJson);
     }
 
     private static VisitReportDto ToDto(VisitReport report, VisitSummary summary) => new()

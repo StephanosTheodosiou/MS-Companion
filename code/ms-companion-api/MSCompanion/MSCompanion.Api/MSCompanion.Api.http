@@ -181,12 +181,12 @@ Content-Type: application/json
       "questionnaireVersion": "2",
       "note": "Tired after work",
       "answers": [
-        { "item": "Fatigue", "score": 7 },
-        { "item": "Mobility", "score": 3 },
-        { "item": "Pain", "score": 2 },
-        { "item": "Mood", "score": 4 },
-        { "item": "Cognition", "score": 3 },
-        { "item": "Bladder", "score": 1 }
+        { "item": "Fatigue", "score": 3 },
+        { "item": "Mobility", "score": 1 },
+        { "item": "Pain", "score": 1 },
+        { "item": "Mood", "score": 2 },
+        { "item": "Cognition", "score": 1 },
+        { "item": "Bladder", "score": 0 }
       ],
       "createdAt": "2026-11-21T08:00:00Z",
       "updatedAt": "2026-11-21T08:00:00Z"
@@ -255,6 +255,10 @@ Authorization: Bearer {{login.response.body.$.token}}
 
 ### Visit report: download the one-page PDF
 GET {{baseUrl}}/api/visit-reports/{{report.response.body.$.id}}/pdf
+Authorization: Bearer {{login.response.body.$.token}}
+
+### Visit report: FHIR R4 Bundle (Patient + daily check-ins as QuestionnaireResponses)
+GET {{baseUrl}}/api/visit-reports/{{report.response.body.$.id}}/fhir
 Authorization: Bearer {{login.response.body.$.token}}
 
 ### Questions for my doctor (status=open or asked, optional appointmentId)
