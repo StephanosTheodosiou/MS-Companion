@@ -84,6 +84,8 @@ export async function loadDemoData(): Promise<void> {
     id: 'demo-se1',
     medicationId: 'demo-bac',
     description: 'Drowsy after the evening dose',
+    severity: 'Mild',
+    startedOn: daysAgoKey(6),
     loggedAt: `${daysAgoKey(5)}T20:00:00.000Z`,
   });
   await saveSymptomEntry({
@@ -91,23 +93,28 @@ export async function loadDemoData(): Promise<void> {
     description: 'Numbness in my left leg',
     startedOn: daysAgoKey(4),
     lastedOver24h: true,
-    feverOrHeat: false,
+    hadFever: false,
+    heatExposure: false,
     createdAt: `${daysAgoKey(2)}T10:00:00.000Z`,
     syncStatus: 'waiting',
   });
 
   await saveAppointment({
     id: 'demo-a1',
+    type: 'Neurologist',
     date: daysAgoKey(15),
     time: '10:30',
+    endTime: '11:00',
     withWhom: 'Dr Andreas',
     place: 'Nicosia General Hospital',
     notes: '',
   });
   await saveAppointment({
     id: 'demo-a2',
+    type: 'Neurologist',
     date: daysAgoKey(-7),
     time: '11:00',
+    endTime: '11:30',
     withWhom: 'Dr Andreas',
     place: 'Nicosia General Hospital',
     notes: 'Bring blood test results.',
@@ -117,7 +124,7 @@ export async function loadDemoData(): Promise<void> {
     id: 'demo-b1',
     name: 'Full blood count',
     dueDate: daysAgoKey(2),
-    repeat: '3',
+    repeat: '13',
     remindDaysBefore: '1',
     notes: '',
     lastDoneOn: daysAgoKey(92),
@@ -126,7 +133,7 @@ export async function loadDemoData(): Promise<void> {
     id: 'demo-b2',
     name: 'Liver function test',
     dueDate: daysAgoKey(-6),
-    repeat: '6',
+    repeat: '26',
     remindDaysBefore: '7',
     notes: 'Fasting needed.',
     lastDoneOn: null,

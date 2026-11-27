@@ -38,7 +38,8 @@ export interface VisitSummary {
   symptomEntries: SymptomEntry[];
   dosesTaken: number;
   dosesSkipped: number;
-  sideEffects: { description: string; medicine: string; date: string }[];
+  /** date is when the side effect started; severity is null for entries saved before it was asked. */
+  sideEffects: { description: string; medicine: string; severity: string | null; date: string }[];
   openQuestions: DoctorQuestion[];
 }
 
@@ -90,8 +91,10 @@ export function buildVisitSummary(input: {
   });
 
   const logs = input.doseLogs.filter((l) => inPeriod(l.date));
-  const medName = (id: string) =>
-    input.medications.find((m) => m.id === id)?.name ?? 'Removed medicine';
+  const medName = (id: string | null) =>
+    id === null
+      ? 'Medicine not known'
+      : (input.medications.find((m) => m.id === id)?.name ?? 'Removed medicine');
 
   return {
     from,
@@ -112,7 +115,8 @@ export function buildVisitSummary(input: {
       .map((s) => ({
         description: s.description,
         medicine: medName(s.medicationId),
-        date: todayKey(new Date(s.loggedAt)),
+        severity: s.severity,
+        date: s.startedOn,
       })),
     openQuestions: input.questions.filter((q) => !q.asked),
   };
@@ -135,4 +139,12 @@ export function describeChange(change: number | null): string | null {
 function parseKey(key: string): Date {
   const [y, m, d] = key.split('-').map(Number);
   return new Date(y, m - 1, d);
+}
+
+/** "with fever or infection", "after heat exposure", both, or null. Used by the summary screen and the PDF. */
+export function feverHeatNote(e: Pick<SymptomEntry, 'hadFever' | 'heatExposure'>): string | null {
+  if (e.hadFever && e.heatExposure) return 'with fever or infection, and heat exposure';
+  if (e.hadFever) return 'with fever or infection';
+  if (e.heatExposure) return 'after heat exposure';
+  return null;
 }

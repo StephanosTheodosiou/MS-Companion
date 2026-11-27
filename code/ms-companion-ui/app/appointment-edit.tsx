@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/app-button';
+import { ChoiceCards } from '@/components/ui/choice-cards';
 import { PickerRow } from '@/components/ui/picker-row';
 import { Row } from '@/components/ui/row';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
 import { TextField } from '@/components/ui/app-text-field';
 import { TopBar } from '@/components/layout/top-bar';
+import { APPOINTMENT_TYPES } from '@/constants/appointment';
+import { useColors } from '@/hooks/use-colors';
+import { AppointmentType } from '@/types/health';
 import { deleteAppointment, getAppointment, saveAppointment } from '@/utils/storage';
 import { todayKey } from '@/utils/date';
 import { newId } from '@/utils/id';
@@ -32,16 +37,21 @@ function dateToTime(d: Date): string {
 // E7: record an appointment the clinic has booked. Past visits can be added too,
 // because the visit summary covers everything since the last visit.
 export default function AppointmentEditScreen() {
+  const colors = useColors();
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string }>();
   const editingId = params.id;
   const [date, setDate] = useState<string | null>(null);
   const [time, setTime] = useState<string | null>(null);
+  const [endTime, setEndTime] = useState<string | null>(null);
+  const [type, setType] = useState<AppointmentType | null>(null);
   const [withWhom, setWithWhom] = useState('');
   const [place, setPlace] = useState('');
   const [notes, setNotes] = useState('');
   const [dateError, setDateError] = useState<string | null>(null);
   const [timeError, setTimeError] = useState<string | null>(null);
+  const [endError, setEndError] = useState<string | null>(null);
+  const [typeError, setTypeError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!editingId) return;
@@ -50,6 +60,8 @@ export default function AppointmentEditScreen() {
         if (!a) return;
         setDate(a.date);
         setTime(a.time);
+        setEndTime(a.endTime);
+        setType(a.type);
         setWithWhom(a.withWhom);
         setPlace(a.place);
         setNotes(a.notes);
@@ -58,14 +70,26 @@ export default function AppointmentEditScreen() {
   }, [editingId]);
 
   const onSave = async () => {
+    // The API needs the type and an end time after the start (N3). Times are "HH:MM", so they compare as text.
+    const endAfterStart = !time || !endTime || endTime > time;
+    setTypeError(type ? null : 'Choose what the appointment is for.');
     setDateError(date ? null : 'Choose a date.');
-    setTimeError(time ? null : 'Choose a time.');
-    if (!date || !time) return;
+    setTimeError(time ? null : 'Choose a start time.');
+    setEndError(
+      !endTime
+        ? 'Choose an end time.'
+        : endAfterStart
+          ? null
+          : 'The end time must be after the start time.',
+    );
+    if (!type || !date || !time || !endTime || !endAfterStart) return;
     try {
       await saveAppointment({
         id: editingId ?? newId(),
+        type,
         date,
         time,
+        endTime,
         withWhom: withWhom.trim(),
         place: place.trim(),
         notes: notes.trim(),
@@ -111,6 +135,21 @@ export default function AppointmentEditScreen() {
       title={editingId ? 'Edit appointment' : 'Add an appointment'}
       subtitle="Add appointments your MS clinic has booked for you, or past visits."
       footer={<Button label="Save" onPress={onSave} />}>
+      <ChoiceCards
+        header="What is it for?"
+        options={APPOINTMENT_TYPES}
+        selected={type}
+        onSelect={(value) => {
+          setType(value);
+          setTypeError(null);
+        }}
+      />
+      {typeError ? (
+        <AppText variant="footnote" color={colors.destructive} accessibilityLiveRegion="polite">
+          {typeError}
+        </AppText>
+      ) : null}
+
       <Section header="When" iconInset>
         <PickerRow
           label="Date"
@@ -124,15 +163,27 @@ export default function AppointmentEditScreen() {
           error={dateError}
         />
         <PickerRow
-          label="Time"
+          label="Starts"
           mode="time"
           value={time ? timeToDate(time) : null}
           display={time}
           onChange={(d) => {
             setTime(dateToTime(d));
             setTimeError(null);
+            setEndError(null);
           }}
           error={timeError}
+        />
+        <PickerRow
+          label="Ends"
+          mode="time"
+          value={endTime ? timeToDate(endTime) : time ? timeToDate(time) : null}
+          display={endTime}
+          onChange={(d) => {
+            setEndTime(dateToTime(d));
+            setEndError(null);
+          }}
+          error={endError}
         />
       </Section>
 
