@@ -109,6 +109,7 @@ export default function SideEffectScreen() {
           mode="date"
           value={keyToDate(startedOn)}
           display={startedOn === todayKey() ? 'Today' : formatShortDate(startedOn)}
+          maximumDate={new Date()}
           onChange={(d) => {
             setStartedOn(todayKey(d));
             setDateError(null);

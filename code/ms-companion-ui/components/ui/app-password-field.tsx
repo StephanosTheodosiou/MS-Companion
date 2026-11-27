@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Pressable, TextInputProps } from 'react-native';
+import React, { useState, type Ref } from 'react';
+import { Pressable, TextInputProps, type TextInputInstance } from 'react-native';
 import { Icon } from '@/components/ui/app-icon';
 import { TextField } from '@/components/ui/app-text-field';
 import { useColors } from '@/hooks/use-colors';
@@ -10,6 +10,7 @@ interface Props extends Omit<TextInputProps, 'style' | 'secureTextEntry'> {
   error?: string | null;
   /** `new` for creating an account (the phone may suggest a strong password), `current` for logging in. */
   kind: 'new' | 'current';
+  ref?: Ref<TextInputInstance>;
 }
 
 // A password field with a button to show what was typed, which helps with tremor and typos.

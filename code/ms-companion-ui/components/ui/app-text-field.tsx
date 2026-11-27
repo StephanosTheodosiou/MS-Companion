@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TextInput, TextInputProps, View } from 'react-native';
+import React, { useState, type Ref } from 'react';
+import { TextInput, TextInputProps, View, type TextInputInstance } from 'react-native';
 import { MIN_TOUCH, radius, shadow, space, type } from '@/constants/design-tokens';
 import { makeStyles, useColors } from '@/hooks/use-colors';
 import { useTextSize } from '@/context/text-size-context';
@@ -14,9 +14,11 @@ interface Props extends Omit<TextInputProps, 'style'> {
   error?: string | null;
   /** Something inside the field on the right, e.g. a show-password button. */
   trailing?: React.ReactNode;
+  ref?: Ref<TextInputInstance>;
 }
 
 export function TextField({
+  ref,
   label,
   icon,
   hint,
@@ -57,6 +59,7 @@ export function TextField({
         ) : null}
         <TextInput
           {...rest}
+          ref={ref}
           multiline={multiline}
           accessibilityLabel={label}
           accessibilityHint={hint ?? rest.placeholder}

@@ -9,24 +9,15 @@ import { Row } from '@/components/ui/row';
 import { MS_TYPES } from '@/constants/profile';
 import { EMPTY_PROFILE, Profile } from '@/types/health';
 import { ApiError } from '@/utils/apiClient';
-import { todayKey } from '@/utils/date';
+import { formatBirthDate, todayKey } from '@/utils/date';
 import { fetchProfile, pushProfile } from '@/utils/patientApi';
-import { getProfile, saveProfile } from '@/utils/storage';
+import { getProfile, isProfileUnsynced, saveProfile, setProfileUnsynced } from '@/utils/storage';
 import { validatePhone } from '@/utils/validation';
 
 /** "1985-03-12" -> local Date at midday (avoids time-zone edge cases). */
 function keyToDate(key: string): Date {
   const [y, m, d] = key.split('-').map(Number);
   return new Date(y, m - 1, d, 12);
-}
-
-/** "12 March 1985" */
-export function formatBirthDate(key: string): string {
-  return keyToDate(key).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
 }
 
 /** Same rule as the API (UpdatePatientRequest): in the past and not before 1900. */
@@ -56,14 +47,21 @@ export function useProfileForm() {
       .then(async (local) => {
         setProfile(local);
         try {
+          if (await isProfileUnsynced()) {
+            await pushProfile(local);
+            await setProfileUnsynced(false);
+            return;
+          }
           const server = await fetchProfile();
           if (edited.current) return;
           const merged = { ...local, ...server };
           setProfile(merged);
           await saveProfile(merged);
         } catch (e) {
-          // Offline or not reachable: the phone's copy is shown, which is fine.
-          console.warn('Could not load profile from the server', e);
+          if (e instanceof ApiError && e.status === 400) {
+            await setProfileUnsynced(false).catch(() => {});
+          }
+          console.warn('Could not sync profile with the server', e);
         }
       })
       .catch((e) => console.warn('Could not load profile', e));
@@ -95,8 +93,10 @@ export function useProfileForm() {
     }
     try {
       await pushProfile(profile);
+      await setProfileUnsynced(false);
       return true;
     } catch (e) {
+      await setProfileUnsynced(true).catch(() => {});
       if (e instanceof ApiError && e.status === 400) {
         // The server checks the same fields; show its message under the matching one.
         const errors = e.fieldErrors;
@@ -110,7 +110,7 @@ export function useProfileForm() {
       console.warn('Could not save profile on the server', e);
       Alert.alert(
         'Saved on this phone only',
-        'MS Companion could not be reached. Save again when you are online to update your account.',
+        'MS Companion could not be reached. Your changes will be sent to your account the next time you open your profile while online.',
       );
       return true;
     } finally {

@@ -1,5 +1,5 @@
 import { Medication, Profile } from '@/types/health';
-import { formatShortDate } from '@/utils/date';
+import { formatBirthDate, formatShortDate } from '@/utils/date';
 import { describeAverage, describeChange, feverHeatNote, VisitSummary } from '@/utils/summary';
 
 // Turns the visit summary (E7) into a one-page A4 HTML document, which expo-print
@@ -28,16 +28,6 @@ const row = (label: string, value: string) =>
 
 const empty = (text: string) => `<p class="empty">${escapeHtml(text)}</p>`;
 
-/** "12 March 1985" */
-function birthDate(key: string): string {
-  const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, m - 1, d, 12).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
 /**
  * @param patientName The account's first and last name; printed at the top with the date of birth (F11).
  */
@@ -49,7 +39,7 @@ export function visitSummaryHtml(
 ): string {
   const patient = [
     patientName.trim() ? `<strong>${escapeHtml(patientName.trim())}</strong>` : '',
-    profile.dateOfBirth ? `born ${escapeHtml(birthDate(profile.dateOfBirth))}` : '',
+    profile.dateOfBirth ? `born ${escapeHtml(formatBirthDate(profile.dateOfBirth))}` : '',
   ]
     .filter(Boolean)
     .join(', ');

@@ -120,6 +120,14 @@ export async function saveProfile(next: Profile): Promise<void> {
   });
 }
 
+export async function isProfileUnsynced(): Promise<boolean> {
+  return (await getUserValue<boolean>('profileUnsynced')) === true;
+}
+
+export async function setProfileUnsynced(unsynced: boolean): Promise<void> {
+  await setUserValue('profileUnsynced', unsynced);
+}
+
 export async function hasCompletedOnboarding(): Promise<boolean> {
   if (isUserDatabaseOpen()) {
     return (await getUserValue<boolean>('onboardingCompleted')) === true;

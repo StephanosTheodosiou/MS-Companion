@@ -44,6 +44,15 @@ export function formatShortDate(key: string): string {
   });
 }
 
+export function formatBirthDate(key: string): string {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d, 12).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
 /** Whole days from one YYYY-MM-DD to another. */
 export function daysBetween(fromKey: string, toKey: string): number {
   const [y1, m1, d1] = fromKey.split('-').map(Number);

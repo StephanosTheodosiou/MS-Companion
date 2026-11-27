@@ -2,28 +2,37 @@ import { Redirect, type Href } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 import { useAuth } from '@/context/auth-context';
-import { fetchConsents } from '@/utils/patientApi';
-import { completeOnboarding, hasCompletedOnboarding } from '@/utils/storage';
+import { fetchConsents, pushConsents } from '@/utils/patientApi';
+import { completeOnboarding, getConsents, hasCompletedOnboarding } from '@/utils/storage';
 
-/**
- * Signed in: setup is done when the server already has the user's consent choices (N4).
- * This works on a new phone too. Offline, the flag saved on this phone is used instead.
- */
 async function isOnboarded(signedIn: boolean): Promise<boolean> {
-  if (!signedIn) return hasCompletedOnboarding();
+  if (await hasCompletedOnboarding()) {
+    if (signedIn) void recordConsentsIfMissing();
+    return true;
+  }
+  if (!signedIn) return false;
   try {
     const { decided } = await fetchConsents();
-    if (decided) await completeOnboarding().catch(() => {}); // remember it for offline starts
+    if (decided) await completeOnboarding().catch(() => {});
     return decided;
   } catch (e) {
     console.warn('Could not check setup with the server', e);
-    return hasCompletedOnboarding();
+    return false;
+  }
+}
+
+async function recordConsentsIfMissing(): Promise<void> {
+  try {
+    const { decided } = await fetchConsents();
+    if (!decided) await pushConsents(await getConsents());
+  } catch (e) {
+    console.warn('Could not check consent with the server', e);
   }
 }
 
 /**
  * App entry point ("/") and the anchor protected routes fall back to after signing in or out.
- *   signed in, setup finished     -> Today (home tab); "finished" comes from the server, see isOnboarded
+ *   signed in, setup finished     -> Today (home tab); a new phone asks the server
  *   signed in, setup not finished -> consent and profile setup (E1)
  *   signed out after setting up   -> Log in
  *   first launch                  -> Welcome

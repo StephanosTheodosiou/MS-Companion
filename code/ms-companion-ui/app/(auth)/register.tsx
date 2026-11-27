@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import type { TextInputInstance } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/app-button';
 import { ErrorNote, Note } from '@/components/ui/notice';
@@ -28,6 +29,10 @@ export default function RegisterScreen() {
   const [errors, setErrors] = useState<Partial<Record<Field, string | null>>>({});
   const [failure, setFailure] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const lastNameRef = useRef<TextInputInstance>(null);
+  const emailRef = useRef<TextInputInstance>(null);
+  const passwordRef = useRef<TextInputInstance>(null);
+  const confirmRef = useRef<TextInputInstance>(null);
 
   const clear = (field: Field) => setErrors((e) => (e[field] ? { ...e, [field]: null } : e));
 
@@ -89,7 +94,7 @@ export default function RegisterScreen() {
           <Button
             label="I already have an account"
             variant="plain"
-            onPress={() => router.push('/login')}
+            onPress={() => router.dismissTo('/login')}
           />
         </>
       }>
@@ -108,9 +113,13 @@ export default function RegisterScreen() {
           autoComplete="given-name"
           maxLength={AuthLimits.nameMax}
           textContentType="givenName"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => lastNameRef.current?.focus()}
           error={errors.firstName}
         />
         <TextField
+          ref={lastNameRef}
           label="Last name"
           icon="user"
           placeholder="For example: Georgiou"
@@ -123,9 +132,13 @@ export default function RegisterScreen() {
           autoComplete="family-name"
           maxLength={AuthLimits.nameMax}
           textContentType="familyName"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => emailRef.current?.focus()}
           error={errors.lastName}
         />
         <TextField
+          ref={emailRef}
           label="Email"
           icon="mail"
           placeholder="name@example.com"
@@ -140,9 +153,13 @@ export default function RegisterScreen() {
           autoComplete="email"
           maxLength={AuthLimits.emailMax}
           textContentType="emailAddress"
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => passwordRef.current?.focus()}
           error={errors.email}
         />
         <PasswordField
+          ref={passwordRef}
           kind="new"
           maxLength={AuthLimits.passwordMax}
           label="Password"
@@ -153,9 +170,13 @@ export default function RegisterScreen() {
             setPassword(t);
             clear('password');
           }}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => confirmRef.current?.focus()}
           error={errors.password}
         />
         <PasswordField
+          ref={confirmRef}
           kind="new"
           maxLength={AuthLimits.passwordMax}
           label="Repeat password"
@@ -165,6 +186,8 @@ export default function RegisterScreen() {
             setConfirm(t);
             clear('confirm');
           }}
+          returnKeyType="go"
+          onSubmitEditing={onCreate}
           error={errors.confirm}
         />
       </Section>

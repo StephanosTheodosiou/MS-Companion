@@ -20,7 +20,7 @@ import {
   listSymptomEntries,
 } from '@/utils/storage';
 import { Medication, Profile } from '@/types/health';
-import { formatShortDate } from '@/utils/date';
+import { formatBirthDate, formatShortDate } from '@/utils/date';
 import {
   buildVisitSummary,
   describeAverage,
@@ -143,8 +143,18 @@ export default function VisitSummaryScreen() {
       ) : null}
 
       <Section header="About me" iconInset>
+        {patientName.trim() ? (
+          <Row
+            icon="user"
+            strong
+            label={patientName.trim()}
+            description={
+              profile.dateOfBirth ? `Born ${formatBirthDate(profile.dateOfBirth)}` : undefined
+            }
+          />
+        ) : null}
         <Row
-          icon="user"
+          icon="heart"
           label="Type of MS"
           value={MS_TYPES.find((t) => t.value === profile.msType)?.label ?? 'Not given'}
         />
