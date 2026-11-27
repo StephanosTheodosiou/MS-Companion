@@ -22,7 +22,11 @@ function keyToDate(key: string): Date {
 
 /** "12 March 1985" */
 export function formatBirthDate(key: string): string {
-  return keyToDate(key).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return keyToDate(key).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 }
 
 /** Same rule as the API (UpdatePatientRequest): in the past and not before 1900. */

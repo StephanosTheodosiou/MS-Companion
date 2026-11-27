@@ -31,7 +31,11 @@ const empty = (text: string) => `<p class="empty">${escapeHtml(text)}</p>`;
 /** "12 March 1985" */
 function birthDate(key: string): string {
   const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, m - 1, d, 12).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return new Date(y, m - 1, d, 12).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 }
 
 /**
