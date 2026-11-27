@@ -75,7 +75,14 @@ export function visitSummaryHtml(
         ? `<ul>${summary.sideEffects
             .map(
               (s) =>
-                `<li>Side effect: ${escapeHtml(s.description)} (${[s.severity, s.medicine, `started ${formatShortDate(s.date)}`].filter(Boolean).map((x) => escapeHtml(String(x))).join(', ')})</li>`,
+                `<li>Side effect: ${escapeHtml(s.description)} (${[
+                  s.severity,
+                  s.medicine,
+                  `started ${formatShortDate(s.date)}`,
+                ]
+                  .filter(Boolean)
+                  .map((x) => escapeHtml(String(x)))
+                  .join(', ')})</li>`,
             )
             .join('')}</ul>`
         : ''

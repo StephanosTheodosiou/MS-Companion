@@ -76,7 +76,11 @@ export default function AppointmentEditScreen() {
     setDateError(date ? null : 'Choose a date.');
     setTimeError(time ? null : 'Choose a start time.');
     setEndError(
-      !endTime ? 'Choose an end time.' : endAfterStart ? null : 'The end time must be after the start time.',
+      !endTime
+        ? 'Choose an end time.'
+        : endAfterStart
+          ? null
+          : 'The end time must be after the start time.',
     );
     if (!type || !date || !time || !endTime || !endAfterStart) return;
     try {

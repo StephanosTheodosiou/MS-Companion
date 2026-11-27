@@ -42,7 +42,12 @@ const doseKey = (medicationId: string, date: string, time: string) =>
 type Legacy<T> = Partial<T> & Record<string, unknown>;
 
 /** Old blood tests repeated in months (1, 3, 6, 12); now it is weeks (4, 13, 26, 52). */
-const MONTHS_TO_WEEKS: Record<string, BloodTest['repeat']> = { '1': '4', '3': '13', '6': '26', '12': '52' };
+const MONTHS_TO_WEEKS: Record<string, BloodTest['repeat']> = {
+  '1': '4',
+  '3': '13',
+  '6': '26',
+  '12': '52',
+};
 
 function upgradeSideEffect(e: Legacy<SideEffect>): SideEffect {
   const loggedAt = e.loggedAt ?? new Date().toISOString();
@@ -73,7 +78,10 @@ function upgradeAppointment(a: Legacy<Appointment>): Appointment {
 
 function upgradeBloodTest(b: Legacy<BloodTest>): BloodTest {
   const repeat = String(b.repeat ?? 'none');
-  return { ...(b as BloodTest), repeat: MONTHS_TO_WEEKS[repeat] ?? (repeat as BloodTest['repeat']) };
+  return {
+    ...(b as BloodTest),
+    repeat: MONTHS_TO_WEEKS[repeat] ?? (repeat as BloodTest['repeat']),
+  };
 }
 
 export async function getConsents(): Promise<ConsentMap> {

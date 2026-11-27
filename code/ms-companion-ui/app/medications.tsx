@@ -56,7 +56,9 @@ export default function MedicationsScreen() {
   }
 
   const medName = (id: string | null) =>
-    id === null ? 'Medicine not known' : (medications.find((m) => m.id === id)?.name ?? 'Removed medicine');
+    id === null
+      ? 'Medicine not known'
+      : (medications.find((m) => m.id === id)?.name ?? 'Removed medicine');
 
   return (
     <Screen

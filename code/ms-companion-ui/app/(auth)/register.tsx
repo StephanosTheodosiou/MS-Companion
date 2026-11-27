@@ -59,7 +59,11 @@ export default function RegisterScreen() {
       setBusy(false);
       if (err instanceof ApiError && err.status === 409) {
         setErrors({ email: 'An account with this email already exists. Log in instead.' });
-      } else if (err instanceof ApiError && err.status === 400 && Object.keys(err.fieldErrors).length > 0) {
+      } else if (
+        err instanceof ApiError &&
+        err.status === 400 &&
+        Object.keys(err.fieldErrors).length > 0
+      ) {
         // The server checks the same fields; show its messages under the matching field.
         setErrors({ ...err.fieldErrors });
       } else if (err instanceof ApiError && err.isNetworkError) {
@@ -77,8 +81,16 @@ export default function RegisterScreen() {
       subtitle="Your account keeps your record safe if you change or lose your phone."
       footer={
         <>
-          <Button label={busy ? 'Creating account…' : 'Create account'} onPress={onCreate} disabled={busy} />
-          <Button label="I already have an account" variant="plain" onPress={() => router.push('/login')} />
+          <Button
+            label={busy ? 'Creating account…' : 'Create account'}
+            onPress={onCreate}
+            disabled={busy}
+          />
+          <Button
+            label="I already have an account"
+            variant="plain"
+            onPress={() => router.push('/login')}
+          />
         </>
       }>
       {failure ? <ErrorNote>{failure}</ErrorNote> : null}

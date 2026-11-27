@@ -10,5 +10,7 @@ export function appointmentTitle(a: Appointment): string {
 
 /** "Neurologist · Dr Andreas · Nicosia General Hospital" */
 export function appointmentDetails(a: Appointment): string | undefined {
-  return [appointmentTypeLabel(a.type), a.withWhom, a.place].filter(Boolean).join(' · ') || undefined;
+  return (
+    [appointmentTypeLabel(a.type), a.withWhom, a.place].filter(Boolean).join(' · ') || undefined
+  );
 }

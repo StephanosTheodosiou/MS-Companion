@@ -21,7 +21,13 @@ import {
 } from '@/utils/storage';
 import { Medication, Profile } from '@/types/health';
 import { formatShortDate } from '@/utils/date';
-import { buildVisitSummary, describeAverage, describeChange, feverHeatNote, VisitSummary } from '@/utils/summary';
+import {
+  buildVisitSummary,
+  describeAverage,
+  describeChange,
+  feverHeatNote,
+  VisitSummary,
+} from '@/utils/summary';
 import { visitSummaryHtml } from '@/utils/summaryHtml';
 import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
 import { MS_TYPES } from '@/constants/profile';
@@ -218,7 +224,12 @@ export default function VisitSummaryScreen() {
             key={i}
             icon="alert-circle"
             label={s.description}
-            description={['Side effect', s.severity, s.medicine, `started ${formatShortDate(s.date)}`]
+            description={[
+              'Side effect',
+              s.severity,
+              s.medicine,
+              `started ${formatShortDate(s.date)}`,
+            ]
               .filter(Boolean)
               .join(' · ')}
           />

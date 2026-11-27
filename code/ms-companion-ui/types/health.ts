@@ -96,7 +96,8 @@ export interface SymptomEntry {
 // ---------- Appointments and visit preparation (E7) ----------
 
 /** Same names as the API's AppointmentType, so no mapping is needed when syncing. */
-export type AppointmentType = 'Neurologist' | 'MsNurse' | 'Infusion' | 'BloodTest' | 'Mri' | 'Other';
+export type AppointmentType =
+  'Neurologist' | 'MsNurse' | 'Infusion' | 'BloodTest' | 'Mri' | 'Other';
 
 export interface Appointment {
   id: string;
