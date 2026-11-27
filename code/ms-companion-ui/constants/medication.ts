@@ -1,4 +1,4 @@
-import { DoseTime } from '@/types/health';
+import { DoseTime, SideEffectSeverity } from '@/types/health';
 
 // Fixed times keep scheduling to a few big taps instead of a clock picker.
 export const DOSE_TIMES: { value: DoseTime; label: string }[] = [
@@ -17,3 +17,10 @@ export function doseTimeLabel(time: DoseTime): string {
 export function sortTimes(times: DoseTime[]): DoseTime[] {
   return [...times].sort((a, b) => a.localeCompare(b));
 }
+
+/** Side-effect severity (N3: same names as the API). */
+export const SEVERITY_OPTIONS: { value: SideEffectSeverity; label: string }[] = [
+  { value: 'Mild', label: 'Mild' },
+  { value: 'Moderate', label: 'Moderate' },
+  { value: 'Severe', label: 'Severe' },
+];

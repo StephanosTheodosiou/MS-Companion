@@ -255,7 +255,7 @@ namespace MSCompanion.Data.Migrations
                         {
                             t.HasCheckConstraint("ck_check_in_answer_item", "item IN ('Fatigue', 'Mobility', 'Mood', 'Pain', 'Cognition', 'Bladder')");
 
-                            t.HasCheckConstraint("ck_check_in_answer_score", "score BETWEEN 0 AND 10");
+                            t.HasCheckConstraint("ck_check_in_answer_score", "score BETWEEN 0 AND 4");
                         });
                 });
 

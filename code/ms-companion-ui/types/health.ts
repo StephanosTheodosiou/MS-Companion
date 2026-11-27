@@ -62,10 +62,18 @@ export interface DoseLog {
   loggedAt: string;
 }
 
+/** Same names as the API's SideEffectSeverity, so no mapping is needed when syncing. */
+export type SideEffectSeverity = 'Mild' | 'Moderate' | 'Severe';
+
 export interface SideEffect {
   id: string;
-  medicationId: string;
+  /** The medicine the patient thinks caused it, or null when they don't know. */
+  medicationId: string | null;
   description: string;
+  /** null only for entries saved before severity was asked (the API needs it for new ones). */
+  severity: SideEffectSeverity | null;
+  /** YYYY-MM-DD the side effect started. */
+  startedOn: string;
   loggedAt: string;
 }
 
@@ -79,8 +87,10 @@ export interface SymptomEntry {
   /** YYYY-MM-DD the symptom started. */
   startedOn: string;
   lastedOver24h: boolean;
-  /** Fever, infection or heat can briefly make MS symptoms worse. */
-  feverOrHeat: boolean;
+  /** Fever or an infection can briefly make MS symptoms worse (API: hadFever). */
+  hadFever: boolean;
+  /** So can a very hot day or other heat exposure (API: heatExposure). */
+  heatExposure: boolean;
   createdAt: string;
   /** Scenario 2: saved on the phone first, uploaded when back online. */
   syncStatus: SyncStatus;
@@ -88,12 +98,19 @@ export interface SymptomEntry {
 
 // ---------- Appointments and visit preparation (E7) ----------
 
+/** Same names as the API's AppointmentType, so no mapping is needed when syncing. */
+export type AppointmentType =
+  'Neurologist' | 'MsNurse' | 'Infusion' | 'BloodTest' | 'Mri' | 'Other';
+
 export interface Appointment {
   id: string;
+  type: AppointmentType;
   /** YYYY-MM-DD */
   date: string;
-  /** HH:MM, 24-hour */
+  /** Start, HH:MM, 24-hour */
   time: string;
+  /** End on the same day, HH:MM. The API requires it (unless cancelled); null only for entries saved before it was asked. */
+  endTime: string | null;
   /** Who the visit is with, e.g. "Dr Andreas". */
   withWhom: string;
   place: string;
@@ -110,8 +127,8 @@ export interface DoctorQuestion {
 
 // ---------- Blood-test reminders (E3) ----------
 
-/** How often a blood test comes round, in months. 'none' means a one-off test. */
-export type BloodTestRepeat = 'none' | '1' | '3' | '6' | '12';
+/** How often a blood test comes round, in weeks (API: repeatEveryWeeks). 'none' means a one-off test. */
+export type BloodTestRepeat = 'none' | '4' | '13' | '26' | '52';
 
 /** How many days before the due date the reminder is sent. */
 export type RemindBefore = '0' | '1' | '7';

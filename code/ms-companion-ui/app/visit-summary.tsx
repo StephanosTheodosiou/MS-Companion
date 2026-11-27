@@ -21,7 +21,13 @@ import {
 } from '@/utils/storage';
 import { Medication, Profile } from '@/types/health';
 import { formatShortDate } from '@/utils/date';
-import { buildVisitSummary, describeAverage, describeChange, VisitSummary } from '@/utils/summary';
+import {
+  buildVisitSummary,
+  describeAverage,
+  describeChange,
+  feverHeatNote,
+  VisitSummary,
+} from '@/utils/summary';
 import { visitSummaryHtml } from '@/utils/summaryHtml';
 import { useAuth } from '@/context/auth-context';
 import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
@@ -197,7 +203,7 @@ export default function VisitSummaryScreen() {
             description={[
               `Started ${formatShortDate(e.startedOn)}`,
               e.lastedOver24h ? 'lasted over 24 hours' : 'under 24 hours',
-              e.feverOrHeat ? 'with fever or heat' : null,
+              feverHeatNote(e),
             ]
               .filter(Boolean)
               .join(' · ')}
@@ -221,7 +227,14 @@ export default function VisitSummaryScreen() {
             key={i}
             icon="alert-circle"
             label={s.description}
-            description={`Side effect · ${s.medicine} · ${formatShortDate(s.date)}`}
+            description={[
+              'Side effect',
+              s.severity,
+              s.medicine,
+              `started ${formatShortDate(s.date)}`,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
           />
         ))}
       </Section>

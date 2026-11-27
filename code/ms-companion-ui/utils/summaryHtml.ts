@@ -1,6 +1,6 @@
 import { Medication, Profile } from '@/types/health';
 import { formatShortDate } from '@/utils/date';
-import { describeAverage, describeChange, VisitSummary } from '@/utils/summary';
+import { describeAverage, describeChange, feverHeatNote, VisitSummary } from '@/utils/summary';
 
 // Turns the visit summary (E7) into a one-page A4 HTML document, which expo-print
 // converts to a PDF on the phone. Pure function, so it works offline and is easy to test.
@@ -81,7 +81,7 @@ export function visitSummaryHtml(
           (e) =>
             `<li><strong>${escapeHtml(e.description)}</strong>. Started ${formatShortDate(e.startedOn)}, ${
               e.lastedOver24h ? 'lasted over 24 hours' : 'under 24 hours'
-            }${e.feverOrHeat ? ', with fever or heat' : ''}.</li>`,
+            }${feverHeatNote(e) ? `, ${feverHeatNote(e)}` : ''}.</li>`,
         )
         .join('')}</ul>`
     : empty('None logged in this period.');
@@ -95,7 +95,14 @@ export function visitSummaryHtml(
         ? `<ul>${summary.sideEffects
             .map(
               (s) =>
-                `<li>Side effect: ${escapeHtml(s.description)} (${escapeHtml(s.medicine)}, ${formatShortDate(s.date)})</li>`,
+                `<li>Side effect: ${escapeHtml(s.description)} (${[
+                  s.severity,
+                  s.medicine,
+                  `started ${formatShortDate(s.date)}`,
+                ]
+                  .filter(Boolean)
+                  .map((x) => escapeHtml(String(x)))
+                  .join(', ')})</li>`,
             )
             .join('')}</ul>`
         : ''

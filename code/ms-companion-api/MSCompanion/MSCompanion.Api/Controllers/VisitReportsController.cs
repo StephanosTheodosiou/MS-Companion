@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MSCompanion.Api.Dto;
 using MSCompanion.Api.Extensions;
 using MSCompanion.Api.Interfaces;
+using MSCompanion.Api.Services;
 
 namespace MSCompanion.Api.Controllers;
 
@@ -39,6 +40,24 @@ public sealed class VisitReportsController(IVisitReportService reports) : Contro
         return File(file.Content, "application/pdf", file.FileName);
     }
 
+    [HttpGet("{id:guid}/fhir")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK, VisitReportFhir.MediaType)]
+    public async Task<ActionResult> GetFhir(Guid id, CancellationToken ct)
+    {
+        if (User.GetUserId() is not { } userId)
+        {
+            return Unauthorized();
+        }
+
+        var result = await reports.GetFhirAsync(userId, id, ct);
+        if (result.Error is { } error)
+        {
+            return ToProblem(error);
+        }
+
+        return Content(result.Value!, $"{VisitReportFhir.MediaType}; fhirVersion=4.0");
+    }
+
     [HttpPost]
     public Task<ActionResult<VisitReportDto>> Create(CreateVisitReportRequest request, CancellationToken ct) =>
         Run(userId => reports.CreateAsync(userId, request, ct));
@@ -62,6 +81,10 @@ public sealed class VisitReportsController(IVisitReportService reports) : Contro
                 statusCode: 400,
                 title: "Appointment has already happened",
                 detail: "Create the report for today's or an upcoming appointment."),
+            ServiceError.FhirNotAvailable => Problem(
+                statusCode: 404,
+                title: "FHIR export not available for this report",
+                detail: "This report was created before FHIR export existed. Create a new report."),
             _ => Problem(statusCode: 404, title: "Not found"),
         };
 }

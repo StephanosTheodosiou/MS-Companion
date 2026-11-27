@@ -18,17 +18,6 @@ export function addDaysKey(key: string, days: number): string {
   return todayKey(d);
 }
 
-/** Adds whole months and keeps the date valid (31 Jan + 1 month = 28 Feb). */
-export function addMonthsKey(key: string, months: number): string {
-  const d = parseKey(key);
-  const day = d.getDate();
-  d.setDate(1);
-  d.setMonth(d.getMonth() + months);
-  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  d.setDate(Math.min(day, lastDay));
-  return todayKey(d);
-}
-
 /** A one-off test that was marked as done has nothing left to remind about. */
 export function isFinished(test: BloodTest): boolean {
   return test.repeat === 'none' && test.lastDoneOn !== null;
@@ -61,7 +50,8 @@ export function reminderDate(test: BloodTest): string {
 /** Marks a test as done today. Repeating tests move on to their next due date. */
 export function markDone(test: BloodTest, today: string = todayKey()): BloodTest {
   if (test.repeat === 'none') return { ...test, lastDoneOn: today };
-  return { ...test, lastDoneOn: today, dueDate: addMonthsKey(today, Number(test.repeat)) };
+  // Same as the API's BloodTestRules.NextDueDate: completed date + weeks * 7 days.
+  return { ...test, lastDoneOn: today, dueDate: addDaysKey(today, Number(test.repeat) * 7) };
 }
 
 /** Overdue first, then soonest due, finished tests last. */
