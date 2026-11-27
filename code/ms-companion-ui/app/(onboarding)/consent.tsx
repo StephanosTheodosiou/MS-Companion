@@ -11,10 +11,13 @@ import { getConsents, saveAllConsents } from '@/utils/storage';
 import { OPTIONAL_CONSENTS } from '@/constants/consent';
 import { useAuth } from '@/context/auth-context';
 import { ConsentMap } from '@/types/health';
+import { ApiError } from '@/utils/apiClient';
+import { pushConsents } from '@/utils/patientApi';
 
 // E1, step 2 of 3: one switch per data type. Only symptom data is required for the app to work.
-// This screen stores the user's choice. The phone's own permission prompts
-// (notifications, location) come later, with the features that need them.
+// The choices are saved on the phone and recorded on the server (POST /api/consent, N4).
+// The server's record also tells the app that this step is done (see app/index.tsx).
+// The phone's own permission prompts (notifications, location) come later, with the features that need them.
 export default function ConsentScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
@@ -34,12 +37,20 @@ export default function ConsentScreen() {
 
   const onContinue = async () => {
     setSaving(true);
+    const choices = { ...consents, symptoms: true };
     try {
-      await saveAllConsents({ ...consents, symptoms: true });
+      await saveAllConsents(choices);
+      await pushConsents(choices);
       router.push('/profile-setup');
     } catch (e) {
       console.warn('Could not save consents', e);
-      Alert.alert('Your choices were not saved', 'Please try again.');
+      const offline = e instanceof ApiError && e.isNetworkError;
+      Alert.alert(
+        'Your choices were not saved',
+        offline
+          ? "MS Companion couldn't be reached. Check your internet connection and try again."
+          : 'Please try again.',
+      );
     } finally {
       setSaving(false);
     }

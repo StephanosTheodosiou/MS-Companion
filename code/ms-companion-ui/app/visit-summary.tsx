@@ -29,6 +29,7 @@ import {
   VisitSummary,
 } from '@/utils/summary';
 import { visitSummaryHtml } from '@/utils/summaryHtml';
+import { useAuth } from '@/context/auth-context';
 import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
 import { MS_TYPES } from '@/constants/profile';
 
@@ -36,6 +37,8 @@ import { MS_TYPES } from '@/constants/profile';
 // The same page can be shared as a PDF or printed (made on the phone, works offline).
 export default function VisitSummaryScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const patientName = user ? `${user.firstName} ${user.lastName}` : '';
   const [summary, setSummary] = useState<VisitSummary | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [medications, setMedications] = useState<Medication[]>([]);
@@ -101,7 +104,7 @@ export default function VisitSummaryScreen() {
   const run = async (action: 'share' | 'print') => {
     setBusy(true);
     try {
-      const html = visitSummaryHtml(summary, profile, medications);
+      const html = visitSummaryHtml(summary, profile, medications, patientName);
       if (action === 'share') await shareSummaryPdf(html);
       else await printSummary(html);
     } catch (e) {

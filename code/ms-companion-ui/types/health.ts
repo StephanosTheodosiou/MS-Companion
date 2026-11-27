@@ -10,6 +10,8 @@ export interface Profile {
   medication: string;
   teamName: string;
   teamPhone: string;
+  /** YYYY-MM-DD, optional. Printed on the visit summary next to the name. */
+  dateOfBirth: string | null;
 }
 
 export const EMPTY_PROFILE: Profile = {
@@ -17,6 +19,7 @@ export const EMPTY_PROFILE: Profile = {
   medication: '',
   teamName: '',
   teamPhone: '',
+  dateOfBirth: null,
 };
 
 // ---------- Daily check-in (E2) ----------

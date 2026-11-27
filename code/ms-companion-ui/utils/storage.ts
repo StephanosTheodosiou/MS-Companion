@@ -116,6 +116,7 @@ export async function saveProfile(next: Profile): Promise<void> {
     medication: next.medication.trim(),
     teamName: next.teamName.trim(),
     teamPhone: next.teamPhone.trim(),
+    dateOfBirth: next.dateOfBirth,
   });
 }
 
