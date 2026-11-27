@@ -41,6 +41,7 @@ function RootNavigator() {
           {/* Full-screen pages opened from the tabs. Each draws its own back button. */}
           <Stack.Screen name="check-in" />
           <Stack.Screen name="profile-edit" />
+          <Stack.Screen name="delete-account" />
           <Stack.Screen name="medications" />
           <Stack.Screen name="medication-edit" />
           <Stack.Screen name="side-effect" />
