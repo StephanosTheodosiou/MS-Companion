@@ -10,4 +10,6 @@ export const authApi = {
     api.post<AuthResponse>('/api/auth/register', request, { auth: false }),
 
   me: () => api.get<User>('/api/auth/me'),
+
+  deleteAccount: (password: string) => api.post<void>('/api/auth/delete-account', { password }),
 };

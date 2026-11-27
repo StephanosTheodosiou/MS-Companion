@@ -14,7 +14,6 @@ import { ApiError } from '@/utils/apiClient';
 import { bloodTestSummary } from '@/utils/bloodTest';
 import { fetchConsents, pushConsents } from '@/utils/patientApi';
 import {
-  deleteAllData,
   exportAllData,
   getConsents,
   getProfile,
@@ -109,30 +108,6 @@ export default function ProfileScreen() {
     ]);
   };
 
-  const onDelete = () => {
-    Alert.alert(
-      'Delete all your data?',
-      'Your profile, health data, choices and settings will be removed from this phone, and you will be logged out. This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deleteAllData();
-              setSize('normal', { persist: false });
-              await signOut();
-            } catch (e) {
-              console.warn('Could not delete data', e);
-              Alert.alert('Your data was not deleted', 'Please try again.');
-            }
-          },
-        },
-      ],
-    );
-  };
-
   const msTypeLabel = MS_TYPES.find((t) => t.value === profile?.msType)?.label;
   const aboutMe = [msTypeLabel, profile?.teamName.trim()].filter(Boolean).join(' · ');
 
@@ -197,7 +172,14 @@ export default function ProfileScreen() {
 
       <Section header="Your data" iconInset>
         <Row icon="download" label="Export my data" chevron onPress={onExport} />
-        <Row icon="trash-2" label="Delete all my data" destructive onPress={onDelete} />
+        <Row
+          icon="trash-2"
+          label="Delete my account"
+          description="Removes your account and all your data, everywhere."
+          destructive
+          chevron
+          onPress={() => router.push('/delete-account')}
+        />
       </Section>
 
       <Section iconInset>
