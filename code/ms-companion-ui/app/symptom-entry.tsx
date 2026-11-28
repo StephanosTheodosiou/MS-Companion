@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, Linking } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
+import { useSaveGuard } from '@/hooks/use-save-guard';
 import { useConfirmLeave } from '@/hooks/use-confirm-leave';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/app-button';
@@ -58,6 +59,7 @@ export default function SymptomEntryScreen() {
   const [lasted, setLasted] = useState<YesNo | null>(null);
   const [fever, setFever] = useState<YesNo | null>(null);
   const [heat, setHeat] = useState<YesNo | null>(null);
+  const { saving, guard } = useSaveGuard();
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Guidance | null>(null);
   const [profile, setProfile] = useState<Profile>({ ...EMPTY_PROFILE });
@@ -76,31 +78,32 @@ export default function SymptomEntryScreen() {
     description !== '' || started !== null || lasted !== null || fever !== null || heat !== null;
   useConfirmLeave(dirty && !result, 'This symptom will not be saved.');
 
-  const onSave = async () => {
-    if (description.trim() === '' || !started || !lasted || !fever || !heat) {
-      setError('Please answer all five questions.');
-      return;
-    }
-    const lastedOver24h = lasted === 'yes';
-    const hadFever = fever === 'yes';
-    const heatExposure = heat === 'yes';
-    try {
-      await saveSymptomEntry({
-        id: newId(),
-        description: description.trim(),
-        startedOn: daysAgoKey(Number(started)),
-        lastedOver24h,
-        hadFever,
-        heatExposure,
-        createdAt: new Date().toISOString(),
-        syncStatus: 'waiting',
-      });
-      setResult(symptomGuidance(lastedOver24h, hadFever, heatExposure));
-    } catch (e) {
-      console.warn('Could not save symptom', e);
-      Alert.alert('The symptom was not saved', 'Please try again.');
-    }
-  };
+  const onSave = () =>
+    guard(async () => {
+      if (description.trim() === '' || !started || !lasted || !fever || !heat) {
+        setError('Please answer all five questions.');
+        return;
+      }
+      const lastedOver24h = lasted === 'yes';
+      const hadFever = fever === 'yes';
+      const heatExposure = heat === 'yes';
+      try {
+        await saveSymptomEntry({
+          id: newId(),
+          description: description.trim(),
+          startedOn: daysAgoKey(Number(started)),
+          lastedOver24h,
+          hadFever,
+          heatExposure,
+          createdAt: new Date().toISOString(),
+          syncStatus: 'waiting',
+        });
+        setResult(symptomGuidance(lastedOver24h, hadFever, heatExposure));
+      } catch (e) {
+        console.warn('Could not save symptom', e);
+        Alert.alert('The symptom was not saved', 'Please try again.');
+      }
+    });
 
   // ---------- Guidance after saving ----------
   if (result) {
@@ -161,7 +164,7 @@ export default function SymptomEntryScreen() {
       topBar={<TopBar onBack={() => router.back()} />}
       title="New or worse symptom"
       subtitle="Answer five short questions. The app will tell you what to do next."
-      footer={<Button label="Save" onPress={onSave} />}>
+      footer={<Button label="Save" onPress={onSave} disabled={saving} />}>
       <TextField
         label="What is new or worse?"
         icon="edit-3"

@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useSaveGuard } from '@/hooks/use-save-guard';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/app-button';
 import { Icon } from '@/components/ui/app-icon';
@@ -18,6 +19,7 @@ import { newId } from '@/utils/id';
 export default function QuestionsScreen() {
   const colors = useColors();
   const router = useRouter();
+  const { saving, guard } = useSaveGuard();
   const [questions, setQuestions] = useState<DoctorQuestion[]>([]);
   const [draft, setDraft] = useState('');
 
@@ -29,25 +31,32 @@ export default function QuestionsScreen() {
 
   useFocusEffect(reload);
 
-  const onAdd = async () => {
-    if (draft.trim() === '') return;
-    try {
-      await saveQuestion({
-        id: newId(),
-        text: draft.trim(),
-        createdAt: new Date().toISOString(),
-        asked: false,
-      });
-      setDraft('');
-      reload();
-    } catch (e) {
-      console.warn('Could not save question', e);
-      Alert.alert('The question was not saved', 'Please try again.');
-    }
-  };
+  const onAdd = () =>
+    guard(async () => {
+      if (draft.trim() === '') return;
+      try {
+        await saveQuestion({
+          id: newId(),
+          text: draft.trim(),
+          createdAt: new Date().toISOString(),
+          asked: false,
+        });
+        setDraft('');
+        reload();
+      } catch (e) {
+        console.warn('Could not save question', e);
+        Alert.alert('The question was not saved', 'Please try again.');
+      }
+    });
 
+  // F13: like the other screens, tell the user when saving fails.
   const toggle = async (q: DoctorQuestion) => {
-    await saveQuestion({ ...q, asked: !q.asked });
+    try {
+      await saveQuestion({ ...q, asked: !q.asked });
+    } catch (e) {
+      console.warn('Could not update question', e);
+      Alert.alert('The question was not updated', 'Please try again.');
+    }
     reload();
   };
 
@@ -58,8 +67,13 @@ export default function QuestionsScreen() {
         text: 'Remove',
         style: 'destructive',
         onPress: async () => {
-          for (const q of questions.filter((x) => x.asked)) await deleteQuestion(q.id);
-          reload();
+          try {
+            for (const q of questions.filter((x) => x.asked)) await deleteQuestion(q.id);
+          } catch (e) {
+            console.warn('Could not remove questions', e);
+            Alert.alert('Not all questions were removed', 'Please try again.');
+          }
+          reload(); // show what is really saved, also after a partial failure
         },
       },
     ]);
@@ -82,7 +96,11 @@ export default function QuestionsScreen() {
           multiline
           placeholder="For example: could the numbness be related to the heat?"
         />
-        <Button label="Add question" onPress={onAdd} disabled={draft.trim() === ''} />
+        <Button
+          label="Add question"
+          onPress={onAdd}
+          disabled={saving || draft.trim() === ''}
+        />
       </Section>
 
       <Section

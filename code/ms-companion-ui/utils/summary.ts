@@ -10,6 +10,7 @@ import {
   SymptomEntry,
   SymptomKey,
 } from '@/types/health';
+import { nextAppointment, pastAppointments } from '@/utils/appointment';
 import { daysAgoKey, daysBetween, todayKey } from '@/utils/date';
 
 // Builds the one-page visit summary (E7) from everything logged since the last visit.
@@ -26,9 +27,10 @@ export interface SymptomSummary {
 }
 
 export interface VisitSummary {
-  /** Start of the period (YYYY-MM-DD): the last visit, or 30 days ago if there was none. */
+  /** First day of the period (YYYY-MM-DD): the day of the last visit, or the first of the last 30 days. */
   from: string;
   to: string;
+  /** Calendar days from `from` to `to`, counting both (F10). Check-ins on every day give "N of N days". */
   days: number;
   lastVisit: Appointment | null;
   nextVisit: Appointment | null;
@@ -49,7 +51,8 @@ const average = (values: number[]) =>
   values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
 
 export function buildVisitSummary(input: {
-  today?: string;
+  /** For tests: the moment the summary is made (default: now). */
+  now?: Date;
   appointments: Appointment[];
   checkIns: CheckIn[];
   symptomEntries: SymptomEntry[];
@@ -58,15 +61,14 @@ export function buildVisitSummary(input: {
   sideEffects: SideEffect[];
   questions: DoctorQuestion[];
 }): VisitSummary {
-  const today = input.today ?? todayKey();
-  const sorted = [...input.appointments].sort((a, b) =>
-    `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`),
-  );
-  const past = sorted.filter((a) => a.date < today);
-  const lastVisit = past.length ? past[past.length - 1] : null;
-  const nextVisit = sorted.find((a) => a.date >= today) ?? null;
+  const now = input.now ?? new Date();
+  const today = todayKey(now);
+  // F16: date AND time, with the same rule as every other screen.
+  const lastVisit = pastAppointments(input.appointments, now)[0] ?? null;
+  const nextVisit = nextAppointment(input.appointments, now);
 
-  const from = lastVisit ? lastVisit.date : daysAgoKey(DEFAULT_PERIOD_DAYS, parseKey(today));
+  // F10: "Last 30 days" is today and the 29 days before it, so the period and the day count agree.
+  const from = lastVisit ? lastVisit.date : daysAgoKey(DEFAULT_PERIOD_DAYS - 1, now);
   const inPeriod = (date: string) => date >= from && date <= today;
 
   const checkIns = input.checkIns
@@ -99,7 +101,7 @@ export function buildVisitSummary(input: {
   return {
     from,
     to: today,
-    days: daysBetween(from, today),
+    days: daysBetween(from, today) + 1,
     lastVisit,
     nextVisit,
     checkInDays: checkIns.length,
@@ -134,11 +136,6 @@ export function describeChange(change: number | null): string | null {
   if (change >= 0.5) return 'Worse lately';
   if (change <= -0.5) return 'Better lately';
   return 'Steady';
-}
-
-function parseKey(key: string): Date {
-  const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, m - 1, d);
 }
 
 /** "with fever or infection", "after heat exposure", both, or null. Used by the summary screen and the PDF. */

@@ -7,12 +7,11 @@ import { PasswordField } from '@/components/ui/app-password-field';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
 import { StepHeader } from '@/components/layout/step-header';
+import { SETUP_STEPS } from '@/constants/onboarding';
 import { TextField } from '@/components/ui/app-text-field';
 import { useAuth } from '@/context/auth-context';
 import { ApiError } from '@/utils/apiClient';
 import { AuthLimits, validateEmail, validateName, validateNewPassword } from '@/utils/validation';
-
-const SETUP_STEPS = 4;
 
 type Field = 'firstName' | 'lastName' | 'email' | 'password' | 'confirm';
 
@@ -81,7 +80,7 @@ export default function RegisterScreen() {
 
   return (
     <Screen
-      topBar={<StepHeader step={2} total={SETUP_STEPS} onBack={back} />}
+      topBar={<StepHeader step={SETUP_STEPS.createAccount} total={SETUP_STEPS.total} onBack={back} />}
       title="Create your account"
       subtitle="Your account keeps your record safe if you change or lose your phone."
       footer={

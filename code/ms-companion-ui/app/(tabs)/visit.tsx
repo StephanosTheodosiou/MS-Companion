@@ -7,7 +7,7 @@ import { Row } from '@/components/ui/row';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
 import { Appointment } from '@/types/health';
-import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
+import { appointmentDetails, appointmentTitle, upcomingAppointments } from '@/utils/appointment';
 import { todayKey } from '@/utils/date';
 import { listAppointments, listQuestions, listSymptomEntries } from '@/utils/storage';
 
@@ -28,10 +28,9 @@ export default function VisitScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      const now = todayKey();
       listAppointments()
         .then((all) => {
-          const future = all.filter((a) => a.date >= now);
+          const future = upcomingAppointments(all); // F16: date and time, shared rule
           setNextVisit(future[0] ?? null);
           setUpcoming(future.length);
         })

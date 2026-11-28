@@ -7,8 +7,12 @@ import { Section } from '@/components/layout/section';
 import { TopBar } from '@/components/layout/top-bar';
 import { listAppointments } from '@/utils/storage';
 import { Appointment } from '@/types/health';
-import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
-import { todayKey } from '@/utils/date';
+import {
+  appointmentDetails,
+  appointmentTitle,
+  pastAppointments,
+  upcomingAppointments,
+} from '@/utils/appointment';
 
 // E7: upcoming and past appointments.
 export default function AppointmentsScreen() {
@@ -23,12 +27,9 @@ export default function AppointmentsScreen() {
     }, []),
   );
 
-  const today = todayKey();
-  const upcoming = appointments.filter((a) => a.date >= today);
-  const past = appointments
-    .filter((a) => a.date < today)
-    .reverse()
-    .slice(0, 5);
+  // F16: date and time, with the same rule as Home, the Visit tab and the visit summary.
+  const upcoming = upcomingAppointments(appointments);
+  const past = pastAppointments(appointments).slice(0, 5);
   const open = (a: Appointment) =>
     router.push({ pathname: '/appointment-edit', params: { id: a.id } });
 

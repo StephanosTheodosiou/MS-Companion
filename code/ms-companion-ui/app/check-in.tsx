@@ -127,7 +127,16 @@ export default function CheckInScreen() {
                     )
                   }
                 />
-              ) : null}
+              ) : (
+                // Setup can be skipped, so the number may be missing: offer to add it, as Home does.
+                <Row
+                  icon="phone"
+                  label="Add your MS team's number"
+                  description="To call them with one tap."
+                  chevron
+                  onPress={() => router.push('/profile-edit')}
+                />
+              )}
             </Section>
             <SafetyCard>
               If you feel unsafe or think you might harm yourself, call 112 now.

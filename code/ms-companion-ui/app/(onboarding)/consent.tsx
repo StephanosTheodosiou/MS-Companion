@@ -7,6 +7,7 @@ import { Row, SwitchRow } from '@/components/ui/row';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
 import { StepHeader } from '@/components/layout/step-header';
+import { SETUP_STEPS } from '@/constants/onboarding';
 import { getConsents, saveAllConsents } from '@/utils/storage';
 import { OPTIONAL_CONSENTS } from '@/constants/consent';
 import { useAuth } from '@/context/auth-context';
@@ -14,7 +15,7 @@ import { ConsentMap } from '@/types/health';
 import { ApiError } from '@/utils/apiClient';
 import { pushConsents } from '@/utils/patientApi';
 
-// E1, step 2 of 3: one switch per data type. Only symptom data is required for the app to work.
+// E1, step 3 of 4: one switch per data type. Only symptom data is required for the app to work.
 // The choices are saved on the phone and recorded on the server (POST /api/consent, N4).
 // The server's record also tells the app that this step is done (see app/index.tsx).
 // The phone's own permission prompts (notifications, location) come later, with the features that need them.
@@ -56,17 +57,30 @@ export default function ConsentScreen() {
     }
   };
 
+  // F15: the account already exists here, so "back" cannot go to Create account. It means leaving
+  // setup, which logs out; ask first instead of logging out without a word.
+  const onBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    Alert.alert(
+      'Leave setup?',
+      "You'll be logged out. Your account is kept, and you can finish setup when you log in again.",
+      [
+        { text: 'Stay', style: 'cancel' },
+        { text: 'Log out', style: 'destructive', onPress: () => signOut() },
+      ],
+    );
+  };
+
   return (
     <Screen
       topBar={
-        <StepHeader
-          step={2}
-          total={3}
-          onBack={() => (router.canGoBack() ? router.back() : signOut())}
-        />
+        <StepHeader step={SETUP_STEPS.consent} total={SETUP_STEPS.total} onBack={onBack} />
       }
       title="Your data, your choice"
-      subtitle="Choose what the app may use. You can change this later in Profile."
+      subtitle="Your account is ready. Now choose what the app may use. You can change this later in Profile."
       footer={<Button label="Continue" onPress={onContinue} disabled={saving} />}>
       <Section footer="The app needs these to work. To stop them, delete your data in Profile.">
         <Row

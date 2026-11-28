@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useSaveGuard } from '@/hooks/use-save-guard';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/app-button';
 import { ChoiceCards } from '@/components/ui/choice-cards';
@@ -31,6 +32,7 @@ function keyToDate(key: string): Date {
 export default function SideEffectScreen() {
   const colors = useColors();
   const router = useRouter();
+  const { saving, guard } = useSaveGuard();
   const [medications, setMedications] = useState<Medication[]>([]);
   const [medicine, setMedicine] = useState<string | null>(null);
   const [description, setDescription] = useState('');
@@ -46,35 +48,36 @@ export default function SideEffectScreen() {
       .catch((e) => console.warn('Could not load medicines', e));
   }, []);
 
-  const onSave = async () => {
-    const missingDescription = description.trim() === '';
-    const inFuture = startedOn > todayKey();
-    setDescriptionError(missingDescription ? 'Describe the side effect.' : null);
-    setSeverityError(severity ? null : 'Choose how bad it is.');
-    setDateError(inFuture ? 'The start date cannot be in the future.' : null);
-    if (missingDescription || !severity || inFuture) return;
-    try {
-      await addSideEffect({
-        id: newId(),
-        medicationId: medicine && medicine !== NOT_SURE ? medicine : null,
-        description: description.trim(),
-        severity,
-        startedOn,
-        loggedAt: new Date().toISOString(),
-      });
-      router.back();
-    } catch (e) {
-      console.warn('Could not save side effect', e);
-      Alert.alert('The side effect was not saved', 'Please try again.');
-    }
-  };
+  const onSave = () =>
+    guard(async () => {
+      const missingDescription = description.trim() === '';
+      const inFuture = startedOn > todayKey();
+      setDescriptionError(missingDescription ? 'Describe the side effect.' : null);
+      setSeverityError(severity ? null : 'Choose how bad it is.');
+      setDateError(inFuture ? 'The start date cannot be in the future.' : null);
+      if (missingDescription || !severity || inFuture) return;
+      try {
+        await addSideEffect({
+          id: newId(),
+          medicationId: medicine && medicine !== NOT_SURE ? medicine : null,
+          description: description.trim(),
+          severity,
+          startedOn,
+          loggedAt: new Date().toISOString(),
+        });
+        router.back();
+      } catch (e) {
+        console.warn('Could not save side effect', e);
+        Alert.alert('The side effect was not saved', 'Please try again.');
+      }
+    });
 
   return (
     <Screen
       topBar={<TopBar onBack={() => router.back()} />}
       title="Note a side effect"
       subtitle="Do not stop or change a medicine on your own. Talk to your doctor first."
-      footer={<Button label="Save" onPress={onSave} />}>
+      footer={<Button label="Save" onPress={onSave} disabled={saving} />}>
       <TextField
         label="What happened?"
         icon="edit-3"

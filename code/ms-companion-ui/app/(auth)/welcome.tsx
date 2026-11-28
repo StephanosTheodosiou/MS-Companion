@@ -7,8 +7,9 @@ import { Note, PageDots, SafetyCard } from '@/components/ui/notice';
 import { Row } from '@/components/ui/row';
 import { Screen } from '@/components/layout/screen';
 import { Section } from '@/components/layout/section';
+import { SETUP_STEPS } from '@/constants/onboarding';
 
-// E1: first launch, step 1 of 4. Explains what the app stores before asking for consent.
+// E1: first launch, step 1 of 4 (see constants/onboarding.ts). Explains what the app stores before asking for consent.
 export default function WelcomeScreen() {
   const router = useRouter();
   return (
@@ -18,7 +19,7 @@ export default function WelcomeScreen() {
       subtitle="Record how you feel each day and take a clear summary to your next MS appointment."
       footer={
         <>
-          <PageDots index={0} total={4} />
+          <PageDots index={SETUP_STEPS.welcome - 1} total={SETUP_STEPS.total} />
           <View style={styles.gap} />
           <Button label="Create an account" onPress={() => router.push('/register')} />
           <Button

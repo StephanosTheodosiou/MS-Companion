@@ -4,10 +4,11 @@ import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/app-button';
 import { Screen } from '@/components/layout/screen';
 import { StepHeader } from '@/components/layout/step-header';
+import { SETUP_STEPS } from '@/constants/onboarding';
 import { useProfileForm } from '@/hooks/use-profile-form';
 import { completeOnboarding } from '@/utils/storage';
 
-// E1, step 3 of 3: first-time setup. Everything is optional.
+// E1, step 4 of 4: first-time setup. Everything is optional.
 export default function ProfileSetupScreen() {
   const router = useRouter();
   const form = useProfileForm();
@@ -29,7 +30,11 @@ export default function ProfileSetupScreen() {
   return (
     <Screen
       scrollRef={form.scrollRef}
-      topBar={<StepHeader step={3} total={3} onBack={() => router.back()} />}
+      topBar={<StepHeader
+          step={SETUP_STEPS.profile}
+          total={SETUP_STEPS.total}
+          onBack={() => router.back()}
+        />}
       title="About you"
       subtitle="This prepares your visit summary. Everything here is optional and you can add it later."
       footer={

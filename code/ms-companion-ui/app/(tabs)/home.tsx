@@ -14,7 +14,7 @@ import { useAuth } from '@/context/auth-context';
 import { useColors } from '@/hooks/use-colors';
 import { useTodaysDoses } from '@/hooks/use-todays-doses';
 import { Appointment, CheckIn, EMPTY_PROFILE, Profile } from '@/types/health';
-import { appointmentDetails, appointmentTitle } from '@/utils/appointment';
+import { appointmentDetails, appointmentTitle, nextAppointment } from '@/utils/appointment';
 import { bloodTestSummary } from '@/utils/bloodTest';
 import { daysBetween, formatLongDate, formatTime, todayKey } from '@/utils/date';
 import { getCheckIn, getProfile, listAppointments, listBloodTests } from '@/utils/storage';
@@ -50,7 +50,7 @@ export default function HomeScreen() {
       reloadDoses();
       listAppointments()
         .then((all) => {
-          const next = all.find((a) => a.date >= today) ?? null;
+          const next = nextAppointment(all); // F16: date and time, shared rule
           setSoonVisit(next && daysBetween(today, next.date) <= VISIT_SOON_DAYS ? next : null);
         })
         .catch((e) => console.warn('Could not load appointments', e));

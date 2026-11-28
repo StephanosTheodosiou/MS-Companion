@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSaveGuard } from '@/hooks/use-save-guard';
 import { AppText } from '@/components/ui/app-text';
 import { Button } from '@/components/ui/app-button';
 import { ChoiceCards } from '@/components/ui/choice-cards';
@@ -39,6 +40,7 @@ function dateToTime(d: Date): string {
 export default function AppointmentEditScreen() {
   const colors = useColors();
   const router = useRouter();
+  const { saving, guard } = useSaveGuard();
   const params = useLocalSearchParams<{ id?: string }>();
   const editingId = params.id;
   const [date, setDate] = useState<string | null>(null);
@@ -69,37 +71,38 @@ export default function AppointmentEditScreen() {
       .catch((e) => console.warn('Could not load appointment', e));
   }, [editingId]);
 
-  const onSave = async () => {
-    // The API needs the type and an end time after the start (N3). Times are "HH:MM", so they compare as text.
-    const endAfterStart = !time || !endTime || endTime > time;
-    setTypeError(type ? null : 'Choose what the appointment is for.');
-    setDateError(date ? null : 'Choose a date.');
-    setTimeError(time ? null : 'Choose a start time.');
-    setEndError(
-      !endTime
-        ? 'Choose an end time.'
-        : endAfterStart
-          ? null
-          : 'The end time must be after the start time.',
-    );
-    if (!type || !date || !time || !endTime || !endAfterStart) return;
-    try {
-      await saveAppointment({
-        id: editingId ?? newId(),
-        type,
-        date,
-        time,
-        endTime,
-        withWhom: withWhom.trim(),
-        place: place.trim(),
-        notes: notes.trim(),
-      });
-      router.back();
-    } catch (e) {
-      console.warn('Could not save appointment', e);
-      Alert.alert('The appointment was not saved', 'Please try again.');
-    }
-  };
+  const onSave = () =>
+    guard(async () => {
+      // The API needs the type and an end time after the start (N3). Times are "HH:MM", so they compare as text.
+      const endAfterStart = !time || !endTime || endTime > time;
+      setTypeError(type ? null : 'Choose what the appointment is for.');
+      setDateError(date ? null : 'Choose a date.');
+      setTimeError(time ? null : 'Choose a start time.');
+      setEndError(
+        !endTime
+          ? 'Choose an end time.'
+          : endAfterStart
+            ? null
+            : 'The end time must be after the start time.',
+      );
+      if (!type || !date || !time || !endTime || !endAfterStart) return;
+      try {
+        await saveAppointment({
+          id: editingId ?? newId(),
+          type,
+          date,
+          time,
+          endTime,
+          withWhom: withWhom.trim(),
+          place: place.trim(),
+          notes: notes.trim(),
+        });
+        router.back();
+      } catch (e) {
+        console.warn('Could not save appointment', e);
+        Alert.alert('The appointment was not saved', 'Please try again.');
+      }
+    });
 
   const onDelete = () => {
     if (!editingId) return;
@@ -134,7 +137,7 @@ export default function AppointmentEditScreen() {
       topBar={<TopBar onBack={() => router.back()} />}
       title={editingId ? 'Edit appointment' : 'Add an appointment'}
       subtitle="Add appointments your MS clinic has booked for you, or past visits."
-      footer={<Button label="Save" onPress={onSave} />}>
+      footer={<Button label="Save" onPress={onSave} disabled={saving} />}>
       <ChoiceCards
         header="What is it for?"
         options={APPOINTMENT_TYPES}
